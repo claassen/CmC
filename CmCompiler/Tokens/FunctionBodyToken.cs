@@ -18,9 +18,12 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            for (int i = 1; i < Tokens.Count - 1; i++)
+            foreach (var token in Tokens)
             {
-                ((ICodeEmitter)Tokens[i]).Emit(context);
+                if (token is ICodeEmitter)
+                {
+                    ((ICodeEmitter)token).Emit(context);
+                }
             }
         }
     }

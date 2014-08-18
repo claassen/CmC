@@ -14,13 +14,23 @@ namespace CmCompilerTester
             var compiler = new CmCompiler();
 
             compiler.Compile(
-                @"var test = Avg(2, 4); 
-                  var x = 1 * 2 + 3;
-                  var y = 2 + 3 * 4;
-                  Avg(x, y) {
-                      return (x + y) / 2;
+                @"var a = 1;
+                  var b = 2;
+                  Add(x, y, z) {
+                      var temp = x + y;
+                      if(x == y) {
+                          var p = temp + 1;
+                      }
+                      else if(y == z) {
+                          var p = x + 2;
+                      }
+                      else {
+                          var p = y + 3;
+                      }
+                      var tempTwo = x == y;
+                      return temp;
                   }
-                  Avg(x, y);"
+                  var res = Add(a, b);"
             );
         }
     }

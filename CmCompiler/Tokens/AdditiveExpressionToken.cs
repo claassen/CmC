@@ -18,11 +18,21 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
+            Console.WriteLine(";Additive expression");
+
             ((ICodeEmitter)Tokens[0]).Emit(context);
-            ((ICodeEmitter)Tokens[2]).Emit(context);
-            Console.WriteLine("pop eax");
-            Console.WriteLine("pop ebx");
-            Console.WriteLine("add ecx <- eax, ebx");
+
+            for (int i = 1; i < Tokens.Count; i += 2)
+            {
+                ((ICodeEmitter)Tokens[i+1]).Emit(context);
+
+                string op = ((DefaultLanguageTerminalToken)Tokens[i]).Value;
+
+                context.Emit("pop -> eax");
+                context.Emit("pop -> ebx");
+                context.Emit("add eax, ebx -> ecx");
+                context.Emit("push ecx");
+            }
         }
     }
 }

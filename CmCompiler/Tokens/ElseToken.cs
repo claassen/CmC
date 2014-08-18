@@ -18,7 +18,23 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine("evaluate else");
+            Console.WriteLine(";Else");
+
+            Console.WriteLine("ELSE" + context.ElseIfCount + ":");
+
+            Console.WriteLine(";Then");
+
+            context.NewScope(false);
+
+            foreach (var token in Tokens)
+            {
+                if (token is ICodeEmitter)
+                {
+                    ((ICodeEmitter)token).Emit(context);
+                }
+            }
+
+            context.EndScope(false);
         }
     }
 }

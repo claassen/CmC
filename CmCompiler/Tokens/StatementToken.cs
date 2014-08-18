@@ -8,7 +8,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("STATEMENT", "((VARIABLE_DEFINITION|ASSIGNMENT|FUNCTION_CALL|'return' EXPRESSION) ';' | CONDITIONAL)")]
+    [UserLanguageToken("STATEMENT", "((VARIABLE_DEFINITION|ASSIGNMENT|FUNCTION_CALL|RETURN_STATEMENT) ';' | CONDITIONAL)")]
     public class StatementToken : IUserLanguageNonTerminalToken, ICodeEmitter
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)

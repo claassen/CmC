@@ -33,16 +33,4 @@ namespace CmC
             }
         }
     }
-
-    public class CompilationContext
-    {
-        public List<Dictionary<string, int>> SymbolTables;
-        public int CurrentScopeLevel;
-
-        public CompilationContext()
-        {
-            SymbolTables = new List<Dictionary<string, int>>();
-            CurrentScopeLevel = 0;
-        }
-    }
 }

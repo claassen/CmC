@@ -18,8 +18,24 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine("add function to symbol table, create new scope and add arguments to symbol table");
+            Console.WriteLine("\n;Function definition");
+
+            string functionName = ((VariableToken)Tokens[0]).Name;
+
+            context.AddFunctionSymbol(functionName);
+
+            context.NewScope(true);
+
+            for (int i = 1; i < Tokens.Count - 1; i++)
+            {
+                string parameterName = ((VariableToken)Tokens[i]).Name;
+
+                context.AddFunctionArgSymbol(parameterName);
+            }
+
             ((ICodeEmitter)Tokens.Last()).Emit(context);
+
+            context.EndScope(true);
         }
     }
 }

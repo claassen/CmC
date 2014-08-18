@@ -20,8 +20,15 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine("load eax <- memory[addressOf(" + Name + ")]");
-            Console.WriteLine("push eax");
+            int? address = context.GetVariableAddress(Name);
+
+            if (address == null)
+            {
+                throw new Exception("Undefined variable: " + Name);
+            }
+
+            context.Emit("load eax <- " + address);
+            context.Emit("push eax");
         }
     }
 }

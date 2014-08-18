@@ -18,7 +18,26 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine("evaluate if");
+            Console.WriteLine("\n;If");
+
+            context.ElseIfCount = 0;
+
+            ((ICodeEmitter)Tokens[1]).Emit(context);
+
+            context.Emit("pop eax");
+            context.Emit("cmp eax, $0");
+            context.Emit("je ELSE" + context.ElseIfCount);
+
+            Console.WriteLine(";Then");
+
+            context.NewScope(false);
+
+            for (int i = 3; i < Tokens.Count - 1; i++)
+            {
+                ((ICodeEmitter)Tokens[i]).Emit(context);
+            }
+
+            context.EndScope(false);
         }
     }
 }

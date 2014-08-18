@@ -20,7 +20,7 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine("push " + Value);
+            context.Emit("push " + Value);
         }
     }
 }

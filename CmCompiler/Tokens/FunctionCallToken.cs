@@ -18,8 +18,29 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine("push arguments on stack");
-            Console.WriteLine("call [addressOf(function)]");
+            Console.WriteLine(";Function call");
+
+            for (int i = Tokens.Count - 1; i > 0; i--)
+            {
+                ((ICodeEmitter)Tokens[i]).Emit(context);
+            }
+
+            string functionName = ((VariableToken)Tokens[0]).Name;
+
+            int? funcAddress = context.GetFunctionAddress(functionName);
+
+            if (funcAddress == null)
+            {
+                throw new Exception("Undefined symbol: " + functionName);
+            }
+
+            int currentInstrAddress = context.GetCurrentInstructionAddress();
+            int functionReturnAddress = currentInstrAddress + 3;
+
+            //Push return address on stack and jump to function
+            context.Emit("push $" + functionReturnAddress, "Push return address on stack");
+            context.Emit("jmp " + funcAddress);
+            context.Emit("push eax");
         }
     }
 }

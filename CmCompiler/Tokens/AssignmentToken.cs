@@ -18,9 +18,20 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
+            Console.WriteLine(";Assignment");
+
             ((ICodeEmitter)Tokens[2]).Emit(context);
-            Console.WriteLine("pop eax");
-            Console.WriteLine("store memory[addressOf(" + ((VariableToken)Tokens[0]).Name + ")] <- eax");
+
+            context.Emit("pop eax");
+
+            int? address = context.GetVariableAddress(((VariableToken)Tokens[0]).Name);
+
+            if (address == null)
+            {
+                throw new Exception("Undefined variable: " + ((VariableToken)Tokens[0]).Name);
+            }
+
+            context.Emit("store eax -> " + address);
         }
     }
 }
