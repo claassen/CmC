@@ -18,7 +18,13 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine("evaulate expression");
+            foreach (var token in Tokens)
+            {
+                if (token is ICodeEmitter)
+                {
+                    ((ICodeEmitter)token).Emit(context);
+                }
+            }
         }
     }
 }

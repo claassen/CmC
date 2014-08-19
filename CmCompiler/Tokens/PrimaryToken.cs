@@ -8,7 +8,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("PRIMARY", "('(' BOOLEAN_EXPRESSION ')' | NUMBER | FUNCTION_CALL | VARIABLE | MINUS PRIMARY)")]
+    [UserLanguageToken("PRIMARY", "('(' BOOLEAN_EXPRESSION ')' | NUMBER | FUNCTION_CALL | VARIABLE | '-' PRIMARY)")]
     public class PrimaryToken : IUserLanguageNonTerminalToken, ICodeEmitter
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
@@ -18,7 +18,13 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine("evaluate primary");
+            foreach (var token in Tokens)
+            {
+                if (token is ICodeEmitter)
+                {
+                    ((ICodeEmitter)token).Emit(context);
+                }
+            }
         }
     }
 }

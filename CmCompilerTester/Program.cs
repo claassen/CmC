@@ -14,8 +14,9 @@ namespace CmCompilerTester
             var compiler = new CmCompiler();
 
             //TODO: validate function call argument count
-            //TODO: fix address offsetting in instructions
-
+            //TODO: validate function has reachable return statement
+            //TODO: unit tests, many many unit tests
+            
             compiler.Compile(
                 @"var a = 1;
                   var b = 2;

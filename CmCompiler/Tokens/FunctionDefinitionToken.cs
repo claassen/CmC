@@ -36,6 +36,11 @@ namespace CmC.Tokens
             ((ICodeEmitter)Tokens.Last()).Emit(context);
 
             context.EndScope(true);
+
+            if (!context.FunctionHasReturn())
+            {
+                throw new Exception("Missing 'return' in function: " + functionName);
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using CmC.Exceptions;
 
 namespace CmC
 {
@@ -25,6 +26,9 @@ namespace CmC
         private Dictionary<string, int> _functionSymbolTable;
         private Dictionary<string, int> _globalVarSymbolTable;
         private int _globalVarOffset;
+
+        private bool _functionHasReturn;
+        private bool _inPossiblyNonExecutedBlock;
 
         public CompilationContext()
         {
@@ -73,6 +77,8 @@ namespace CmC
                 _stackOffsets.Push(0);
                 _functionArgStackOffset = -1;
                 _functionLocalVarCount = 0;
+                _functionHasReturn = false;
+                _inPossiblyNonExecutedBlock = false;
             }
         }
 
@@ -84,6 +90,29 @@ namespace CmC
             {
                 _stackOffsets.Pop();
             }
+        }
+
+        public void StartPossiblyNonExecutedBlock()
+        {
+            _inPossiblyNonExecutedBlock = true;
+        }
+
+        public void EndPossiblyNonExecutedBlock()
+        {
+            _inPossiblyNonExecutedBlock = false;
+        }
+
+        public void ReportReturnStatement()
+        {
+            if (!_inPossiblyNonExecutedBlock)
+            {
+                _functionHasReturn = true;
+            }
+        }
+
+        public bool FunctionHasReturn()
+        {
+            return _functionHasReturn;
         }
 
         public void AddVariableSymbol(string name)
@@ -133,7 +162,7 @@ namespace CmC
                 return new StaticAddressValue(_globalVarSymbolTable[varName]);
             }
 
-            throw new Exception("Undefined variable: " + varName);
+            throw new UndefinedVariableException(varName);
         }
 
         public AbsoluteAddressValue GetFunctionAddress(string funcName)
@@ -144,7 +173,7 @@ namespace CmC
             }
             else
             {
-                throw new Exception("Undefined function: " + funcName);
+                throw new UndefinedFunctionException(funcName);
             }
         }
 

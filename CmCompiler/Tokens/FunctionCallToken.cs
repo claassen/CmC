@@ -23,10 +23,13 @@ namespace CmC.Tokens
             //Push base pointer on stack
             context.EmitInstruction(new Op() { Name = "push", R1 = "bp" });
 
-            //Push arguments on stack in reverse order
-            for (int i = Tokens.Count - 1; i > 0; i--)
+            if (Tokens.Count > 1)
             {
-                ((ICodeEmitter)Tokens[i]).Emit(context);
+                //Push arguments on stack in reverse order
+                for (int i = Tokens.Count - 1; i > 0; i--)
+                {
+                    ((ICodeEmitter)Tokens[i]).Emit(context);
+                }
             }
 
             string functionName = ((VariableToken)Tokens[0]).Name;

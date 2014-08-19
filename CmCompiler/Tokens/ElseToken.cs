@@ -25,6 +25,7 @@ namespace CmC.Tokens
             context.EmitComment(";Then");
 
             context.NewScope(false);
+            context.StartPossiblyNonExecutedBlock();
 
             foreach (var token in Tokens)
             {
@@ -34,6 +35,7 @@ namespace CmC.Tokens
                 }
             }
 
+            context.EndPossiblyNonExecutedBlock();
             context.EndScope(false);
         }
     }

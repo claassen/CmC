@@ -19,7 +19,9 @@ namespace CmC.Tokens
         public void Emit(CompilationContext context)
         {
             context.EmitComment(";Return statement");
-            
+
+            context.ReportReturnStatement();
+
             ((ICodeEmitter)Tokens[1]).Emit(context);
 
             //Retrurn value from function goes in eax

@@ -31,12 +31,14 @@ namespace CmC.Tokens
             context.EmitComment(";Then");
 
             context.NewScope(false);
+            context.StartPossiblyNonExecutedBlock();
 
             for (int i = 3; i < Tokens.Count - 1; i++)
             {
                 ((ICodeEmitter)Tokens[i]).Emit(context);
             }
 
+            context.EndPossiblyNonExecutedBlock();
             context.EndScope(false);
         }
     }

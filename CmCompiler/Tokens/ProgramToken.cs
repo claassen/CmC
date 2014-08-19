@@ -20,7 +20,10 @@ namespace CmC.Tokens
         {
             foreach (var token in Tokens)
             {
-                ((ICodeEmitter)token).Emit(context);
+                if (token is ICodeEmitter)
+                {
+                    ((ICodeEmitter)token).Emit(context);
+                }
             }
         }
     }
