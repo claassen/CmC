@@ -18,20 +18,15 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine(";Assignment");
+            context.EmitComment(";Assignment");
 
             ((ICodeEmitter)Tokens[2]).Emit(context);
 
-            context.Emit("pop eax");
+            context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
 
-            int? address = context.GetVariableAddress(((VariableToken)Tokens[0]).Name);
+            var address = context.GetVariableAddress(((VariableToken)Tokens[0]).Name);
 
-            if (address == null)
-            {
-                throw new Exception("Undefined variable: " + ((VariableToken)Tokens[0]).Name);
-            }
-
-            context.Emit("store eax -> " + address);
+            context.EmitInstruction(new Op() { Name = "store", Imm = address });
         }
     }
 }

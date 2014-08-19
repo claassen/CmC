@@ -18,6 +18,8 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
+            context.EmitComment(";Multiplicative expression");
+
             ((ICodeEmitter)Tokens[0]).Emit(context);
 
             for (int i = 1; i < Tokens.Count; i += 2)
@@ -26,10 +28,20 @@ namespace CmC.Tokens
 
                 string op = ((DefaultLanguageTerminalToken)Tokens[i]).Value;
 
-                context.Emit("pop -> eax");
-                context.Emit("pop -> ebx");
-                context.Emit("mult eax, ebx -> ecx");
-                context.Emit("push ecx");
+                context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
+                context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
+
+                switch (op)
+                {
+                    case "*":
+                        context.EmitInstruction(new Op() { Name = "mult", R1 = "eax", R2 = "ebx", R3 = "ecx" });
+                        break;
+                    case "/":
+                        context.EmitInstruction(new Op() { Name = "div", R1 = "eax", R2 = "ebx", R3 = "ecx" });
+                        break;
+                }
+                
+                context.EmitInstruction(new Op() { Name = "push", R1 = "ecx" });
             }
         }
     }

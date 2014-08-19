@@ -18,17 +18,17 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine("\n;If");
+            context.EmitComment(";If");
 
-            context.ElseIfCount = 0;
+            context.ElseIfLabelCount = 0;
 
             ((ICodeEmitter)Tokens[1]).Emit(context);
 
-            context.Emit("pop eax");
-            context.Emit("cmp eax, $0");
-            context.Emit("je ELSE" + context.ElseIfCount);
+            context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
+            context.EmitInstruction(new Op() { Name = "cmp", R1 = "eax", Imm = new ImmediateValue(0) });
+            context.EmitInstruction(new Op() { Name = "je", Imm = new LabelAddressValue("ELSE" + context.ElseIfLabelCount.ToString()) });
 
-            Console.WriteLine(";Then");
+            context.EmitComment(";Then");
 
             context.NewScope(false);
 

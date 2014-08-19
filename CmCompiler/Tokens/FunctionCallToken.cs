@@ -18,8 +18,12 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine(";Function call");
+            context.EmitComment(";Function call");
 
+            //Push base pointer on stack
+            context.EmitInstruction(new Op() { Name = "push", R1 = "bp" });
+
+            //Push arguments on stack in reverse order
             for (int i = Tokens.Count - 1; i > 0; i--)
             {
                 ((ICodeEmitter)Tokens[i]).Emit(context);
@@ -27,20 +31,23 @@ namespace CmC.Tokens
 
             string functionName = ((VariableToken)Tokens[0]).Name;
 
-            int? funcAddress = context.GetFunctionAddress(functionName);
-
-            if (funcAddress == null)
-            {
-                throw new Exception("Undefined symbol: " + functionName);
-            }
+            var funcAddress = context.GetFunctionAddress(functionName);
 
             int currentInstrAddress = context.GetCurrentInstructionAddress();
-            int functionReturnAddress = currentInstrAddress + 3;
+            int functionReturnAddress = currentInstrAddress + 4;
 
             //Push return address on stack and jump to function
-            context.Emit("push $" + functionReturnAddress, "Push return address on stack");
-            context.Emit("jmp " + funcAddress);
-            context.Emit("push eax");
+            context.EmitInstruction(new Op() { Name = "push", Imm = new AbsoluteAddressValue(functionReturnAddress) });
+
+            //Set base pointer to be the top of current function's stack which will be the bottom
+            //of the called function's stack
+            context.EmitInstruction(new Op { Name = "mov", R1 = "sp", R2 = "bp" });
+            
+            //Jump to function location
+            context.EmitInstruction(new Op() { Name = "jmp", Imm = funcAddress });
+
+            //Resume here
+            context.EmitInstruction(new Op() { Name = "push", R1 = "eax" });
         }
     }
 }

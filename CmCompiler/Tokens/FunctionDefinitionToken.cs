@@ -18,7 +18,7 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine("\n;Function definition");
+            context.EmitComment(";Function definition");
 
             string functionName = ((VariableToken)Tokens[0]).Name;
 

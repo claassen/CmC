@@ -18,7 +18,7 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine(";Boolean expression");
+            context.EmitComment(";Boolean expression");
 
             ((ICodeEmitter)Tokens[0]).Emit(context);
 
@@ -28,8 +28,8 @@ namespace CmC.Tokens
 
                 string op = ((DefaultLanguageTerminalToken)Tokens[i]).Value;
 
-                context.Emit("pop -> eax");
-                context.Emit("pop -> ebx");
+                context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
+                context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
 
                 int currentInstrAddress = context.GetCurrentInstructionAddress();
                 int trueJmpLocation = currentInstrAddress + 6;
@@ -37,26 +37,25 @@ namespace CmC.Tokens
                 switch (op)
                 {
                     case "&&":
-                        context.Emit("and eax, ebx - > ecx");
-                        context.Emit("cmp ecx, $0");
-                        context.Emit("jne " + trueJmpLocation);
+                        context.EmitInstruction(new Op() { Name = "and", R1 = "eax", R2 = "ebx", R3 = "ecx" });
+                        context.EmitInstruction(new Op() { Name = "cmp", R1 = "ecx", Imm = new ImmediateValue(0) });
+                        context.EmitInstruction(new Op() { Name = "jne", Imm = new AbsoluteAddressValue(trueJmpLocation) });
                         break;
                     case "||":
-                        context.Emit("or eax, ebx -> ecx");
-                        context.Emit("cmp ecx, $0");
-                        context.Emit("jne " + trueJmpLocation);
+                        context.EmitInstruction(new Op() { Name = "or", R1 = "eax", R2 = "ebx", R3 = "ecx" });
+                        context.EmitInstruction(new Op() { Name = "cmp", R1 = "ecx", Imm = new ImmediateValue(0) });
+                        context.EmitInstruction(new Op() { Name = "jne", Imm = new AbsoluteAddressValue(trueJmpLocation) });
                         break;
                     case "^":
-                        context.Emit("xor eax, ebx -> ecx");
-                        context.Emit("cmp ecx, $0");
-                        context.Emit("jne " + trueJmpLocation);
+                        context.EmitInstruction(new Op() { Name = "xor", R1 = "eax", R2 = "ebx", R3 = "ecx" });
+                        context.EmitInstruction(new Op() { Name = "cmp", R1 = "ecx", Imm = new ImmediateValue(0) });
+                        context.EmitInstruction(new Op() { Name = "jne", Imm = new AbsoluteAddressValue(trueJmpLocation) });
                         break;
                 }
 
-                context.Emit("FALSE: push $0");
-                context.Emit("jmp " + (trueJmpLocation + 1));
-                context.Emit("TRUE: push $1");
-                context.Emit("DONE: nop");
+                context.EmitInstruction(new Op() { Name = "push", Imm = new ImmediateValue(0) }, "FALSE");
+                context.EmitInstruction(new Op() { Name = "jmp", Imm = new AbsoluteAddressValue(trueJmpLocation + 1) });
+                context.EmitInstruction(new Op() { Name = "push", Imm = new ImmediateValue(1) });
             }
         }
     }

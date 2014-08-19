@@ -20,7 +20,7 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            context.Emit("push " + Value);
+            context.EmitInstruction(new Op() { Name = "push", Imm = new ImmediateValue(Value) });
         }
     }
 }

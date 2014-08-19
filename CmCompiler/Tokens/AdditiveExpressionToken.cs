@@ -18,7 +18,7 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine(";Additive expression");
+            context.EmitComment(";Additive expression");
 
             ((ICodeEmitter)Tokens[0]).Emit(context);
 
@@ -28,10 +28,20 @@ namespace CmC.Tokens
 
                 string op = ((DefaultLanguageTerminalToken)Tokens[i]).Value;
 
-                context.Emit("pop -> eax");
-                context.Emit("pop -> ebx");
-                context.Emit("add eax, ebx -> ecx");
-                context.Emit("push ecx");
+                context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
+                context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
+
+                switch (op)
+                {
+                    case "+":
+                        context.EmitInstruction(new Op() { Name = "add", R1 = "eax", R2 = "ebx", R3 = "ecx" });
+                        break;
+                    case "-":
+                        context.EmitInstruction(new Op() { Name = "sub", R1 = "eax", R2 = "ebx", R3 = "ecx" });
+                        break;
+                }
+                
+                context.EmitInstruction(new Op() { Name = "push", R1 = "ecx" });
             }
         }
     }

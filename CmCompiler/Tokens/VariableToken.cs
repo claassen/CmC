@@ -20,15 +20,10 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            int? address = context.GetVariableAddress(Name);
+            var address = context.GetVariableAddress(Name);
 
-            if (address == null)
-            {
-                throw new Exception("Undefined variable: " + Name);
-            }
-
-            context.Emit("load eax <- " + address);
-            context.Emit("push eax");
+            context.EmitInstruction(new Op() { Name = "load", R1 = "eax", Imm = address });
+            context.EmitInstruction(new Op() { Name = "push", R1 = "eax" });
         }
     }
 }

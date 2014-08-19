@@ -13,25 +13,44 @@ namespace CmCompilerTester
         {
             var compiler = new CmCompiler();
 
+            //TODO: validate function call argument count
+            //TODO: fix address offsetting in instructions
+
             compiler.Compile(
                 @"var a = 1;
                   var b = 2;
-                  Add(x, y, z) {
-                      var temp = x + y;
+                  Test(x, y, z) {
+                      var temp = 0;
                       if(x == y) {
-                          var p = temp + 1;
-                      }
-                      else if(y == z) {
-                          var p = x + 2;
+                          temp = x + z;
                       }
                       else {
-                          var p = y + 3;
+                          temp = x + y;
                       }
-                      var tempTwo = x == y;
                       return temp;
                   }
-                  var res = Add(a, b);"
+                  var res = Test(a, b);"
             );
+
+//            compiler.Compile(
+//                @"var a = 1;
+//                  var b = 2;
+//                  Add(x, y, z) {
+//                      var temp = x + y;
+//                      if(x == y) {
+//                          var p = temp + 1;
+//                      }
+//                      else if(y == z) {
+//                          var p = x + 2;
+//                      }
+//                      else {
+//                          var p = y + 3;
+//                      }
+//                      var tempTwo = x == y;
+//                      return temp;
+//                  }
+//                  var res = Add(a, b);"
+//            );
         }
     }
 }

@@ -31,6 +31,9 @@ namespace CmC
             {
                 ((ICodeEmitter)token).Emit(_context);
             }
+
+            _context.ResolveAddresses();
+            _context.PrintInstructions();
         }
     }
 }

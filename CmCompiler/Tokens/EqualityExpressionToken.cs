@@ -18,7 +18,7 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine(";Equality expression");
+            context.EmitComment(";Equality expression");
 
             ((ICodeEmitter)Tokens[0]).Emit(context);
 
@@ -28,10 +28,10 @@ namespace CmC.Tokens
 
                 string op = ((DefaultLanguageTerminalToken)Tokens[i]).Value;
 
-                context.Emit("pop -> eax");
-                context.Emit("pop -> ebx");
+                context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
+                context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
 
-                context.Emit("cmp eax, ebx");
+                context.EmitInstruction(new Op() { Name = "cmp", R1 = "eax", R2 = "ebx" });
 
                 int currentInstrAddress = context.GetCurrentInstructionAddress();
                 int trueJmpLocation = currentInstrAddress + 4;
@@ -39,29 +39,28 @@ namespace CmC.Tokens
                 switch (op)
                 {
                     case "==":
-                        context.Emit("je " + trueJmpLocation);
+                        context.EmitInstruction(new Op() { Name = "je", Imm = new AbsoluteAddressValue(trueJmpLocation) });
                         break;
                     case "!=":
-                        context.Emit("jne " + trueJmpLocation);
+                        context.EmitInstruction(new Op() { Name = "jne", Imm = new AbsoluteAddressValue(trueJmpLocation) });
                         break;
                     case ">":
-                        context.Emit("jl " + trueJmpLocation);
+                        context.EmitInstruction(new Op() { Name = "jl", Imm = new AbsoluteAddressValue(trueJmpLocation) });
                         break;
                     case "<":
-                        context.Emit("jg " + trueJmpLocation);
+                        context.EmitInstruction(new Op() { Name = "jg", Imm = new AbsoluteAddressValue(trueJmpLocation) });
                         break;
                     case ">=":
-                        context.Emit("jge " + trueJmpLocation);
+                        context.EmitInstruction(new Op() { Name = "jge", Imm = new AbsoluteAddressValue(trueJmpLocation) });
                         break;
                     case "<=":
-                        context.Emit("jle " + trueJmpLocation);
+                        context.EmitInstruction(new Op() { Name = "jle", Imm = new AbsoluteAddressValue(trueJmpLocation) });
                         break;
                 }
 
-                context.Emit("FALSE: push $0");
-                context.Emit("jmp " + (trueJmpLocation + 1));
-                context.Emit("TRUE: push $1");
-                context.Emit("DONE: nop");
+                context.EmitInstruction(new Op() { Name = "FALSE: push", Imm = new ImmediateValue(0) });
+                context.EmitInstruction(new Op() { Name = "jmp", Imm = new AbsoluteAddressValue(trueJmpLocation + 1) });
+                context.EmitInstruction(new Op() { Name = "TRUE: push", Imm = new ImmediateValue(1) });
             }
         }
     }

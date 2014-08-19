@@ -18,20 +18,27 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine(";Return statement");
+            context.EmitComment(";Return statement");
             
             ((ICodeEmitter)Tokens[1]).Emit(context);
 
-            context.Emit("pop eax");
+            //Retrurn value from function goes in eax
+            context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
 
+            //Reclaim local variables from stack space
             for (int i = 0; i < context.GetFunctionLocalVarCount(); i++)
             {
-                context.Emit("pop");
+                context.EmitInstruction(new Op() { Name = "pop" });
             }
 
             //Pop return address of stack and jump
-            context.Emit("pop ebx");
-            context.Emit("jmp ebx");
+            context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
+
+            //Reset callee's base pointer
+            context.EmitInstruction(new Op() { Name = "pop", R1 = "bp" });
+
+            //Resume execution from call site
+            context.EmitInstruction(new Op() { Name = "jmp", R1 = "ebx" });
         }
     }
 }

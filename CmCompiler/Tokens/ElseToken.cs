@@ -18,11 +18,11 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            Console.WriteLine(";Else");
+            context.EmitComment(";Else");
 
-            Console.WriteLine("ELSE" + context.ElseIfCount + ":");
+            context.EmitLabel("ELSE" + context.ElseIfLabelCount);
 
-            Console.WriteLine(";Then");
+            context.EmitComment(";Then");
 
             context.NewScope(false);
 
