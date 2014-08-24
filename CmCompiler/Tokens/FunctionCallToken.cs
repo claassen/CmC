@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CmC.Exceptions;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("FUNCTION_CALL", "VARIABLE '(' (EXPRESSION (',' EXPRESSION)*)? ')'")]
-    public class FunctionCallToken : IUserLanguageNonTerminalToken, ICodeEmitter
+    [UserLanguageToken("FUNCTION_CALL", "IDENTIFIER '(' (EXPRESSION (',' EXPRESSION)*)? ')'")]
+    public class FunctionCallToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
@@ -20,21 +21,34 @@ namespace CmC.Tokens
         {
             context.EmitComment(";Function call");
 
+            string functionName = ((IdentifierToken)Tokens[0]).Name;
+
+            var function = context.GetFunction(functionName);
+
             //Push base pointer on stack
             context.EmitInstruction(new Op() { Name = "push", R1 = "bp" });
+
+            int argumentCount = 0;
 
             if (Tokens.Count > 1)
             {
                 //Push arguments on stack in reverse order
                 for (int i = Tokens.Count - 1; i > 0; i--)
                 {
+                    var argType = ((IHasType)Tokens[i]).GetExpressionType(context);
+                    var paramType = function.ParameterTypes[function.ParameterTypes.Count - (Tokens.Count - 1)];
+
+                    Type.CheckTypesMatch(paramType, argType);
+
                     ((ICodeEmitter)Tokens[i]).Emit(context);
+                    argumentCount++;
                 }
             }
 
-            string functionName = ((VariableToken)Tokens[0]).Name;
-
-            var funcAddress = context.GetFunctionAddress(functionName);
+            if (argumentCount != function.ParameterTypes.Count)
+            {
+                throw new ArgumentCountMismatchException(functionName, function.ParameterTypes.Count, argumentCount);
+            }
 
             int currentInstrAddress = context.GetCurrentInstructionAddress();
             int functionReturnAddress = currentInstrAddress + 4;
@@ -47,10 +61,33 @@ namespace CmC.Tokens
             context.EmitInstruction(new Op { Name = "mov", R1 = "sp", R2 = "bp" });
             
             //Jump to function location
-            context.EmitInstruction(new Op() { Name = "jmp", Imm = funcAddress });
+            context.EmitInstruction(new Op() { Name = "jmp", Imm = function.Address });
 
             //Resume here
+            for (int i = 0; i < argumentCount; i++)
+            {
+                //Reclaim stack space from arguments pushed before the call
+                context.EmitInstruction(new Op() { Name = "pop" });
+            }
+
+            //Reset base pointer
+            context.EmitInstruction(new Op() { Name = "pop", R1 = "bp" });
+
             context.EmitInstruction(new Op() { Name = "push", R1 = "eax" });
+        }
+
+        public Type GetExpressionType(CompilationContext context)
+        {
+            string functionName = ((VariableToken)Tokens[0]).Name;
+
+            var function = context.GetFunction(functionName);
+
+            return function.ReturnType;
+        }
+
+        public void EmitAddress(CompilationContext context)
+        {
+            throw new Exception("Can't take address of function call");
         }
     }
 }

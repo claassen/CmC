@@ -8,17 +8,17 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("BOOLEAN_EXPRESSION", "BITWISE_EXPRESSION (('&&'|'||') BITWISE_EXPRESSION)*")]
-    public class BooleanExpressionToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
+    [UserLanguageToken("BITWISE_EXPRESSION", "EQUALITY_EXPRESSION (('&'|'|'|'^') EQUALITY_EXPRESSION)*")]
+    public class BitwiseExpressionToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
-            return new BooleanExpressionToken() { Tokens = tokens };
+            return new BitwiseExpressionToken() { Tokens = tokens };
         }
 
         public void Emit(CompilationContext context)
         {
-            context.EmitComment(";Boolean expression");
+            context.EmitComment(";Bitwise expression");
 
             ((ICodeEmitter)Tokens[0]).Emit(context);
 
@@ -26,7 +26,7 @@ namespace CmC.Tokens
 
             if (Tokens.Count > 1)
             {
-                Type.CheckTypeIsBoolean(type); 
+                Type.CheckTypeIsNumeric(type);
             }
 
             for (int i = 1; i < Tokens.Count; i += 2)
@@ -37,31 +37,25 @@ namespace CmC.Tokens
 
                 type = ((IHasType)Tokens[i + 1]).GetExpressionType(context);
 
-                Type.CheckTypeIsBoolean(type);
+                Type.CheckTypeIsNumeric(type);
 
                 context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
                 context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
 
-                int currentInstrAddress = context.GetCurrentInstructionAddress();
-                int trueJmpLocation = currentInstrAddress + 6;
-
                 switch (op)
                 {
-                    case "&&":
+                    case "&":
                         context.EmitInstruction(new Op() { Name = "and", R1 = "eax", R2 = "ebx", R3 = "ecx" });
-                        context.EmitInstruction(new Op() { Name = "cmp", R1 = "ecx", Imm = new ImmediateValue(0) });
-                        context.EmitInstruction(new Op() { Name = "jne", Imm = new AbsoluteAddressValue(trueJmpLocation) });
                         break;
-                    case "||":
+                    case "|":
                         context.EmitInstruction(new Op() { Name = "or", R1 = "eax", R2 = "ebx", R3 = "ecx" });
-                        context.EmitInstruction(new Op() { Name = "cmp", R1 = "ecx", Imm = new ImmediateValue(0) });
-                        context.EmitInstruction(new Op() { Name = "jne", Imm = new AbsoluteAddressValue(trueJmpLocation) });
+                        break;
+                    case "^":
+                        context.EmitInstruction(new Op() { Name = "xor", R1 = "eax", R2 = "ebx", R3 = "ecx" });
                         break;
                 }
 
-                context.EmitInstruction(new Op() { Name = "push", Imm = new ImmediateValue(0) }, "FALSE");
-                context.EmitInstruction(new Op() { Name = "jmp", Imm = new AbsoluteAddressValue(trueJmpLocation + 1) });
-                context.EmitInstruction(new Op() { Name = "push", Imm = new ImmediateValue(1) });
+                context.EmitInstruction(new Op() { Name = "push", R1 = "ecx" });
             }
         }
 
@@ -69,7 +63,7 @@ namespace CmC.Tokens
         {
             if (Tokens.Count > 1)
             {
-                return new Type() { Name = "bool" };
+                return new Type() { Name = "int" };
             }
             else
             {
@@ -81,7 +75,7 @@ namespace CmC.Tokens
         {
             if (Tokens.Count > 1)
             {
-                throw new Exception("Can't take address of boolean expression");
+                throw new Exception("Can't take address of bitwise expression");
             }
 
             ((IHasAddress)Tokens[0]).EmitAddress(context);

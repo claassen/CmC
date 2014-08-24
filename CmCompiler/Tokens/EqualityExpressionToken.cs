@@ -8,8 +8,8 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("EQUALITY_EXPRESSION", "ADDITIVE_EXPRESSION (('=='|'!='|'<'|'>'|'<='|'>=') ADDITIVE_EXPRESSION)*")]
-    public class EqualityExpressionToken : IUserLanguageNonTerminalToken, ICodeEmitter
+    [UserLanguageToken("EQUALITY_EXPRESSION", "ADDITIVE_EXPRESSION (('=='|'!='|'<'|'>'|'<='|'>=') ADDITIVE_EXPRESSION)?")]
+    public class EqualityExpressionToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
@@ -22,11 +22,18 @@ namespace CmC.Tokens
 
             ((ICodeEmitter)Tokens[0]).Emit(context);
 
+            var t1 = ((IHasType)Tokens[0]).GetExpressionType(context);
+
             for (int i = 1; i < Tokens.Count; i += 2)
             {
+                string op = ((DefaultLanguageTerminalToken)Tokens[i]).Value;
+
                 ((ICodeEmitter)Tokens[i + 1]).Emit(context);
 
-                string op = ((DefaultLanguageTerminalToken)Tokens[i]).Value;
+                var t2 = ((IHasType)Tokens[i + 1]).GetExpressionType(context);
+
+                Type.CheckTypesMatch(t1, t2);
+                t1 = t2;
 
                 context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
                 context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
@@ -62,6 +69,28 @@ namespace CmC.Tokens
                 context.EmitInstruction(new Op() { Name = "jmp", Imm = new AbsoluteAddressValue(trueJmpLocation + 1) });
                 context.EmitInstruction(new Op() { Name = "TRUE: push", Imm = new ImmediateValue(1) });
             }
+        }
+
+        public Type GetExpressionType(CompilationContext context)
+        {
+            if (Tokens.Count > 1)
+            {
+                return new Type() { Name = "bool" };
+            }
+            else
+            {
+                return ((IHasType)Tokens[0]).GetExpressionType(context);
+            }
+        }
+
+        public void EmitAddress(CompilationContext context)
+        {
+            if (Tokens.Count > 1)
+            {
+                throw new Exception("Can't take address of equality expression");
+            }
+
+            ((IHasAddress)Tokens[0]).EmitAddress(context);
         }
     }
 }

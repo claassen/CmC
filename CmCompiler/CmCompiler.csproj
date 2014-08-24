@@ -44,11 +44,19 @@
   <ItemGroup>
     <Compile Include="CmCompiler.cs" />
     <Compile Include="CompilationContext.cs" />
+    <Compile Include="EmitToken.cs" />
+    <Compile Include="Exceptions\ArgumentCountMismatchException.cs" />
+    <Compile Include="Exceptions\TypeMismatchException.cs" />
+    <Compile Include="Exceptions\MissingReturnException.cs" />
     <Compile Include="Exceptions\UndefinedFunctionException.cs" />
     <Compile Include="Exceptions\UndefinedVariableException.cs" />
+    <Compile Include="IHasAddress.cs" />
+    <Compile Include="IHasType.cs" />
+    <Compile Include="ImmediateValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tokens\AdditiveExpressionToken.cs" />
     <Compile Include="Tokens\AssignmentToken.cs" />
+    <Compile Include="Tokens\BitwiseExpressionToken.cs" />
     <Compile Include="Tokens\BooleanExpressionToken.cs" />
     <Compile Include="Tokens\ConditionalToken.cs" />
     <Compile Include="Tokens\ElseIfToken.cs" />
@@ -59,6 +67,7 @@
     <Compile Include="Tokens\FunctionCallToken.cs" />
     <Compile Include="Tokens\FunctionDefinitionToken.cs" />
     <Compile Include="ICodeEmitter.cs" />
+    <Compile Include="Tokens\IdentifierToken.cs" />
     <Compile Include="Tokens\IfToken.cs" />
     <Compile Include="Tokens\MultiplicativeExpression.cs" />
     <Compile Include="Tokens\NumberToken.cs" />
@@ -66,8 +75,11 @@
     <Compile Include="Tokens\ProgramToken.cs" />
     <Compile Include="Tokens\ReturnStatementToken.cs" />
     <Compile Include="Tokens\StatementToken.cs" />
+    <Compile Include="Tokens\TypeSpecifierToken.cs" />
+    <Compile Include="Tokens\TypeToken.cs" />
     <Compile Include="Tokens\VariableDefinitionToken.cs" />
     <Compile Include="Tokens\VariableToken.cs" />
+    <Compile Include="Type.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

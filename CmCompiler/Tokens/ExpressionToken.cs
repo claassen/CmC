@@ -8,8 +8,8 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("EXPRESSION", "(BOOLEAN_EXPRESSION | NUMBER | VARIABLE)")]
-    public class ExpressionToken : IUserLanguageNonTerminalToken, ICodeEmitter
+    [UserLanguageToken("EXPRESSION", "BOOLEAN_EXPRESSION")]
+    public class ExpressionToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
@@ -18,13 +18,15 @@ namespace CmC.Tokens
 
         public void Emit(CompilationContext context)
         {
-            foreach (var token in Tokens)
+            if (Tokens[0] is ICodeEmitter)
             {
-                if (token is ICodeEmitter)
-                {
-                    ((ICodeEmitter)token).Emit(context);
-                }
-            }
+                ((ICodeEmitter)Tokens[0]).Emit(context);
+            }   
+        }
+
+        public Type GetExpressionType(CompilationContext context)
+        {
+            return ((IHasType)Tokens[0]).GetExpressionType(context);
         }
     }
 }

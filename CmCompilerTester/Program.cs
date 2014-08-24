@@ -13,25 +13,40 @@ namespace CmCompilerTester
         {
             var compiler = new CmCompiler();
 
-            //TODO: validate function call argument count
-            //TODO: validate function has reachable return statement
-            //TODO: unit tests, many many unit tests
-            
+            //TODO: arrays
+            //TODO: type definitions, type sizes
+            //TODO: return values on stack
+
+//            compiler.Compile(
+//                @"int** x;
+//                  int y = *(*x);"
+//            );
+
             compiler.Compile(
-                @"var a = 1;
-                  var b = 2;
-                  Test(x, y, z) {
-                      var temp = 0;
-                      if(x == y) {
-                          temp = x + z;
-                      }
-                      else {
-                          temp = x + y;
-                      }
-                      return temp;
+                @"int* x;
+                  int y = *x;
+                  int Test(int* a) {
+                      *a = 42;
+                      return 0;
                   }
-                  var res = Test(a, b);"
+                  Test(&y);"
             );
+
+//            compiler.Compile(
+//                @"int a = 1;
+//                  int b = 2;
+//                  int Test(int x, int y, int z) {
+//                      int temp = 0;
+//                      if(x == y) {
+//                          temp = x + z;
+//                      }
+//                      else {
+//                          temp = x + y;
+//                      }
+//                      return temp;
+//                  }
+//                  int res = Test(a, b);"
+//            );
 
 //            compiler.Compile(
 //                @"var a = 1;

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CmC.Exceptions;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("FUNCTION_DEFINITION", "VARIABLE '(' (VARIABLE (',' VARIABLE)*)? ')' FUNCTION_BODY")]
+    [UserLanguageToken("FUNCTION_DEFINITION", "TYPE_SPECIFIER IDENTIFIER '(' (TYPE_SPECIFIER IDENTIFIER (',' TYPE_SPECIFIER IDENTIFIER)*)? ')' FUNCTION_BODY")]
     public class FunctionDefinitionToken : IUserLanguageNonTerminalToken, ICodeEmitter
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
@@ -20,18 +21,26 @@ namespace CmC.Tokens
         {
             context.EmitComment(";Function definition");
 
-            string functionName = ((VariableToken)Tokens[0]).Name;
+            var returnType = ((TypeSpecifierToken)Tokens[0]).GetExpressionType(context);
 
-            context.AddFunctionSymbol(functionName);
+            string functionName = ((IdentifierToken)Tokens[1]).Name;
 
             context.NewScope(true);
 
-            for (int i = 1; i < Tokens.Count - 1; i++)
-            {
-                string parameterName = ((VariableToken)Tokens[i]).Name;
+            var parameterTypes = new List<Type>();
 
-                context.AddFunctionArgSymbol(parameterName);
+            for (int i = 2; i < Tokens.Count - 1; i += 2)
+            {
+                var parameterType = ((IHasType)Tokens[i]).GetExpressionType(context);
+
+                parameterTypes.Add(parameterType);
+
+                string parameterName = ((IdentifierToken)Tokens[i + 1]).Name;
+
+                context.AddFunctionArgSymbol(parameterName, parameterType);
             }
+
+            context.AddFunctionSymbol(functionName, returnType, parameterTypes);
 
             ((ICodeEmitter)Tokens.Last()).Emit(context);
 
@@ -39,7 +48,7 @@ namespace CmC.Tokens
 
             if (!context.FunctionHasReturn())
             {
-                throw new Exception("Missing 'return' in function: " + functionName);
+                throw new MissingReturnException(functionName);
             }
         }
     }

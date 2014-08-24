@@ -8,7 +8,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("VARIABLE_DEFINITION", "'var' VARIABLE ('=' EXPRESSION)?")]
+    [UserLanguageToken("VARIABLE_DEFINITION", "TYPE_SPECIFIER IDENTIFIER ('=' EXPRESSION)?")]
     public class VariableDefinitionToken : IUserLanguageNonTerminalToken, ICodeEmitter
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
@@ -20,18 +20,24 @@ namespace CmC.Tokens
         {
             context.EmitComment(";Variable definition");
 
-            string variableName = ((VariableToken)Tokens[1]).Name;
+            var type = ((IHasType)Tokens[0]).GetExpressionType(context);
 
-            context.AddVariableSymbol(variableName);
+            string variableName = ((IdentifierToken)Tokens[1]).Name;
+
+            context.AddVariableSymbol(variableName, type);
 
             if (Tokens.Count > 2)
             {
                 ((ICodeEmitter)Tokens[3]).Emit(context);
 
-                var address = context.GetVariableAddress(variableName);
+                var expressionType = ((IHasType)Tokens[3]).GetExpressionType(context);
+
+                var variable = context.GetVariable(variableName);
+
+                Type.CheckTypesMatch(variable.Type, expressionType);
 
                 context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
-                context.EmitInstruction(new Op() { Name = "store", R1 = "eax", Imm = address });
+                context.EmitInstruction(new Op() { Name = "store", R1 = "eax", Imm = variable.Address });
             }
         }
     }

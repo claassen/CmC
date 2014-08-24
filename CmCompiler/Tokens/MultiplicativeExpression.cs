@@ -9,7 +9,7 @@ using ParserGen.Parser.Tokens;
 namespace CmC.Tokens
 {
     [UserLanguageToken("MULTIPLICATIVE_EXPRESSION", "PRIMARY (('*'|'/') PRIMARY)*")]
-    public class MultiplicativeExpression : IUserLanguageNonTerminalToken, ICodeEmitter
+    public class MultiplicativeExpression : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
@@ -22,9 +22,18 @@ namespace CmC.Tokens
 
             ((ICodeEmitter)Tokens[0]).Emit(context);
 
+            var t1 = ((IHasType)Tokens[0]).GetExpressionType(context);
+
+            Type.CheckTypeIsNumeric(t1);
+
             for (int i = 1; i < Tokens.Count; i += 2)
             {
                 ((ICodeEmitter)Tokens[i + 1]).Emit(context);
+
+                var t2 = ((IHasType)Tokens[i + 1]).GetExpressionType(context);
+                Type.CheckTypeIsNumeric(t2);
+                Type.CheckTypesMatch(t1, t2);
+                t1 = t2;
 
                 string op = ((DefaultLanguageTerminalToken)Tokens[i]).Value;
 
@@ -43,6 +52,21 @@ namespace CmC.Tokens
                 
                 context.EmitInstruction(new Op() { Name = "push", R1 = "ecx" });
             }
+        }
+
+        public Type GetExpressionType(CompilationContext context)
+        {
+            return ((IHasType)Tokens[0]).GetExpressionType(context);
+        }
+
+        public void EmitAddress(CompilationContext context)
+        {
+            if (Tokens.Count > 1)
+            {
+                throw new Exception("Can't take address of multiplicative expression");
+            }
+
+            ((IHasAddress)Tokens[0]).EmitAddress(context);
         }
     }
 }

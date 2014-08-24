@@ -10,7 +10,7 @@ namespace CmC
 {
     public class CompilationContext
     {
-        private Dictionary<string, int>[] _varSymbolTables;
+        private Dictionary<string, Variable>[] _varSymbolTables;
         private int _currentScopeLevel;
         private Stack<int> _stackOffsets;
 
@@ -23,8 +23,8 @@ namespace CmC
 
         private List<EmitToken> _instructions;
 
-        private Dictionary<string, int> _functionSymbolTable;
-        private Dictionary<string, int> _globalVarSymbolTable;
+        private Dictionary<string, Function> _functionSymbolTable;
+        private Dictionary<string, Variable> _globalVarSymbolTable;
         private int _globalVarOffset;
 
         private bool _functionHasReturn;
@@ -32,13 +32,13 @@ namespace CmC
 
         public CompilationContext()
         {
-            _varSymbolTables = new Dictionary<string, int>[100];
-            _functionSymbolTable = new Dictionary<string, int>();
-            _globalVarSymbolTable = new Dictionary<string, int>();
+            _varSymbolTables = new Dictionary<string, Variable>[100];
+            _functionSymbolTable = new Dictionary<string, Function>();
+            _globalVarSymbolTable = new Dictionary<string, Variable>();
 
             //Start at global scope
             _currentScopeLevel = -1;
-            _varSymbolTables[0] = new Dictionary<string, int>();
+            _varSymbolTables[0] = new Dictionary<string, Variable>();
 
             _stackOffsets = new Stack<int>();
             _stackOffsets.Push(0);
@@ -70,7 +70,7 @@ namespace CmC
         {
             _currentScopeLevel++;
 
-            _varSymbolTables[_currentScopeLevel] = new Dictionary<string, int>();
+            _varSymbolTables[_currentScopeLevel] = new Dictionary<string, Variable>();
 
             if (isFunction)
             {
@@ -115,18 +115,18 @@ namespace CmC
             return _functionHasReturn;
         }
 
-        public void AddVariableSymbol(string name)
+        public void AddVariableSymbol(string name, Type type)
         {
             if (_currentScopeLevel == -1)
             {
                 //Global scope
-                _globalVarSymbolTable.Add(name, _globalVarOffset++);
+                _globalVarSymbolTable.Add(name, new Variable() { Address = new StaticAddressValue(_globalVarOffset++), Type = type });
             }
             else
             {
                 //Function or block scope
                 int currentStackOffset = _stackOffsets.Pop();
-                _varSymbolTables[_currentScopeLevel].Add(name, currentStackOffset++);
+                _varSymbolTables[_currentScopeLevel].Add(name, new Variable() { Address = new StackAddressValue(currentStackOffset++), Type = type });
                 _stackOffsets.Push(currentStackOffset);
                 _functionLocalVarCount++;
             }
@@ -137,39 +137,39 @@ namespace CmC
             return _functionLocalVarCount;
         }
 
-        public void AddFunctionSymbol(string name)
+        public void AddFunctionSymbol(string name, Type returnType, List<Type> parameterTypes)
         {
-            _functionSymbolTable.Add(name, _instructionAddress);
+            _functionSymbolTable.Add(name, new Function() { Address = new AbsoluteAddressValue(_instructionAddress), ReturnType = returnType, ParameterTypes = parameterTypes });
         }
 
-        public void AddFunctionArgSymbol(string name)
+        public void AddFunctionArgSymbol(string name, Type type)
         {
-            _varSymbolTables[_currentScopeLevel].Add(name, _functionArgStackOffset--);
+            _varSymbolTables[_currentScopeLevel].Add(name, new Variable() { Address = new StackAddressValue(_functionArgStackOffset--), Type = type });
         }
 
-        public AddressValue GetVariableAddress(string varName)
+        public Variable GetVariable(string varName)
         {
             for (int i = _currentScopeLevel; i >= 0; i--)
             {
                 if (_varSymbolTables[i].ContainsKey(varName))
                 {
-                    return new StackAddressValue(_varSymbolTables[i][varName]);
+                    return _varSymbolTables[i][varName];
                 }
             }
 
             if (_globalVarSymbolTable.ContainsKey(varName))
             {
-                return new StaticAddressValue(_globalVarSymbolTable[varName]);
+                return _globalVarSymbolTable[varName];
             }
 
             throw new UndefinedVariableException(varName);
         }
 
-        public AbsoluteAddressValue GetFunctionAddress(string funcName)
+        public Function GetFunction(string funcName)
         {
             if (_functionSymbolTable.ContainsKey(funcName))
             {
-                return new AbsoluteAddressValue(_functionSymbolTable[funcName]);
+                return _functionSymbolTable[funcName];
             }
             else
             {
@@ -244,42 +244,17 @@ namespace CmC
         }
     }
 
-    public interface EmitToken
+    public class Function
     {
+        public AbsoluteAddressValue Address;
+        public Type ReturnType;
+        public List<Type> ParameterTypes;
     }
 
-    public class Instruction : EmitToken
+    public class Variable
     {
-        public int Address;
-        public Op Op;
-        public string Comment;
-
-        public override string ToString()
-        {
-            return String.Format("{0,-30}", String.Format("{0,-2}", Address) + ": " + Op) 
-                + (Comment != null ? "; " + Comment : "");
-        }
-    }
-
-    public class Label : EmitToken
-    {
-        public string Name;
-        public int Address;
-
-        public override string ToString()
-        {
-            return Name + ": ";
-        }
-    }
-
-    public class Comment : EmitToken
-    {
-        public string Text;
-
-        public override string ToString()
-        {
-            return ";" + Text;
-        }
+        public AddressValue Address;
+        public Type Type;
     }
 
     public class Op
@@ -300,69 +275,5 @@ namespace CmC
         }
     }
 
-    public class ImmediateValue
-    {
-        public int Number;
-
-        public ImmediateValue(int num)
-        {
-            Number = num;
-        }
-
-        public override string ToString()
-        {
-            return Number.ToString();
-        }
-    }
-
-    public abstract class AddressValue : ImmediateValue
-    {
-        public AddressValue(int offset)
-            : base(offset)
-        {
-        }
-    }
-
-    public class AbsoluteAddressValue : AddressValue
-    {
-        public AbsoluteAddressValue(int offset)
-            : base(offset)
-        {
-        }
-    }
-
-    public class StaticAddressValue : AddressValue
-    {
-        public StaticAddressValue(int offset)
-            : base(offset)
-        {
-        }
-    }
-
-    public class StackAddressValue : AddressValue
-    {
-        public string BaseRegister;
-
-        public StackAddressValue(int offset)
-            : base(offset)
-        {
-            BaseRegister = "bp";
-        }
-
-        public override string ToString()
-        {
-            return "[bp + " + Number + "]";
-        }
-    }
-
-    public class LabelAddressValue : AddressValue
-    {
-        public string Label;
-
-        public LabelAddressValue(string labelName)
-            : base(0)
-        {
-            Label = labelName;
-        }
-    }
+    
 }

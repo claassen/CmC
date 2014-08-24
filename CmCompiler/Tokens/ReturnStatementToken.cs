@@ -8,8 +8,8 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("RETURN_STATEMENT", "'return' EXPRESSION")] 
-    public class ReturnStatementToken : IUserLanguageNonTerminalToken, ICodeEmitter
+    [UserLanguageToken("RETURN_STATEMENT", "'return' EXPRESSION")]
+    public class ReturnStatementToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
@@ -24,7 +24,9 @@ namespace CmC.Tokens
 
             ((ICodeEmitter)Tokens[1]).Emit(context);
 
-            //Retrurn value from function goes in eax
+            //Caller saves registers
+
+            //Return value from function goes in eax
             context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
 
             //Reclaim local variables from stack space
@@ -33,14 +35,14 @@ namespace CmC.Tokens
                 context.EmitInstruction(new Op() { Name = "pop" });
             }
 
-            //Pop return address of stack and jump
+            //Pop return address off stack and jump
             context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
-
-            //Reset callee's base pointer
-            context.EmitInstruction(new Op() { Name = "pop", R1 = "bp" });
-
-            //Resume execution from call site
             context.EmitInstruction(new Op() { Name = "jmp", R1 = "ebx" });
+        }
+
+        public Type GetExpressionType(CompilationContext context)
+        {
+            return ((IHasType)Tokens[1]).GetExpressionType(context);
         }
     }
 }
