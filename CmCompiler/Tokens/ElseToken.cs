@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CmC.Context;
+using CmC.Tokens.TokenInterfaces;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
 

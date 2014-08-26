@@ -10,12 +10,12 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("CONDITIONAL", "IF (ELSEIF)* (ELSE)?")]
-    public class ConditionalToken : IUserLanguageNonTerminalToken, ICodeEmitter
+    [UserLanguageToken("PRIMARY_EXPRESSION", "('(' EXPRESSION ')' | NUMBER | VARIABLE)")]
+    public class PrimaryExpressionToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
-            return new ConditionalToken() { Tokens = tokens };
+            return new PrimaryExpressionToken() { Tokens = tokens };
         }
 
         public void Emit(CompilationContext context)
@@ -27,6 +27,16 @@ namespace CmC.Tokens
                     ((ICodeEmitter)token).Emit(context);
                 }
             }
+        }
+
+        public ExpressionType GetExpressionType(CompilationContext context)
+        {
+            return ((IHasType)Tokens[0]).GetExpressionType(context);
+        }
+
+        public void EmitAddress(CompilationContext context)
+        {
+            ((IHasAddress)Tokens[0]).EmitAddress(context);
         }
     }
 }

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CmC.Context;
 using CmC.Exceptions;
+using CmC.Tokens.TokenInterfaces;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
 
@@ -27,7 +29,7 @@ namespace CmC.Tokens
 
             context.NewScope(true);
 
-            var parameterTypes = new List<Type>();
+            var parameterTypes = new List<ExpressionType>();
 
             for (int i = 2; i < Tokens.Count - 1; i += 2)
             {

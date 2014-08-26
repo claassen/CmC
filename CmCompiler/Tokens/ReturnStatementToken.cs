@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CmC.Context;
+using CmC.Tokens.TokenInterfaces;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
 
@@ -40,7 +42,7 @@ namespace CmC.Tokens
             context.EmitInstruction(new Op() { Name = "jmp", R1 = "ebx" });
         }
 
-        public Type GetExpressionType(CompilationContext context)
+        public ExpressionType GetExpressionType(CompilationContext context)
         {
             return ((IHasType)Tokens[1]).GetExpressionType(context);
         }

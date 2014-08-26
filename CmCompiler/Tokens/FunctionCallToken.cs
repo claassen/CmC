@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CmC.Context;
 using CmC.Exceptions;
+using CmC.Tokens.TokenInterfaces;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
 
@@ -38,7 +40,7 @@ namespace CmC.Tokens
                     var argType = ((IHasType)Tokens[i]).GetExpressionType(context);
                     var paramType = function.ParameterTypes[function.ParameterTypes.Count - (Tokens.Count - 1)];
 
-                    Type.CheckTypesMatch(paramType, argType);
+                    ExpressionType.CheckTypesMatch(paramType, argType);
 
                     ((ICodeEmitter)Tokens[i]).Emit(context);
                     argumentCount++;
@@ -76,9 +78,9 @@ namespace CmC.Tokens
             context.EmitInstruction(new Op() { Name = "push", R1 = "eax" });
         }
 
-        public Type GetExpressionType(CompilationContext context)
+        public ExpressionType GetExpressionType(CompilationContext context)
         {
-            string functionName = ((VariableToken)Tokens[0]).Name;
+            string functionName = ((IdentifierToken)Tokens[0]).Name;
 
             var function = context.GetFunction(functionName);
 
@@ -88,6 +90,8 @@ namespace CmC.Tokens
         public void EmitAddress(CompilationContext context)
         {
             throw new Exception("Can't take address of function call");
+
+            //Emitting the address of a function call -> address of where return value (temporary) is stored on the stack?
         }
     }
 }

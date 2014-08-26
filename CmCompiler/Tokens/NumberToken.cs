@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CmC.Context;
+using CmC.Tokens.TokenInterfaces;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
 
@@ -23,9 +25,9 @@ namespace CmC.Tokens
             context.EmitInstruction(new Op() { Name = "push", Imm = new ImmediateValue(Value) });
         }
 
-        public Type GetExpressionType(CompilationContext context)
+        public ExpressionType GetExpressionType(CompilationContext context)
         {
-            return new Type() { Name = "int" };
+            return new ExpressionType() { Type = context.GetTypeDef("int") };
         }
 
         public void EmitAddress(CompilationContext context)

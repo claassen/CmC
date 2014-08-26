@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CmC.Context;
+using CmC.Tokens.TokenInterfaces;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
 
@@ -16,9 +18,12 @@ namespace CmC.Tokens
             return new TypeSpecifierToken() { Tokens = tokens };
         }
 
-        public Type GetExpressionType(CompilationContext context)
+        public ExpressionType GetExpressionType(CompilationContext context)
         {
-            var type = new Type() { Name = ((TypeToken)Tokens[0]).GetTypeName() };
+            var type = new ExpressionType() 
+            { 
+                Type = context.GetTypeDef(((TypeToken)Tokens[0]).GetTypeName())
+            };
 
             for (int i = 1; i < Tokens.Count; i++)
             {

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CmC.Context;
+using CmC.Tokens.TokenInterfaces;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
 
@@ -32,7 +34,7 @@ namespace CmC.Tokens
 
                 var t2 = ((IHasType)Tokens[i + 1]).GetExpressionType(context);
 
-                Type.CheckTypesMatch(t1, t2);
+                ExpressionType.CheckTypesMatch(t1, t2);
                 t1 = t2;
 
                 context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
@@ -71,11 +73,11 @@ namespace CmC.Tokens
             }
         }
 
-        public Type GetExpressionType(CompilationContext context)
+        public ExpressionType GetExpressionType(CompilationContext context)
         {
             if (Tokens.Count > 1)
             {
-                return new Type() { Name = "bool" };
+                return new ExpressionType() { Type = context.GetTypeDef("bool") };
             }
             else
             {

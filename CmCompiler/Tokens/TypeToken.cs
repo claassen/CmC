@@ -8,7 +8,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("TYPE", "('int' | 'bool' | IDENTIFIER)")]
+    [UserLanguageToken("TYPE", "IDENTIFIER")]
     public class TypeToken : IUserLanguageNonTerminalToken
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
@@ -18,14 +18,7 @@ namespace CmC.Tokens
 
         public string GetTypeName()
         {
-            if (Tokens[0] is VariableToken)
-            {
-                return ((VariableToken)Tokens[0]).Name;
-            }
-            else
-            {
-                return ((DefaultLanguageTerminalToken)Tokens[0]).Value;
-            }
+            return ((IdentifierToken)Tokens[0]).Name;
         }
     }
 }

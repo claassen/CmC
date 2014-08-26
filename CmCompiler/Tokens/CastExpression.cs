@@ -10,25 +10,28 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("EXPRESSION", "BOOLEAN_EXPRESSION")]
-    public class ExpressionToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType
+    [UserLanguageToken("CAST_EXPRESSION", "('(' TYPE_SPECIFIER ')')? UNARY_EXPRESSION")]
+    public class CastExpression : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
-            return new ExpressionToken() { Tokens = tokens };
+            return new CastExpression() { Tokens = tokens };
         }
 
         public void Emit(CompilationContext context)
         {
-            if (Tokens[0] is ICodeEmitter)
-            {
-                ((ICodeEmitter)Tokens[0]).Emit(context);
-            }   
+            //TODO: need to change emitted value if it's cast?
+            ((ICodeEmitter)Tokens.Last()).Emit(context);
         }
 
         public ExpressionType GetExpressionType(CompilationContext context)
         {
             return ((IHasType)Tokens[0]).GetExpressionType(context);
+        }
+
+        public void EmitAddress(CompilationContext context)
+        {
+            ((IHasAddress)Tokens.Last()).EmitAddress(context);
         }
     }
 }
