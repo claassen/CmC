@@ -11,10 +11,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("FUNCTION_CALL", "IDENTIFIER '(' (EXPRESSION (',' EXPRESSION)*)? ')'")]
-    public class FunctionCallToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
+    [TokenExpression("FUNCTION_CALL", "IDENTIFIER '(' (EXPRESSION (',' EXPRESSION)*)? ')'")]
+    public class FunctionCallToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new FunctionCallToken() { Tokens = tokens };
         }

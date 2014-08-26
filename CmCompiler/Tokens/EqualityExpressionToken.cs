@@ -10,10 +10,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("EQUALITY_EXPRESSION", "ADDITIVE_EXPRESSION (('=='|'!='|'<'|'>'|'<='|'>=') ADDITIVE_EXPRESSION)?")]
-    public class EqualityExpressionToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
+    [TokenExpression("EQUALITY_EXPRESSION", "ADDITIVE_EXPRESSION (('=='|'!='|'<'|'>'|'<='|'>=') ADDITIVE_EXPRESSION)?")]
+    public class EqualityExpressionToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new EqualityExpressionToken() { Tokens = tokens };
         }

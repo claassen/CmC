@@ -10,13 +10,13 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("VARIABLE", "IDENTIFIER")]
-    public class VariableToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
+    [TokenExpression("VARIABLE", "IDENTIFIER")]
+    public class VariableToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public string Name;
         public bool IsAddressOf;
 
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             bool isAddressOf = false;
 

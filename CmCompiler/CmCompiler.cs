@@ -8,6 +8,7 @@ using CmC.Context;
 using CmC.Tokens.TokenInterfaces;
 using ParserGen.Generator;
 using ParserGen.Parser;
+using ParserGen.Parser.Tokens;
 
 namespace CmC
 {
@@ -19,11 +20,11 @@ namespace CmC
         {
             var grammar = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(c => c.Namespace == "CmC.Tokens")
-                .Where(c => c.IsSubclassOf(typeof(IUserLanguageToken)))
-                .Select(t => (IUserLanguageToken)Activator.CreateInstance(t, null));
+                .Where(c => typeof(ILanguageToken).IsAssignableFrom(c))
+                .Select(t => (ILanguageToken)Activator.CreateInstance(t, null));
 
             var generator = new ParserGenerator(grammar.ToList());
-
+            
             var parser = generator.GetParser();
 
             var tokens = parser.Parse(source);

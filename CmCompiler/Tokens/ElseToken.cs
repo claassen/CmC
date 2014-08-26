@@ -10,10 +10,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("ELSE", "'else' '{' (STATEMENT)* '}'")]
-    public class ElseToken : IUserLanguageNonTerminalToken, ICodeEmitter
+    [TokenExpression("ELSE", "'else' '{' (STATEMENT)* '}'")]
+    public class ElseToken : ILanguageNonTerminalToken, ICodeEmitter
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new ElseToken() { Tokens = tokens };
         }

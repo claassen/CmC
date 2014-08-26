@@ -10,10 +10,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("MULTIPLICATIVE_EXPRESSION", "CAST_EXPRESSION (('*'|'/') CAST_EXPRESSION)*")]
-    public class MultiplicativeExpression : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
+    [TokenExpression("MULTIPLICATIVE_EXPRESSION", "CAST_EXPRESSION (('*'|'/') CAST_EXPRESSION)*")]
+    public class MultiplicativeExpression : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new MultiplicativeExpression() { Tokens = tokens };
         }

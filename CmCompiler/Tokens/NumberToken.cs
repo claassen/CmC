@@ -10,12 +10,12 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("REGEX:NUMBER", "'[0-9]+'")]
-    public class NumberToken : IUserLanguageTerminalToken, ICodeEmitter, IHasType, IHasAddress
+    [TokenExpression("REGEX:NUMBER", "'[0-9]+'")]
+    public class NumberToken : ILanguageTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public int Value;
 
-        public override IUserLanguageToken Create(string expressionValue)
+        public override ILanguageToken Create(string expressionValue)
         {
             return new NumberToken() { Value = Int32.Parse(expressionValue) };
         }

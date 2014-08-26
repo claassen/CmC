@@ -10,10 +10,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("BITWISE_EXPRESSION", "EQUALITY_EXPRESSION (('&'|'|'|'^') EQUALITY_EXPRESSION)*")]
-    public class BitwiseExpressionToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
+    [TokenExpression("BITWISE_EXPRESSION", "EQUALITY_EXPRESSION (('&'|'|'|'^') EQUALITY_EXPRESSION)*")]
+    public class BitwiseExpressionToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new BitwiseExpressionToken() { Tokens = tokens };
         }

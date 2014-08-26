@@ -8,10 +8,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("TYPE", "IDENTIFIER")]
-    public class TypeToken : IUserLanguageNonTerminalToken
+    [TokenExpression("TYPE", "IDENTIFIER")]
+    public class TypeToken : ILanguageNonTerminalToken
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new TypeToken() { Tokens = tokens };
         }

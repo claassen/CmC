@@ -10,10 +10,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("STATEMENT", "((VARIABLE_DEFINITION|ASSIGNMENT|FUNCTION_CALL|RETURN_STATEMENT|TYPEDEF) ';' | CONDITIONAL)")]
-    public class StatementToken : IUserLanguageNonTerminalToken, ICodeEmitter
+    [TokenExpression("STATEMENT", "((VARIABLE_DEFINITION|ASSIGNMENT|FUNCTION_CALL|RETURN_STATEMENT|TYPEDEF) ';' | CONDITIONAL)")]
+    public class StatementToken : ILanguageNonTerminalToken, ICodeEmitter
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new StatementToken() { Tokens = tokens };
         }

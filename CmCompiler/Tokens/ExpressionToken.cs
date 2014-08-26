@@ -10,10 +10,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("EXPRESSION", "BOOLEAN_EXPRESSION")]
-    public class ExpressionToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType
+    [TokenExpression("EXPRESSION", "BOOLEAN_EXPRESSION")]
+    public class ExpressionToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new ExpressionToken() { Tokens = tokens };
         }

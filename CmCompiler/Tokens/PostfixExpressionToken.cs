@@ -12,10 +12,10 @@ using ParserGen.Parser.Tokens;
 namespace CmC.Tokens
 {
     //TODO: array operator
-    [UserLanguageToken("POSTFIX_EXPRESSION", "(FUNCTION_CALL | PRIMARY_EXPRESSION) (('.'|'->') IDENTIFIER)?")]
-    public class PostfixExpressionToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
+    [TokenExpression("POSTFIX_EXPRESSION", "(FUNCTION_CALL | PRIMARY_EXPRESSION) (('.'|'->') IDENTIFIER)?")]
+    public class PostfixExpressionToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new PostfixExpressionToken() { Tokens = tokens };
         }

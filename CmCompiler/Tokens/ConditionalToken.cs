@@ -10,10 +10,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("CONDITIONAL", "IF (ELSEIF)* (ELSE)?")]
-    public class ConditionalToken : IUserLanguageNonTerminalToken, ICodeEmitter
+    [TokenExpression("CONDITIONAL", "IF (ELSEIF)* (ELSE)?")]
+    public class ConditionalToken : ILanguageNonTerminalToken, ICodeEmitter
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new ConditionalToken() { Tokens = tokens };
         }

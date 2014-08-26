@@ -10,10 +10,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("TYPEDEF", "'typedef' IDENTIFIER '{' (TYPE_SPECIFIER IDENTIFIER ';')+ '}'")]
-    public class TypeDefToken : IUserLanguageNonTerminalToken, ICodeEmitter
+    [TokenExpression("TYPEDEF", "'typedef' IDENTIFIER '{' (TYPE_SPECIFIER IDENTIFIER ';')+ '}'")]
+    public class TypeDefToken : ILanguageNonTerminalToken, ICodeEmitter
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new TypeDefToken() { Tokens = tokens };
         }

@@ -10,10 +10,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("RETURN_STATEMENT", "'return' EXPRESSION")]
-    public class ReturnStatementToken : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType
+    [TokenExpression("RETURN_STATEMENT", "'return' EXPRESSION")]
+    public class ReturnStatementToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new ReturnStatementToken() { Tokens = tokens };
         }

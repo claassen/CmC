@@ -10,10 +10,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("PROGRAM", "(STATEMENT | FUNCTION_DEFINITION)+")]
-    public class ProgramToken : IUserLanguageNonTerminalToken, ICodeEmitter
+    [TokenExpression("PROGRAM", "(STATEMENT | FUNCTION_DEFINITION)+")]
+    public class ProgramToken : ILanguageNonTerminalToken, ICodeEmitter
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new ProgramToken() { Tokens = tokens };
         }

@@ -10,10 +10,10 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("UNARY_EXPRESSION", "('*'|'&')? POSTFIX_EXPRESSION")]
-    public class UnaryExpression : IUserLanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
+    [TokenExpression("UNARY_EXPRESSION", "('*'|'&')? POSTFIX_EXPRESSION")]
+    public class UnaryExpression : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
-        public override IUserLanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
+        public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
             return new UnaryExpression() { Tokens = tokens };
         }

@@ -10,12 +10,12 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Tokens
 {
-    [UserLanguageToken("REGEX:IDENTIFIER", "'[a-zA-Z_][a-zA-Z_0-9]*'")]
-    public class IdentifierToken : IUserLanguageTerminalToken
+    [TokenExpression("REGEX:IDENTIFIER", "'[a-zA-Z_][a-zA-Z_0-9]*'")]
+    public class IdentifierToken : ILanguageTerminalToken
     {
         public string Name;
 
-        public override IUserLanguageToken Create(string expressionValue)
+        public override ILanguageToken Create(string expressionValue)
         {
             return new IdentifierToken() { Name = expressionValue };
         }
