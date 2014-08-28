@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CmC;
-using CmC.Exceptions;
+using CmC.Compiler;
+using CmC.Compiler.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
