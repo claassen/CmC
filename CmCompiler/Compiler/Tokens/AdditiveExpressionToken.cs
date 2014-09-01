@@ -39,30 +39,24 @@ namespace CmC.Compiler.Tokens
 
                 ExpressionType t2 = ((IHasType)Tokens[i + 1]).GetExpressionType(context);
                 ExpressionType.CheckTypeIsNumeric(t2);
-                //Type.CheckTypesMatch(t1, t2);
+                
                 t1 = t2;
 
                 string op = ((DefaultLanguageTerminalToken)Tokens[i]).Value;
 
-                //context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
                 context.EmitInstruction(new IRPop() { To = "eax" });
-
-                //context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
                 context.EmitInstruction(new IRPop() { To = "ebx" });
 
                 switch (op)
                 {
                     case "+":
-                        //context.EmitInstruction(new Op() { Name = "add", R1 = "eax", R2 = "ebx", R3 = "ecx" });
                         context.EmitInstruction(new IRAdd() { Left = "eax", Right = "ebx", To = "ecx" });
                         break;
                     case "-":
-                        //context.EmitInstruction(new Op() { Name = "sub", R1 = "eax", R2 = "ebx", R3 = "ecx" });
                         context.EmitInstruction(new IRSub() { Left = "eax", Right = "ebx", To = "ecx" });
                         break;
                 }
                 
-                //context.EmitInstruction(new Op() { Name = "push", R1 = "ecx" });
                 context.EmitInstruction(new IRPushRegister() { From = "ecx" });
             }
         }

@@ -30,18 +30,28 @@ namespace CmC.Compiler.Tokens
 
             ((IHasAddress)Tokens[0]).EmitAddress(context);
 
-            //context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
+            //Dest address -> eax
             context.EmitInstruction(new IRPop() { To = "eax" });
 
+            //value -> stack
             ((ICodeEmitter)Tokens[2]).Emit(context);
 
-            //Store assign value in ebx
-            //context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
-            context.EmitInstruction(new IRPop() { To = "ebx" });
+            if (rightSideType.GetSize() > 4)
+            {
+                //sp -= size of value
+                context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(rightSideType.GetSize()) });
+                context.EmitInstruction(new IRSub() { Left = "sp", Right = "ebx", To = "sp" });
+                //[sp] -> [destination]
+                context.EmitInstruction(new IRMemCopy() { From = "ebx", To = "eax", Length = new ImmediateValue(rightSideType.GetSize()) });
+            }
+            else
+            {
+                //Store assign value in ebx
+                context.EmitInstruction(new IRPop() { To = "ebx" });
 
-            //store ebx -> memory[eax]
-            //context.EmitInstruction(new Op() { Name = "store", R1 = "eax", R2 = "ebx" });
-            context.EmitInstruction(new IRStoreRegister() { From = "ebx", To = "eax" });
+                //store ebx -> [eax]
+                context.EmitInstruction(new IRStoreRegister() { From = "ebx", To = "eax" });
+            }
         }
 
         public ExpressionType GetExpressionType(CompilationContext context)

@@ -29,22 +29,26 @@ namespace CmC.Compiler.Tokens
 
             //Caller saves registers
 
-            //Return value from function goes in eax
-            //context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
-            context.EmitInstruction(new IRPop() { To = "eax" });
+            if (((IHasType)Tokens[1]).GetExpressionType(context).GetSize() > 4)
+            {
+                //Return value gets placed space allocated in caller's stack
+                throw new Exception("Large return values not supported");
+            }
+            else
+            {
+                //Return value from function goes in eax
+                context.EmitInstruction(new IRPop() { To = "eax" });
+            }
 
             //Reclaim local variables from stack space
-            for (int i = 0; i < context.GetFunctionLocalVarCount(); i++)
+            for (int i = 0; i < context.GetFunctionLocalVarSize() / 4; i++)
             {
-                //context.EmitInstruction(new Op() { Name = "pop" });
                 context.EmitInstruction(new IRPop() { To = "nil" });
             }
 
             //Pop return address off stack and jump
-            //context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
             context.EmitInstruction(new IRPop() { To = "ebx" });
 
-            //context.EmitInstruction(new Op() { Name = "jmp", R1 = "ebx" });
             context.EmitInstruction(new IRJumpRegister() { Address = "ebx" });
         }
 

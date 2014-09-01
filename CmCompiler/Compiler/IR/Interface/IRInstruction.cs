@@ -11,5 +11,6 @@ namespace CmC.Compiler.IR.Interface
     public interface IRInstruction
     {
         byte[] GetImplementation(IArchitecture arch);
+        string Display();
     }
 }

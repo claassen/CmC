@@ -16,9 +16,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(MissingReturnException))]
         public void MissingReturn_Test()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"int Test(int x, int y, int z) {
                       int temp = x + y;
                   }"
@@ -29,11 +27,71 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(UndefinedVariableException))]
         public void UndefinedArgumentVariable_Test()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"int Test(int x, int y) {
                       return z;
+                  }"
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(DuplicateFunctionDefinitionException))]
+        public void DuplicateFunctionDefinition_Test()
+        {
+            CmCompiler.Compile(
+                @"int Test(int x, int y) {
+                      return x;
+                  }
+                  int Test(int x, int y) {
+                      return y; 
+                  }"
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(DuplicateFunctionDefinitionException))]
+        public void DuplicateFunctionDefinition_Test2()
+        {
+            CmCompiler.Compile(
+                @"int Test(int x, int y) {
+                      return x;
+                  }
+                  export int Test(int x, int y) {
+                      return y; 
+                  }"
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ExportUndefinedFunctionException))]
+        public void ExportUndefinedFunction_Test()
+        {
+            CmCompiler.Compile(
+                @"export int Test(int x, int y);"
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LargeReturnValuesNotSupportedException))]
+        public void LargeReturnValuesNotSupportedTest()
+        {
+            CmCompiler.Compile(
+                @"typedef X { int x; int y; };
+                  X Test(int a);"
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LargeReturnValuesNotSupportedException))]
+        public void LargeReturnValuesNotSupportedTest2()
+        {
+            CmCompiler.Compile(
+                @"typedef X { int x; int y; };
+                  X Test(int a) {
+                      X x;
+                      x.x = 1;
+                      x.y = 2;
+                      return x;
                   }"
             );
         }

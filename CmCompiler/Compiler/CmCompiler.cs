@@ -5,25 +5,27 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using CmC.Common;
 using CmC.Compiler.Architecture;
 using CmC.Compiler.Context;
 using CmC.Compiler.IR;
 using CmC.Compiler.IR.Interface;
 using CmC.Compiler.Tokens.TokenInterfaces;
+using CmC.Linker;
 using ParserGen.Generator;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler
 {
-    public class CmCompiler
+    public static class CmCompiler
     {
-        public byte[] Compile(string source)
+        public static void Compile(string source, string outputObjFile = "")
         {
-            return Compile(source, new TestArchitecture());
+            Compile(source, outputObjFile, new TestArchitecture());
         }
 
-        public byte[] Compile(string source, IArchitecture architecture)
+        public static void Compile(string source, string outputObjFile, IArchitecture architecture)
         {
             var grammar = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(c => c.Namespace == "CmC.Compiler.Tokens")
@@ -43,28 +45,92 @@ namespace CmC.Compiler
                 ((ICodeEmitter)token).Emit(context);
             }
 
-            return CreateObjectCode(context, architecture);
+            CreateObjectFile(context, outputObjFile, architecture);
         }
 
-        private byte[] CreateObjectCode(CompilationContext context, IArchitecture architecture)
+        /*
+         * Object file format:
+         *  (int)                 # relocations
+         *  (int)                 # label addresses
+         *  (int)                 # exported symbols
+         *  (int)                 .data section offset
+         *  (int)[]               relocations - addresses relative to start of .data section
+         *  (byte,(int|string))[] label addresses - type followed by either address relative to start of .data section or symbol name
+         *  (string,int)[]        exported symbols - symbol name followed by index into label addresses
+         */
+        private static void CreateObjectFile(CompilationContext context, string outputObjFile, IArchitecture architecture)
         {
             var ir = context.GetIR();
 
-            int byteCount = 0;
+            ShowIR(ir);
 
-            var labelAddresses = new List<Tuple<int, int>>();
-            var relocationAddresses = new List<int>();
+            var header = new ObjectFileHeader();
+
+            header.RelocationAddresses = new List<int>();
+            header.LabelAddresses = new List<LabelAddressTableEntry>();
+            
             var code = new List<byte>();
 
             int globalDataSize = 0;
 
+            //name => labelIndex
+            header.ExportedSymbols = new Dictionary<string, int>();
+
             foreach (var variable in context.GetGlobalVariables())
             {
-                labelAddresses.Add(new Tuple<int,int>(variable.Address.Number, globalDataSize));
-                globalDataSize += variable.Type.GetSize();
+                if (variable.Value.IsExported)
+                {
+                    //name => labelIndex
+                    header.ExportedSymbols.Add(variable.Key, variable.Value.Address.Number);
+                }
+                
+                if (variable.Value.IsExtern)
+                {
+                    header.LabelAddresses.Add(
+                        new LabelAddressTableEntry() 
+                        { 
+                            Index = variable.Value.Address.Number, 
+                            IsExtern = true, 
+                            SymbolName = variable.Key 
+                        }
+                    );
+                }
+                else
+                {
+                    header.LabelAddresses.Add(
+                        new LabelAddressTableEntry() 
+                        { 
+                            Index = variable.Value.Address.Number, 
+                            IsExtern = false, 
+                            Address = globalDataSize 
+                        }
+                    );
+
+                    globalDataSize += variable.Value.Type.GetSize();
+                }
             }
 
-            byteCount = globalDataSize;
+            foreach (var function in context.GetFunctions())
+            {
+                if (function.Value.IsExported)
+                {
+                    header.ExportedSymbols.Add(function.Key, function.Value.Address.Number);
+                }
+                else if (function.Value.IsExtern)
+                {
+                    //Need to add label address table entry that indicates function addresses is resolved externally
+                    header.LabelAddresses.Add(
+                        new LabelAddressTableEntry() 
+                        { 
+                            Index = function.Value.Address.Number, 
+                            IsExtern = true, 
+                            SymbolName = function.Key 
+                        }
+                    );
+                }
+            }
+
+            int codeAddress = globalDataSize;
 
             foreach (var i in ir)
             {
@@ -75,63 +141,54 @@ namespace CmC.Compiler
 
                 if (i is IRLabel)
                 {
-                    labelAddresses.Add(new Tuple<int, int>(((IRLabel)i).Index, byteCount));
+                    header.LabelAddresses.Add(
+                        new LabelAddressTableEntry() 
+                        { 
+                            Index = ((IRLabel)i).Index, 
+                            Address = codeAddress 
+                        }
+                    );
                 }
 
-                if (i is IRelocatableAddressValue)
+                if (i is IRelocatableAddressValue && ((IRelocatableAddressValue)i).HasRelocatableAddressValue())
                 {
                     int offset = architecture.GetRelocationOffset(i);
-                    relocationAddresses.Add(byteCount + offset);
+                    header.RelocationAddresses.Add(codeAddress + offset);
                 }
 
                 byte[] machineInstruction = i.GetImplementation(architecture);
                 code.AddRange(machineInstruction.ToList());
-                byteCount += machineInstruction.Length;
+                codeAddress += machineInstruction.Length;
             }
 
-            byte[] fileData;
-
-            int dataOffset = 8 + (relocationAddresses.Count * 4) + (labelAddresses.Count * 4);
-
-            using (var stream = new BinaryWriter(new MemoryStream()))
+            if (!String.IsNullOrEmpty(outputObjFile))
             {
-                stream.Write(dataOffset);
-                stream.Write(relocationAddresses.Count);
-
-                foreach (int loc in relocationAddresses)
+                using (var sw = new BinaryWriter(new FileStream(outputObjFile, FileMode.Create)))
                 {
-                    stream.Write(loc);
-                }
+                    ObjectFileUtils.WriteObjectFileHeader(header, sw);
 
-                for(int i = 0; i < labelAddresses.Max(a => a.Item1); i++)
-                {
-                    var address = labelAddresses.FirstOrDefault(a => a.Item1 == i);
-
-                    if(address != null)
+                    //Data section
+                    for (int i = 0; i < globalDataSize; i++)
                     {
-                        stream.Write(address.Item2);
+                        //Zero global/static data memory
+                        sw.Write((byte)0);
                     }
-                    else
+
+                    //Code section
+                    foreach (byte b in code)
                     {
-                        stream.Write(0);
+                        sw.Write(b);
                     }
                 }
-
-                for (int i = 0; i < globalDataSize; i++)
-                {
-                    //Zero global/static data memory
-                    stream.Write(0);
-                }
-
-                foreach (byte b in code)
-                {
-                    stream.Write(b);
-                }
-
-                fileData = ((MemoryStream)stream.BaseStream).ToArray();
             }
+        }
 
-            return fileData;
+        private static void ShowIR(List<IRInstruction> ir)
+        {
+            foreach (var i in ir)
+            {
+                Console.WriteLine(i.Display());
+            }
         }
     }
 }

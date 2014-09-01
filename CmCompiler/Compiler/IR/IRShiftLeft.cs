@@ -8,5 +8,11 @@ namespace CmC.Compiler.IR
         {
             return arch.Implement(this);
         }
+
+
+        public string Display()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

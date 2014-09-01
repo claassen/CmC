@@ -16,9 +16,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(ArgumentCountMismatchException))]
         public void FunctionArgumentCountMismatch_Test()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"int Test(int x, int y, int z) {
                       return x + y + z;
                   }
@@ -30,9 +28,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void FunctionArgumentTypeMismatch_Test()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"int Test(int x, int y) {
                       return x + y;
                   }
@@ -45,9 +41,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(UndefinedFunctionException))]
         public void UndefinedFunction_Test()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"NotTest();"
             );
         }
@@ -56,9 +50,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(UndefinedFunctionException))]
         public void UndefinedFunctionCallBeforeDefinition_Test()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"Test(0);
                   int Test(int x) {
                       return 0;

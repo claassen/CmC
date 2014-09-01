@@ -58,6 +58,7 @@
     <Compile Include="SemanticErrorTests\TypeMismatchErrorTests\DefinitionTypeMismatchTests.cs" />
     <Compile Include="SemanticErrorTests\VariableDefinitionErrorTests.cs" />
     <Compile Include="ValidSemanticsTests\CompatibleTypesTests.cs" />
+    <Compile Include="ValidSemanticsTests\FunctionDeclarationTests.cs" />
     <Compile Include="ValidSemanticsTests\IndirectionLevelTests.cs" />
   </ItemGroup>
   <ItemGroup>

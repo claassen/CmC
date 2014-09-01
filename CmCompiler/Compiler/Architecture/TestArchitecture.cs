@@ -14,7 +14,7 @@ namespace CmC.Compiler.Architecture
 
         public int GetRelocationOffset(IRInstruction ir)
         {
-            return 8;
+            return 0;
         }
 
         public byte[] Implement(IRAdd ir)
@@ -29,12 +29,16 @@ namespace CmC.Compiler.Architecture
 
         public byte[] Implement(IRCall ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Address.Number)
+            );
         }
 
         public byte[] Implement(IRCompareImmediate ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Right.Number)
+            );
         }
 
         public byte[] Implement(IRCompareRegister ir)
@@ -49,37 +53,51 @@ namespace CmC.Compiler.Architecture
 
         public byte[] Implement(IRJumpEQ ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Address.Number)
+            );
         }
 
         public byte[] Implement(IRJumpGE ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Address.Number)
+            );
         }
 
         public byte[] Implement(IRJumpGT ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Address.Number)
+            );
         }
 
         public byte[] Implement(IRJumpImmediate ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Address.Number)
+            );
         }
 
         public byte[] Implement(IRJumpLE ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Address.Number)
+            );
         }
 
         public byte[] Implement(IRJumpLT ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Address.Number)
+            );
         }
 
         public byte[] Implement(IRJumpNE ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Address.Number)
+            );
         }
 
         public byte[] Implement(IRJumpRegister ir)
@@ -89,7 +107,9 @@ namespace CmC.Compiler.Architecture
 
         public byte[] Implement(IRLoadImmediate ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Address.Number)
+            );
         }
 
         public byte[] Implement(IRLoadRegister ir)
@@ -99,12 +119,16 @@ namespace CmC.Compiler.Architecture
 
         public byte[] Implement(IRLoadRegisterPlusImmediate ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Offset.Number)
+            );
         }
 
         public byte[] Implement(IRMoveImmediate ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Value.Number)
+            );
         }
 
         public byte[] Implement(IRMoveRegister ir)
@@ -134,7 +158,9 @@ namespace CmC.Compiler.Architecture
 
         public byte[] Implement(IRPushImmediate ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Value.Number)
+            );
         }
 
         public byte[] Implement(IRPushRegister ir)
@@ -154,7 +180,9 @@ namespace CmC.Compiler.Architecture
 
         public byte[] Implement(IRStoreImmediate ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.To.Number)
+            );
         }
 
         public byte[] Implement(IRStoreRegister ir)
@@ -164,7 +192,9 @@ namespace CmC.Compiler.Architecture
 
         public byte[] Implement(IRStoreRegisterPlusImmediate ir)
         {
-            return BitConverter.GetBytes(count++);
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Offset.Number)
+            );
         }
 
         public byte[] Implement(IRSub ir)
@@ -175,6 +205,13 @@ namespace CmC.Compiler.Architecture
         public byte[] Implement(IRXOr ir)
         {
             return BitConverter.GetBytes(count++);
+        }
+
+        public byte[] Implement(IRMemCopy ir)
+        {
+            return BitConverter.GetBytes(
+                (long)((long)(count++) << 32 | (uint)ir.Length.Number)
+            );
         }
     }
 }

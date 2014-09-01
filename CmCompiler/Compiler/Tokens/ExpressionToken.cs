@@ -11,7 +11,7 @@ using ParserGen.Parser.Tokens;
 namespace CmC.Compiler.Tokens
 {
     [TokenExpression("EXPRESSION", "BOOLEAN_EXPRESSION")]
-    public class ExpressionToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType
+    public class ExpressionToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
@@ -29,6 +29,11 @@ namespace CmC.Compiler.Tokens
         public ExpressionType GetExpressionType(CompilationContext context)
         {
             return ((IHasType)Tokens[0]).GetExpressionType(context);
+        }
+
+        public void EmitAddress(CompilationContext context)
+        {
+            ((IHasAddress)Tokens[0]).EmitAddress(context);
         }
     }
 }

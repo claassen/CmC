@@ -11,12 +11,31 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Tokens
 {
-    [TokenExpression("FUNCTION_DEFINITION", "TYPE_SPECIFIER IDENTIFIER '(' (TYPE_SPECIFIER IDENTIFIER (',' TYPE_SPECIFIER IDENTIFIER)*)? ')' FUNCTION_BODY")]
+    [TokenExpression("FUNCTION_DEFINITION", "('export')? TYPE_SPECIFIER IDENTIFIER '(' (TYPE_SPECIFIER IDENTIFIER (',' TYPE_SPECIFIER IDENTIFIER)*)? ')' (FUNCTION_BODY|';')")]
     public class FunctionDefinitionToken : ILanguageNonTerminalToken, ICodeEmitter
     {
+        private bool IsDefined;
+        private bool IsExported;
+
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
-            return new FunctionDefinitionToken() { Tokens = tokens };
+            bool isExport = tokens[0] is DefaultLanguageTerminalToken
+                && ((DefaultLanguageTerminalToken)tokens[0]).Value == "export";
+
+            bool isDefined = tokens.Last() is FunctionBodyToken;
+
+            if (!isDefined)
+            {
+                //Add fake body token so iteration logic for argument processing still works
+                tokens.Add(new FunctionBodyToken());
+            }
+
+            return new FunctionDefinitionToken()
+            {
+                IsDefined = isDefined,
+                IsExported = isExport,
+                Tokens = isExport ? tokens.Skip(1).ToList() : tokens
+            };
         }
 
         public void Emit(CompilationContext context)
@@ -25,7 +44,17 @@ namespace CmC.Compiler.Tokens
 
             var returnType = ((TypeSpecifierToken)Tokens[0]).GetExpressionType(context);
 
+            if (returnType.GetSize() > 4)
+            {
+                throw new LargeReturnValuesNotSupportedException();
+            }
+
             string functionName = ((IdentifierToken)Tokens[1]).Name;
+
+            if (!IsDefined && IsExported)
+            {
+                throw new ExportUndefinedFunctionException(functionName);
+            }
 
             context.NewScope(true);
 
@@ -42,13 +71,17 @@ namespace CmC.Compiler.Tokens
                 context.AddFunctionArgSymbol(parameterName, parameterType);
             }
 
-            context.AddFunctionSymbol(functionName, returnType, parameterTypes);
+            context.AddFunctionSymbol(functionName, returnType, parameterTypes, IsDefined, IsExported);
 
-            ((ICodeEmitter)Tokens.Last()).Emit(context);
+            if (IsDefined)
+            {
+                context.EmitLabel(context.GetLastCreatedLabelNumber());
+                ((ICodeEmitter)Tokens.Last()).Emit(context);
+            }
 
             context.EndScope(true);
 
-            if (!context.FunctionHasReturn())
+            if (IsDefined && !context.FunctionHasReturn())
             {
                 throw new MissingReturnException(functionName);
             }

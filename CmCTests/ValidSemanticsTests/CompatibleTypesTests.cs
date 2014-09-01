@@ -14,9 +14,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void CompatibleTypeBoolean_Test()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"int x = 0;
                   bool b;
                   bool res = x && b;"
@@ -26,9 +24,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void CompatibleTypeBoolean_Test2()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"int x = 0;
                   int y = 1;
                   bool res = x && y;"
@@ -38,9 +34,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void CompatibleTypeBoolean_Test3()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"bool a;
                   bool b;
                   bool res = a && b ^ 5;"
@@ -50,9 +44,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void CompatibleTypeBoolean_Test4()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"bool a;
                   bool b;
                   bool res = 5 || a ^ b;"

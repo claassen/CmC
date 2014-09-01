@@ -16,9 +16,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(UndefinedVariableException))]
         public void UndefinedVariable_Test()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"int x = y + 1;"
             );
         }
@@ -27,9 +25,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(UndefinedVariableException))]
         public void UndefinedVariable_Test2()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"x = 1;"
             );
         }

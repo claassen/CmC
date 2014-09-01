@@ -20,7 +20,7 @@ namespace CmC.Compiler.Context
             }
             else
             {
-                return 1;
+                return 4;
             }
         }
 
@@ -39,18 +39,28 @@ namespace CmC.Compiler.Context
 
         public static void CheckTypeIsNumeric(ExpressionType t)
         {
-            if (!new[] { "int", "bool" }.Contains(t.Type.Name))
+            if (t.GetSize() != 4)
             {
-                throw new TypeMismatchException(new ExpressionType() { Type = new TypeDef() { Name = "Numeric value" } }, t);
+                throw new TypeMismatchException(new ExpressionType() { Type = new TypeDef() { Name = "Numeric value (4 byte value)" } }, t);
             }
+
+            //if (!new[] { "int", "bool" }.Contains(t.Type.Name))
+            //{
+            //    throw new TypeMismatchException(new ExpressionType() { Type = new TypeDef() { Name = "Numeric value" } }, t);
+            //}
         }
 
         public static void CheckTypeIsBoolean(ExpressionType t)
         {
-            if (!new[] { "bool", "int" }.Contains(t.Type.Name))
+            if (t.GetSize() != 4)
             {
-                throw new TypeMismatchException(new ExpressionType() { Type = new TypeDef() { Name = "Boolean value" } }, t);
+                throw new TypeMismatchException(new ExpressionType() { Type = new TypeDef() { Name = "Boolean value (4 byte value)" } }, t);
             }
+
+            //if (!new[] { "bool", "int" }.Contains(t.Type.Name))
+            //{
+            //    throw new TypeMismatchException(new ExpressionType() { Type = new TypeDef() { Name = "Boolean value" } }, t);
+            //}
         }
 
         public override string ToString()
@@ -63,6 +73,18 @@ namespace CmC.Compiler.Context
             {
                 return "&" + Type.Name;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = (ExpressionType)obj;
+
+            return this.Type == other.Type && this.IndirectionLevel == other.IndirectionLevel;
+        }
+
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
         }
     }
 }

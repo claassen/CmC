@@ -10,6 +10,8 @@ namespace CmC.Compiler.Context
     {
         public AddressValue Address;
         public ExpressionType Type;
+        public bool IsExported;
+        public bool IsExtern;
 
         public override string ToString()
         {

@@ -29,22 +29,6 @@ namespace CmC.Compiler.Context
         }
     }
 
-    //public class AbsoluteAddressValue : AddressValue
-    //{
-    //    public AbsoluteAddressValue(int offset)
-    //        : base(offset)
-    //    {
-    //    }
-    //}
-
-    //public class StaticAddressValue : AddressValue
-    //{
-    //    public StaticAddressValue(int offset)
-    //        : base(offset)
-    //    {
-    //    }
-    //}
-
     public class StackAddressValue : AddressValue
     {
         public string BaseRegister;

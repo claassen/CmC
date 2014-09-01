@@ -15,9 +15,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void IndirectionLevels_Test()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"int x = 0;
                   int* y = &x;
                   int** z = &y;"
@@ -27,9 +25,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void IndirectionLevels_Test2()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"int** x;
                   int y = *(*x);"
             );
@@ -38,9 +34,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void IndirectionLevelsAssignment_Test()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"int x = 0;
                   int* y;
                   y = &x;
@@ -52,9 +46,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void IndirectionLevelsAssingment_Test2()
         {
-            var compiler = new CmCompiler();
-
-            compiler.Compile(
+            CmCompiler.Compile(
                 @"int** x;
                   int y;
                   y = *(*x);"

@@ -15,5 +15,10 @@ namespace CmC.Compiler.IR
         {
             return new byte[0];
         }
+
+        public string Display()
+        {
+            return ";;" + Message;
+        }
     }
 }

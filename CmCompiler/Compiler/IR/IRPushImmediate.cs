@@ -3,23 +3,18 @@ using CmC.Compiler.IR.Interface;
 
 namespace CmC.Compiler.IR
 {
-    public class IRPushImmediate : IRInstruction, IRelocatableAddressValue
+    public class IRPushImmediate : IRInstruction
     {
         public ImmediateValue Value;
-
-        public bool HasRelocatableAddressValue()
-        {
-            return Value is LabelAddressValue;
-        }
-
-        public int GetLabelIndex()
-        {
-            return ((LabelAddressValue)Value).Number;
-        }
 
         public byte[] GetImplementation(Architecture.IArchitecture arch)
         {
             return arch.Implement(this);
+        }
+
+        public string Display()
+        {
+            return "push " + Value;
         }
     }
 }

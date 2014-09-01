@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CmC.Compiler;
 using CmC.Compiler.IR;
 using CmC.Compiler.IR.Interface;
+using CmC.Linker;
 
 namespace CmCompilerTester
 {
@@ -13,66 +15,29 @@ namespace CmCompilerTester
     {
         static void Main(string[] args)
         {
-            var compiler = new CmCompiler();
-
             //TODO: arrays
-            //TODO: type definitions, type sizes
-            //TODO: return values on stack
+            //TODO: type sizes - Done?
+            //TODO: return values on stack - Not supported for now, can pass pointer arguments to accomplish the same thing
 
-            byte[] data = compiler.Compile(
-                @"int x = 0;
-                  int y = 1;
-                  if(x == y) {
-                      x = 1;
-                  }
-                  else {
-                      if(x < y) {
-                          x = 2;
-                      }
-                      else {
-                          x = 3;
-                      }
-                  }"
+            CmCompiler.Compile(
+                @"export int x;
+                  extern int y;
+                  y = 1;",
+                @"C:\share\x.o"
             );
 
-//            compiler.Compile(
-//                @"int x;
-//                  int* y = &x;
-//                  *y = 5;"
-//            );
+            CmCompiler.Compile(
+                @"extern int x;
+                  export int y;
+                  x = 2;",
+                @"C:\share\y.o"
+            );
 
-//            compiler.Compile(
-//                @"typedef X 
-//                  { 
-//                      int x; 
-//                      int y; 
-//                  };
-//                  typedef Y
-//                  {
-//                      int a;
-//                      X* px;
-//                  };
-//                  int a;
-//                  Y y;
-//                  y.px = &a;"
-//            );
-        }
-
-        static void PrintIR(List<IRInstruction> ir)
-        {
-            //Console.WriteLine("data:");
-            //int addr = 0;
-            //foreach (var v in _globalVarSymbolTable)
-            //{
-            //    Console.WriteLine(addr++ + ": " + v.Value + ": " + v.Key);
-            //}
-
-            Console.WriteLine("code:");
-            foreach (var i in ir)
+            CmLinker.Link(new List<string>()
             {
-                //if(!(i is Comment))
-                Console.WriteLine(i);
-            }
+                @"C:\share\x.o",
+                @"C:\share\y.o"
+            }, @"C:\share\xy.exe");
         }
     }
 }

@@ -40,11 +40,23 @@ namespace CmC.Compiler.Tokens
         {
             var variable = context.GetVariable(Name);
 
-            //context.EmitInstruction(new Op() { Name = "load", R1 = "eax", Imm = variable.Address });
-            context.EmitInstruction(new IRLoadImmediate() { To = "eax", Address = variable.Address });
-
-            //context.EmitInstruction(new Op() { Name = "push", R1 = "eax" });
-            context.EmitInstruction(new IRPushRegister() { From = "eax" });
+            if (variable.Type.GetSize() > 4)
+            {
+                //Variable address -> eax
+                context.EmitInstruction(new IRMoveImmediate() { To = "eax", Value = variable.Address });
+                //[eax] -> [sp] 
+                context.EmitInstruction(new IRMemCopy() { From = "eax", To = "sp", Length = new ImmediateValue(variable.Type.GetSize()) });
+                //size -> ebx
+                context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(variable.Type.GetSize()) });
+                //sp += ebx
+                context.EmitInstruction(new IRAdd() { Left = "sp", Right = "ebx", To = "sp" });
+            }
+            else
+            {
+                //[address] -> eax
+                context.EmitInstruction(new IRLoadImmediate() { To = "eax", Address = variable.Address });
+                context.EmitInstruction(new IRPushRegister() { From = "eax" });
+            }
         }
 
         public ExpressionType GetExpressionType(CompilationContext context)

@@ -28,11 +28,19 @@ namespace CmC.Compiler.Tokens
 
             var function = context.GetFunction(functionName);
 
+            if (function.ReturnType.GetSize() > 4)
+            {
+                //Make space for return value in caller stack
+                //context.EmitInstruction(new IRMoveImmediate() { To = "eax", Value = new ImmediateValue(function.ReturnType.GetSize()) });
+                //context.EmitInstruction(new IRAdd() { Left = "sp", Right = "eax", To = "sp" });
+                throw new LargeReturnValuesNotSupportedException();
+            }
+
             //Push base pointer on stack
-            //context.EmitInstruction(new Op() { Name = "push", R1 = "bp" });
             context.EmitInstruction(new IRPushRegister() { From = "bp" });
 
             int argumentCount = 0;
+            int argumentsSize = 0;
 
             if (Tokens.Count > 1)
             {
@@ -44,8 +52,11 @@ namespace CmC.Compiler.Tokens
 
                     ExpressionType.CheckTypesMatch(paramType, argType);
 
+                    //Push argument value on stack
                     ((ICodeEmitter)Tokens[i]).Emit(context);
+                    
                     argumentCount++;
+                    argumentsSize += argType.GetSize();
                 }
             }
 
@@ -54,38 +65,38 @@ namespace CmC.Compiler.Tokens
                 throw new ArgumentCountMismatchException(functionName, function.ParameterTypes.Count, argumentCount);
             }
 
-            //int currentInstrAddress = context.GetCurrentInstructionAddress();
-            //int functionReturnAddress = currentInstrAddress + 4;
-
             var returnLabel = new LabelAddressValue(context.CreateNewLabel());
 
             //Push return address on stack and jump to function
-            //context.EmitInstruction(new Op() { Name = "push", Imm = returnLabel });
             context.EmitInstruction(new IRPushImmediate() { Value = returnLabel });
 
             //Set base pointer to be the top of current function's stack which will be the bottom
             //of the called function's stack
-            //context.EmitInstruction(new Op { Name = "mov", R1 = "sp", R2 = "bp" });
             context.EmitInstruction(new IRMoveRegister() { From = "sp", To = "bp" });
             
             //Jump to function location
-            //context.EmitInstruction(new Op() { Name = "jmp", Imm = function.Address });
             context.EmitInstruction(new IRJumpImmediate() { Address = function.Address });
 
             //Resume here
-            for (int i = 0; i < argumentCount; i++)
+            for (int i = 0; i < argumentsSize / 4; i++)
             {
                 //Reclaim stack space from arguments pushed before the call
-                //context.EmitInstruction(new Op() { Name = "pop" });
                 context.EmitInstruction(new IRPop() { To = "nil" });
             }
 
             //Reset base pointer
-            //context.EmitInstruction(new Op() { Name = "pop", R1 = "bp" });
             context.EmitInstruction(new IRPop() { To = "bp" });
 
-            //context.EmitInstruction(new Op() { Name = "push", R1 = "eax" });
-            context.EmitInstruction(new IRPushRegister() { From = "eax" });
+            if (function.ReturnType.GetSize() > 4)
+            {
+                //Return value is already on stack
+                throw new LargeReturnValuesNotSupportedException();
+            }
+            else
+            {
+                //Return value in eax, put on stack
+                context.EmitInstruction(new IRPushRegister() { From = "eax" });
+            }
         }
 
         public ExpressionType GetExpressionType(CompilationContext context)

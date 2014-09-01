@@ -1,5 +1,7 @@
 
+using System;
 using CmC.Compiler.IR.Interface;
+
 namespace CmC.Compiler.IR
 {
     public class IRAnd : IRInstruction
@@ -11,6 +13,11 @@ namespace CmC.Compiler.IR
         public byte[] GetImplementation(Architecture.IArchitecture arch)
         {
             return arch.Implement(this);
+        }
+
+        public string Display()
+        {
+            return String.Format("and {0}, {1} -> {2}", Left, Right, To);
         }
     }
 }

@@ -21,5 +21,10 @@ namespace CmC.Compiler.IR
         {
             return arch.Implement(this);
         }
+
+        public virtual string Display()
+        {
+            return "jmp " + Address;
+        }
     }
 }

@@ -17,7 +17,7 @@ namespace CmC.Compiler.Context
         private Stack<int> _stackOffsets;
 
         private int _functionArgStackOffset;
-        private int _functionLocalVarCount;
+        private int _functionLocalVarSize;
 
         private int _labelCount;
 
@@ -49,27 +49,24 @@ namespace CmC.Compiler.Context
             _instructions = new List<IRInstruction>();
 
             _types = new Dictionary<string, TypeDef>();
-            _types.Add("int", new TypeDef() { Name = "int", Size = 1 });
-            _types.Add("bool", new TypeDef() { Name = "bool", Size = 1 });
+            _types.Add("int", new TypeDef() { Name = "int", Size = 4 });
+            _types.Add("bool", new TypeDef() { Name = "bool", Size = 4 });
 
             ConditionalElseBranchLabels = new Stack<int>();
         }
 
         public void EmitLabel(int labelIndex)
         {
-            //_instructions.Add(new Label(labelNumber));
             _instructions.Add(new IRLabel(labelIndex));
         }
 
         public void EmitInstruction(IRInstruction ir)
         {
-            //_instructions.Add(new Instruction() { Op = op, Comment = comment });
             _instructions.Add(ir);
         }
 
         public void EmitComment(string text)
         {
-            //_instructions.Add(new Comment() { Text = text });
             _instructions.Add(new IRComment(text));
         }
 
@@ -83,7 +80,7 @@ namespace CmC.Compiler.Context
             {
                 _stackOffsets.Push(0);
                 _functionArgStackOffset = -1;
-                _functionLocalVarCount = 0;
+                _functionLocalVarSize = 0;
                 _functionHasReturn = false;
                 _inPossiblyNonExecutedBlock = false;
             }
@@ -122,20 +119,41 @@ namespace CmC.Compiler.Context
             return _functionHasReturn;
         }
 
-        public void AddVariableSymbol(string name, ExpressionType type)
+        public void AddVariableSymbol(string name, ExpressionType type, bool isExported, bool isExtern)
         {
             if (_currentScopeLevel == -1)
             {
                 //Global scope
-                _globalVarSymbolTable.Add(name, new Variable() { Address = new LabelAddressValue(CreateNewLabel()), Type = type });
+                _globalVarSymbolTable.Add(
+                    name, 
+                    new Variable() 
+                    { 
+                        Type = type,
+                        IsExported = isExported,
+                        IsExtern = isExtern,
+                        Address = new LabelAddressValue(CreateNewLabel())
+                    }
+                );
             }
             else
             {
+                if (isExported || isExtern)
+                {
+                    throw new Exception("Cannot export or extern non global variables");
+                }
+
                 //Function or block scope
                 int currentStackOffset = _stackOffsets.Pop();
-                _varSymbolTables[_currentScopeLevel].Add(name, new Variable() { Address = new StackAddressValue(currentStackOffset++), Type = type });
+                _varSymbolTables[_currentScopeLevel].Add(
+                    name, 
+                    new Variable() 
+                    { 
+                        Address = new StackAddressValue(currentStackOffset++), 
+                        Type = type 
+                    }
+                );
                 _stackOffsets.Push(currentStackOffset);
-                _functionLocalVarCount++;
+                _functionLocalVarSize += type.GetSize();
             }
         }
 
@@ -149,27 +167,67 @@ namespace CmC.Compiler.Context
             return _labelCount - 1;
         }
 
-        public int GetFunctionLocalVarCount()
+        public int GetFunctionLocalVarSize()
         {
-            return _functionLocalVarCount;
+            return _functionLocalVarSize;
         }
 
-        public void AddFunctionSymbol(string name, ExpressionType returnType, List<ExpressionType> parameterTypes)
+        public void AddFunctionSymbol(string name, ExpressionType returnType, List<ExpressionType> parameterTypes, bool isDefined, bool isExported)
         {
-            _functionSymbolTable.Add(
-                name, 
-                new Function() 
-                {  
-                    Address = new LabelAddressValue(CreateNewLabel()),
-                    ReturnType = returnType, 
-                    ParameterTypes = parameterTypes 
+            if (_functionSymbolTable.ContainsKey(name))
+            {
+                var function = _functionSymbolTable[name];
+
+                if (function.IsDefined)
+                {
+                    throw new DuplicateFunctionDefinitionException(name);
                 }
-            );
+                
+                //Check function signature matches previous declaration
+                if (parameterTypes.Count != function.ParameterTypes.Count)
+                {
+                    throw new FunctionSignatureMismatchException(name);
+                }
+
+                for (int i = 0; i < function.ParameterTypes.Count; i++)
+                {
+                    if (!parameterTypes[i].Equals(function.ParameterTypes[i]))
+                    {
+                        throw new FunctionSignatureMismatchException(name);
+                    }
+                }
+                
+                if (isDefined)
+                {
+                    function.IsDefined = true;
+                    function.Address = new LabelAddressValue(CreateNewLabel());
+                }
+            }
+            else
+            {
+                _functionSymbolTable.Add(
+                    name,
+                    new Function()
+                    {
+                        Address = isDefined ? new LabelAddressValue(CreateNewLabel()) : new LabelAddressValue(-1),
+                        ReturnType = returnType,
+                        ParameterTypes = parameterTypes,
+                        IsDefined = isDefined,
+                        IsExported = isExported
+                    }
+                );
+            }
+        }
+
+        public Dictionary<string, Function> GetFunctions()
+        {
+            return _functionSymbolTable;
         }
 
         public void AddFunctionArgSymbol(string name, ExpressionType type)
         {
-            _varSymbolTables[_currentScopeLevel].Add(name, new Variable() { Address = new StackAddressValue(_functionArgStackOffset--), Type = type });
+            _varSymbolTables[_currentScopeLevel].Add(name, new Variable() { Address = new StackAddressValue(_functionArgStackOffset), Type = type });
+            _functionArgStackOffset -= type.GetSize();
         }
 
         public Variable GetVariable(string varName)
@@ -190,9 +248,9 @@ namespace CmC.Compiler.Context
             throw new UndefinedVariableException(varName);
         }
 
-        public List<Variable> GetGlobalVariables()
+        public Dictionary<string, Variable> GetGlobalVariables()
         {
-            return _globalVarSymbolTable.Select(v => v.Value).ToList();
+            return _globalVarSymbolTable;
         }
 
         public Function GetFunction(string funcName)
