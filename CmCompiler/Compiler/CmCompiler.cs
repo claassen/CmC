@@ -10,7 +10,7 @@ using CmC.Compiler.Architecture;
 using CmC.Compiler.Context;
 using CmC.Compiler.IR;
 using CmC.Compiler.IR.Interface;
-using CmC.Compiler.Tokens.TokenInterfaces;
+using CmC.Syntax.TokenInterfaces;
 using CmC.Linker;
 using ParserGen.Generator;
 using ParserGen.Parser;
@@ -28,7 +28,7 @@ namespace CmC.Compiler
         public static void Compile(string source, string outputObjFile, IArchitecture architecture)
         {
             var grammar = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(c => c.Namespace == "CmC.Compiler.Tokens")
+                .Where(c => c.Namespace == "CmC.Syntax")
                 .Where(c => typeof(ILanguageToken).IsAssignableFrom(c))
                 .Select(t => (ILanguageToken)Activator.CreateInstance(t, null));
 
