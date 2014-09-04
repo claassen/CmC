@@ -15,15 +15,15 @@ namespace CmC.Compiler.IR
 
         public int GetLabelIndex()
         {
-            return ((LabelAddressValue)Address).Number;
+            return ((LabelAddressValue)Address).Value;
         }
 
-        public byte[] GetImplementation(Architecture.IArchitecture arch)
+        public override byte[] GetImplementation(Architecture.IArchitecture arch)
         {
             return arch.Implement(this);
         }
 
-        public string Display()
+        public override string Display()
         {
             return "call " + Address;
         }

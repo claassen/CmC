@@ -8,16 +8,16 @@ namespace CmC.Compiler.Context
 {
     public class ImmediateValue
     {
-        public int Number;
+        public int Value;
 
-        public ImmediateValue(int num)
+        public ImmediateValue(int value)
         {
-            Number = num;
+            Value = value;
         }
 
         public override string ToString()
         {
-            return Number.ToString();
+            return Value.ToString();
         }
     }
 
@@ -41,7 +41,7 @@ namespace CmC.Compiler.Context
 
         public override string ToString()
         {
-            return "[bp + " + Number + "]";
+            return "bp + " + Value;
         }
     }
 
@@ -50,6 +50,11 @@ namespace CmC.Compiler.Context
         public LabelAddressValue(int label)
             : base(label)
         {
+        }
+
+        public override string ToString()
+        {
+            return "LABEL" + Value;
         }
     }
 }

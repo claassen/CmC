@@ -27,7 +27,10 @@ namespace CmC.Compiler.Syntax
 
             var t1 = ((IHasType)Tokens[0]).GetExpressionType(context);
 
-            ExpressionType.CheckTypeIsNumeric(t1);
+            if (Tokens.Count > 1)
+            {
+                ExpressionType.CheckTypeIsNumeric(t1);
+            }
 
             for (int i = 1; i < Tokens.Count; i += 2)
             {
@@ -40,25 +43,19 @@ namespace CmC.Compiler.Syntax
 
                 string op = ((DefaultLanguageTerminalToken)Tokens[i]).Value;
 
-                //context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
-                context.EmitInstruction(new IRPop() { To = "eax" });
-
-                //context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
                 context.EmitInstruction(new IRPop() { To = "ebx" });
+                context.EmitInstruction(new IRPop() { To = "eax" });
 
                 switch (op)
                 {
                     case "*":
-                        //context.EmitInstruction(new Op() { Name = "mult", R1 = "eax", R2 = "ebx", R3 = "ecx" });
                         context.EmitInstruction(new IRMult() { Left = "eax", Right = "ebx", To = "ecx" });
                         break;
                     case "/":
-                        //context.EmitInstruction(new Op() { Name = "div", R1 = "eax", R2 = "ebx", R3 = "ecx" });
                         context.EmitInstruction(new IRDiv() { Left = "eax", Right = "ebx", To = "ecx" });
                         break;
                 }
                 
-                //context.EmitInstruction(new Op() { Name = "push", R1 = "ecx" });
                 context.EmitInstruction(new IRPushRegister() { From = "ecx" });
             }
         }

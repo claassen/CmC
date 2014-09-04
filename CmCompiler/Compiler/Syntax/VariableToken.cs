@@ -54,7 +54,15 @@ namespace CmC.Compiler.Syntax
             else
             {
                 //[address] -> eax
-                context.EmitInstruction(new IRLoadImmediate() { To = "eax", Address = variable.Address });
+                if (variable.Address is StackAddressValue)
+                {
+                    context.EmitInstruction(new IRLoadRegisterPlusImmediate() { To = "eax", From = "bp", Offset = new ImmediateValue(variable.Address.Value), OperandBytes = variable.Type.GetSize() });
+                }
+                else
+                {
+                    context.EmitInstruction(new IRLoadImmediate() { To = "eax", Address = variable.Address, OperandBytes = variable.Type.GetSize() });
+                }
+
                 context.EmitInstruction(new IRPushRegister() { From = "eax" });
             }
         }
@@ -70,8 +78,16 @@ namespace CmC.Compiler.Syntax
         {
             var variable = context.GetVariable(Name);
 
-            //context.EmitInstruction(new Op() { Name = "push", Imm = variable.Address });
-            context.EmitInstruction(new IRPushImmediate() { Value = variable.Address });
+            if (variable.Address is StackAddressValue)
+            {
+                context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(variable.Address.Value) });
+                context.EmitInstruction(new IRAdd() { To = "ebx", Left = "bp", Right = "ebx" });
+                context.EmitInstruction(new IRPushRegister() { From = "ebx" });
+            }
+            else
+            {
+                context.EmitInstruction(new IRPushImmediate() { Value = variable.Address });
+            }
         }
     }
 }

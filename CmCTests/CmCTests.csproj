@@ -50,6 +50,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="SemanticErrorTests\ArrayErrorTests.cs" />
     <Compile Include="SemanticErrorTests\FunctionCallErrorTests.cs" />
     <Compile Include="SemanticErrorTests\FunctionDefinitionErrorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -57,9 +58,11 @@
     <Compile Include="SemanticErrorTests\TypeMismatchErrorTests\BinaryOperatorTypeMismatchTests.cs" />
     <Compile Include="SemanticErrorTests\TypeMismatchErrorTests\DefinitionTypeMismatchTests.cs" />
     <Compile Include="SemanticErrorTests\VariableDefinitionErrorTests.cs" />
+    <Compile Include="ValidSemanticsTests\ArrayTests.cs" />
     <Compile Include="ValidSemanticsTests\CompatibleTypesTests.cs" />
     <Compile Include="ValidSemanticsTests\FunctionDeclarationTests.cs" />
     <Compile Include="ValidSemanticsTests\IndirectionLevelTests.cs" />
+    <Compile Include="ValidSemanticsTests\TypedefTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CmCompiler\CmCompiler.csproj">

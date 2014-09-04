@@ -45,5 +45,6 @@ namespace CmC.Compiler.Architecture
         byte[] Implement(IRSub ir);
         byte[] Implement(IRXOr ir);
         byte[] Implement(IRMemCopy ir);
+        byte[] Implement(IRHalt ir);
     }
 }

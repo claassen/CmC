@@ -10,7 +10,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("PRIMARY_EXPRESSION", "('(' EXPRESSION ')' | NUMBER | VARIABLE)")]
+    [TokenExpression("PRIMARY_EXPRESSION", "('(' EXPRESSION ')' | NUMBER | VARIABLE )")]
     public class PrimaryExpressionToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)

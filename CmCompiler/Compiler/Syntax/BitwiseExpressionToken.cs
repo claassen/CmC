@@ -42,29 +42,22 @@ namespace CmC.Compiler.Syntax
 
                 ExpressionType.CheckTypeIsNumeric(type);
 
-                //context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
-                context.EmitInstruction(new IRPop() { To = "eax" });
-
-                //context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
                 context.EmitInstruction(new IRPop() { To = "ebx" });
+                context.EmitInstruction(new IRPop() { To = "eax" });
 
                 switch (op)
                 {
                     case "&":
-                        //context.EmitInstruction(new Op() { Name = "and", R1 = "eax", R2 = "ebx", R3 = "ecx" });
                         context.EmitInstruction(new IRAnd() { Left = "eax", Right = "ebx", To = "ecx" });
                         break;
                     case "|":
-                        //context.EmitInstruction(new Op() { Name = "or", R1 = "eax", R2 = "ebx", R3 = "ecx" });
                         context.EmitInstruction(new IROr() { Left = "eax", Right = "ebx", To = "ecx" });
                         break;
                     case "^":
-                        //context.EmitInstruction(new Op() { Name = "xor", R1 = "eax", R2 = "ebx", R3 = "ecx" });
                         context.EmitInstruction(new IRXOr() { Left = "eax", Right = "ebx", To = "ecx" });
                         break;
                 }
 
-                //context.EmitInstruction(new Op() { Name = "push", R1 = "ecx" });
                 context.EmitInstruction(new IRPushRegister() { From = "ecx" });
             }
         }

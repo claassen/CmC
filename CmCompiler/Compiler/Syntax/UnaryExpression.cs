@@ -33,16 +33,28 @@ namespace CmC.Compiler.Syntax
                 {
                     ((ICodeEmitter)Tokens.Last()).Emit(context);
 
-                    //Get value of expression
-                    //context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
+                    //Value of pointer -> eax
                     context.EmitInstruction(new IRPop() { To = "eax" });
 
-                    //value at memory[value] -> ebx
-                    //context.EmitInstruction(new Op() { Name = "load", R1 = "ebx", R2 = "eax" });
-                    context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx" });
+                    //TODO: type size
+                    int valueSize = GetExpressionType(context).GetSize();
 
-                    //context.EmitInstruction(new Op() { Name = "push", R1 = "ebx" });
-                    context.EmitInstruction(new IRPushRegister() { From = "ebx" });
+                    if (valueSize > 4)
+                    {
+                        //[pointer] -> [sp]
+                        context.EmitInstruction(new IRMemCopy() { From = "eax", To = "sp", Length = new ImmediateValue(valueSize) });
+
+                        //sp += size of value
+                        context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(valueSize) });
+                        context.EmitInstruction(new IRAdd() { Left = "sp", Right = "ebx", To = "sp" });
+                    }
+                    else
+                    {
+                        //value at memory[eax] -> ebx
+                        context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx", OperandBytes = valueSize });
+
+                        context.EmitInstruction(new IRPushRegister() { From = "ebx" });
+                    }
                 }
             }
             else

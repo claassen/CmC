@@ -40,16 +40,25 @@ namespace CmC.Compiler.Syntax
                 context.EmitInstruction(new IRPop() { To = "eax" });
             }
 
+            int localVarsSize = context.GetFunctionLocalVarSize();
+
             //Reclaim local variables from stack space
-            for (int i = 0; i < context.GetFunctionLocalVarSize() / 4; i++)
+            context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(localVarsSize) });
+            context.EmitInstruction(new IRSub() { To = "sp", Left = "sp", Right = "ebx" });
+
+            if (context.IsEntryPointFunction)
             {
-                context.EmitInstruction(new IRPop() { To = "nil" });
+                //At this point the return value of the function is still in eax and we simple halt execution
+                //as the exe has run to completion
+                context.EmitInstruction(new IRHalt());
             }
+            else
+            {
+                //Pop return address off stack and jump
+                context.EmitInstruction(new IRPop() { To = "ebx" });
 
-            //Pop return address off stack and jump
-            context.EmitInstruction(new IRPop() { To = "ebx" });
-
-            context.EmitInstruction(new IRJumpRegister() { Address = "ebx" });
+                context.EmitInstruction(new IRJumpRegister() { Address = "ebx" });
+            }
         }
 
         public ExpressionType GetExpressionType(CompilationContext context)

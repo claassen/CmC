@@ -23,7 +23,6 @@ namespace CmC.Compiler.Syntax
         {
             context.EmitComment(";Else if");
 
-            //context.EmitLabel("ELSE" + context.ElseIfLabelCount++);
             context.EmitLabel(context.ConditionalElseBranchLabels.Pop());
 
             int elseBranchLabel = context.CreateNewLabel();
@@ -31,13 +30,10 @@ namespace CmC.Compiler.Syntax
 
             ((ICodeEmitter)Tokens[2]).Emit(context);
 
-            //context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
             context.EmitInstruction(new IRPop() { To = "eax" });
 
-            //context.EmitInstruction(new Op() { Name = "cmp", Imm = new ImmediateValue(0) });
             context.EmitInstruction(new IRCompareImmediate() { Left = "eax", Right = new ImmediateValue(0) });
 
-            //context.EmitInstruction(new Op() { Name = "je", Imm = new LabelAddressValue(elseBranchLabel) });
             context.EmitInstruction(new IRJumpEQ() { Address = new LabelAddressValue(elseBranchLabel) });
 
             context.EmitComment(";Then");

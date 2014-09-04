@@ -48,16 +48,6 @@ namespace CmC.Compiler
             CreateObjectFile(context, outputObjFile, architecture);
         }
 
-        /*
-         * Object file format:
-         *  (int)                 # relocations
-         *  (int)                 # label addresses
-         *  (int)                 # exported symbols
-         *  (int)                 .data section offset
-         *  (int)[]               relocations - addresses relative to start of .data section
-         *  (byte,(int|string))[] label addresses - type followed by either address relative to start of .data section or symbol name
-         *  (string,int)[]        exported symbols - symbol name followed by index into label addresses
-         */
         private static void CreateObjectFile(CompilationContext context, string outputObjFile, IArchitecture architecture)
         {
             var ir = context.GetIR();
@@ -80,8 +70,7 @@ namespace CmC.Compiler
             {
                 if (variable.Value.IsExported)
                 {
-                    //name => labelIndex
-                    header.ExportedSymbols.Add(variable.Key, variable.Value.Address.Number);
+                    header.ExportedSymbols.Add(variable.Key, variable.Value.Address.Value);
                 }
                 
                 if (variable.Value.IsExtern)
@@ -89,7 +78,7 @@ namespace CmC.Compiler
                     header.LabelAddresses.Add(
                         new LabelAddressTableEntry() 
                         { 
-                            Index = variable.Value.Address.Number, 
+                            Index = variable.Value.Address.Value, 
                             IsExtern = true, 
                             SymbolName = variable.Key 
                         }
@@ -100,7 +89,7 @@ namespace CmC.Compiler
                     header.LabelAddresses.Add(
                         new LabelAddressTableEntry() 
                         { 
-                            Index = variable.Value.Address.Number, 
+                            Index = variable.Value.Address.Value, 
                             IsExtern = false, 
                             Address = globalDataSize 
                         }
@@ -114,19 +103,26 @@ namespace CmC.Compiler
             {
                 if (function.Value.IsExported)
                 {
-                    header.ExportedSymbols.Add(function.Key, function.Value.Address.Number);
+                    header.ExportedSymbols.Add(function.Key, function.Value.Address.Value);
                 }
                 else if (function.Value.IsExtern)
                 {
-                    //Need to add label address table entry that indicates function addresses is resolved externally
                     header.LabelAddresses.Add(
-                        new LabelAddressTableEntry() 
-                        { 
-                            Index = function.Value.Address.Number, 
-                            IsExtern = true, 
-                            SymbolName = function.Key 
+                        new LabelAddressTableEntry()
+                        {
+                            Index = function.Value.Address.Value,
+                            IsExtern = true,
+                            SymbolName = function.Key
                         }
                     );
+                }
+                else
+                {
+                    if (function.Key.Equals("main", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        header.HasEntryPoint = true;
+                        header.EntryPointFunctionLabel = function.Value.Address.Value;
+                    }
                 }
             }
 

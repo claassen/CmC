@@ -33,6 +33,8 @@ namespace CmC.Compiler.Context
 
         public Stack<int> ConditionalElseBranchLabels;
 
+        public bool IsEntryPointFunction;
+
         public CompilationContext()
         {
             _varSymbolTables = new Dictionary<string, Variable>[100];
@@ -148,10 +150,11 @@ namespace CmC.Compiler.Context
                     name, 
                     new Variable() 
                     { 
-                        Address = new StackAddressValue(currentStackOffset++), 
+                        Address = new StackAddressValue(currentStackOffset), 
                         Type = type 
                     }
                 );
+                currentStackOffset += type.GetSize();
                 _stackOffsets.Push(currentStackOffset);
                 _functionLocalVarSize += type.GetSize();
             }

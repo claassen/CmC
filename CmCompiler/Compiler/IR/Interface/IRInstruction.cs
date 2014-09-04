@@ -8,9 +8,10 @@ using CmC.Compiler.Context;
 
 namespace CmC.Compiler.IR.Interface
 {
-    public interface IRInstruction
+    public abstract class IRInstruction
     {
-        byte[] GetImplementation(IArchitecture arch);
-        string Display();
+        public abstract byte[] GetImplementation(IArchitecture arch);
+        public abstract string Display();
+        public int OperandBytes = 4;
     }
 }

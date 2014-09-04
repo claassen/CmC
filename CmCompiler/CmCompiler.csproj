@@ -46,6 +46,7 @@
     <Compile Include="Common\ObjectFileUtils.cs" />
     <Compile Include="Compiler\Architecture\IArchitecture.cs" />
     <Compile Include="Compiler\Architecture\TestArchitecture.cs" />
+    <Compile Include="Compiler\Architecture\VMArchitecture.cs" />
     <Compile Include="Compiler\CmCompiler.cs" />
     <Compile Include="Compiler\Context\CompilationContext.cs" />
     <Compile Include="Compiler\Context\CompositeTypeDef.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="Compiler\IR\IRCompareRegister.cs" />
     <Compile Include="Compiler\IR\IRDiv.cs" />
     <Compile Include="Compiler\IR\Interface\IRInstruction.cs" />
+    <Compile Include="Compiler\IR\IRHalt.cs" />
     <Compile Include="Compiler\IR\IRJumpEQ.cs" />
     <Compile Include="Compiler\IR\IRJumpGE.cs" />
     <Compile Include="Compiler\IR\IRJumpGT.cs" />

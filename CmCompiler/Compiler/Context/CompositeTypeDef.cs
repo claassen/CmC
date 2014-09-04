@@ -21,6 +21,12 @@ namespace CmC.Compiler.Context
                     size += field.Value.Type.GetSize();
                 }
 
+                if (size % 2 != 0)
+                {
+                    //Pad type to be multiple of 2 bytes in size
+                    size++;
+                }
+
                 return size;
             }
             set

@@ -6,12 +6,12 @@ namespace CmC.Compiler.IR
     {
         public string Address;
 
-        public byte[] GetImplementation(Architecture.IArchitecture arch)
+        public override byte[] GetImplementation(Architecture.IArchitecture arch)
         {
             return arch.Implement(this);
         }
 
-        public string Display()
+        public override string Display()
         {
             return "jmp " + Address;
         }

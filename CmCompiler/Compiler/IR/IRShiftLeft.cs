@@ -4,13 +4,13 @@ namespace CmC.Compiler.IR
 {
     public class IRShiftLeft : IRInstruction
     {
-        public byte[] GetImplementation(Architecture.IArchitecture arch)
+        public override byte[] GetImplementation(Architecture.IArchitecture arch)
         {
             return arch.Implement(this);
         }
 
 
-        public string Display()
+        public override string Display()
         {
             throw new System.NotImplementedException();
         }

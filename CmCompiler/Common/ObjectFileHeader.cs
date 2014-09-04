@@ -10,6 +10,8 @@ namespace CmC.Common
     {
         public int DataStart;
         public int SizeOfDataAndCode;
+        public bool HasEntryPoint;
+        public int EntryPointFunctionLabel;
 
         public List<int> RelocationAddresses;
         public List<LabelAddressTableEntry> LabelAddresses;

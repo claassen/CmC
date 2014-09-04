@@ -11,6 +11,8 @@ namespace CmC.Compiler.Context
     {
         public TypeDef Type;
         public int IndirectionLevel;
+        public bool IsArray;
+        public int ArrayLength;
 
         public int GetSize()
         {
@@ -18,8 +20,31 @@ namespace CmC.Compiler.Context
             {
                 return Type.Size;
             }
+            else if (IsArray)
+            {
+                return Type.Size * ArrayLength;
+            }
             else
             {
+                return 4;
+            }
+        }
+
+        public int GetDereferencedSize()
+        {
+            if (IndirectionLevel > 1)
+            {
+                //Pointer to pointer
+                return 4;
+            }
+            else if (IndirectionLevel == 1)
+            {
+                //Pointer
+                return Type.Size;
+            }
+            else
+            {
+                //Address of
                 return 4;
             }
         }
@@ -43,11 +68,6 @@ namespace CmC.Compiler.Context
             {
                 throw new TypeMismatchException(new ExpressionType() { Type = new TypeDef() { Name = "Numeric value (4 byte value)" } }, t);
             }
-
-            //if (!new[] { "int", "bool" }.Contains(t.Type.Name))
-            //{
-            //    throw new TypeMismatchException(new ExpressionType() { Type = new TypeDef() { Name = "Numeric value" } }, t);
-            //}
         }
 
         public static void CheckTypeIsBoolean(ExpressionType t)
@@ -56,11 +76,6 @@ namespace CmC.Compiler.Context
             {
                 throw new TypeMismatchException(new ExpressionType() { Type = new TypeDef() { Name = "Boolean value (4 byte value)" } }, t);
             }
-
-            //if (!new[] { "bool", "int" }.Contains(t.Type.Name))
-            //{
-            //    throw new TypeMismatchException(new ExpressionType() { Type = new TypeDef() { Name = "Boolean value" } }, t);
-            //}
         }
 
         public override string ToString()

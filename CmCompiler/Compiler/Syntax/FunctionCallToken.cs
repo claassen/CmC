@@ -77,12 +77,9 @@ namespace CmC.Compiler.Syntax
             //Jump to function location
             context.EmitInstruction(new IRJumpImmediate() { Address = function.Address });
 
-            //Resume here
-            for (int i = 0; i < argumentsSize / 4; i++)
-            {
-                //Reclaim stack space from arguments pushed before the call
-                context.EmitInstruction(new IRPop() { To = "nil" });
-            }
+            //Resume here, reclaim space from arguments pushed on stack
+            context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(argumentsSize) });
+            context.EmitInstruction(new IRSub() { To = "sp", Left = "sp", Right = "ebx" });
 
             //Reset base pointer
             context.EmitInstruction(new IRPop() { To = "bp" });

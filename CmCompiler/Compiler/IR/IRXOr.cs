@@ -9,12 +9,12 @@ namespace CmC.Compiler.IR
         public string Left;
         public string Right;
 
-        public byte[] GetImplementation(Architecture.IArchitecture arch)
+        public override byte[] GetImplementation(Architecture.IArchitecture arch)
         {
             return arch.Implement(this);
         }
 
-        public string Display()
+        public override string Display()
         {
             return String.Format("xor {0}, {1} -> {2}", Left, Right, To);
         }

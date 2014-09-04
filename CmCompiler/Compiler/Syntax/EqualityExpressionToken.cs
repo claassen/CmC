@@ -11,6 +11,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
+    //TODO: checking equality of expressions larger than 4 bytes
     [TokenExpression("EQUALITY_EXPRESSION", "ADDITIVE_EXPRESSION (('=='|'!='|'<'|'>'|'<='|'>=') ADDITIVE_EXPRESSION)?")]
     public class EqualityExpressionToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
@@ -38,58 +39,42 @@ namespace CmC.Compiler.Syntax
                 ExpressionType.CheckTypesMatch(t1, t2);
                 t1 = t2;
 
-                //context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
+                context.EmitInstruction(new IRPop() { To = "ebx" });
                 context.EmitInstruction(new IRPop() { To = "eax" });
 
-                //context.EmitInstruction(new Op() { Name = "pop", R1 = "ebx" });
-                context.EmitInstruction(new IRPop() { To = "ebx" });
-
-                //context.EmitInstruction(new Op() { Name = "cmp", R1 = "eax", R2 = "ebx" });
                 context.EmitInstruction(new IRCompareRegister() { Left = "eax", Right = "ebx" });
-
-                //int currentInstrAddress = context.GetCurrentInstructionAddress();
-                //int trueJmpLocation = currentInstrAddress + 4;
 
                 var trueLabel = new LabelAddressValue(context.CreateNewLabel());
 
                 switch (op)
                 {
                     case "==":
-                        //context.EmitInstruction(new Op() { Name = "je", Imm = trueLabel });
                         context.EmitInstruction(new IRJumpEQ() { Address = trueLabel });
                         break;
                     case "!=":
-                        //context.EmitInstruction(new Op() { Name = "jne", Imm = trueLabel });
                         context.EmitInstruction(new IRJumpNE() { Address = trueLabel });
                         break;
                     case ">":
-                        //context.EmitInstruction(new Op() { Name = "jl", Imm = trueLabel });
                         context.EmitInstruction(new IRJumpLT() { Address = trueLabel });
                         break;
                     case "<":
-                        //context.EmitInstruction(new Op() { Name = "jg", Imm = trueLabel });
                         context.EmitInstruction(new IRJumpGT() { Address = trueLabel });
                         break;
                     case ">=":
-                        //context.EmitInstruction(new Op() { Name = "jge", Imm = trueLabel });
                         context.EmitInstruction(new IRJumpGE() { Address = trueLabel });
                         break;
                     case "<=":
-                        //context.EmitInstruction(new Op() { Name = "jle", Imm = trueLabel });
                         context.EmitInstruction(new IRJumpLE() { Address = trueLabel });
                         break;
                 }
 
                 var skipTrueLabel = new LabelAddressValue(context.CreateNewLabel());
 
-                //context.EmitInstruction(new Op() { Name = "push", Imm = new ImmediateValue(0) }, "FALSE");
                 context.EmitInstruction(new IRPushImmediate() { Value = new ImmediateValue(0) });
-                //context.EmitInstruction(new Op() { Name = "jmp", Imm = skipTrueLabel });
                 context.EmitInstruction(new IRJumpImmediate() { Address = skipTrueLabel });
-                context.EmitLabel(trueLabel.Number);
-                //context.EmitInstruction(new Op() { Name = "push", Imm = new ImmediateValue(1) }, "TRUE");
+                context.EmitLabel(trueLabel.Value);
                 context.EmitInstruction(new IRPushImmediate() { Value = new ImmediateValue(1) });
-                context.EmitLabel(skipTrueLabel.Number);
+                context.EmitLabel(skipTrueLabel.Value);
             }
         }
 

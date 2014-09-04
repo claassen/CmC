@@ -11,12 +11,12 @@ namespace CmC.Compiler.IR
             Index = index;
         }
 
-        public byte[] GetImplementation(Architecture.IArchitecture arch)
+        public override byte[] GetImplementation(Architecture.IArchitecture arch)
         {
             return new byte[0];
         }
 
-        public string Display()
+        public override string Display()
         {
             return "LABEL " + Index + ": ";
         }

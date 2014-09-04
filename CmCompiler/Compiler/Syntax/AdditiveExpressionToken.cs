@@ -44,8 +44,8 @@ namespace CmC.Compiler.Syntax
 
                 string op = ((DefaultLanguageTerminalToken)Tokens[i]).Value;
 
-                context.EmitInstruction(new IRPop() { To = "eax" });
                 context.EmitInstruction(new IRPop() { To = "ebx" });
+                context.EmitInstruction(new IRPop() { To = "eax" });
 
                 switch (op)
                 {

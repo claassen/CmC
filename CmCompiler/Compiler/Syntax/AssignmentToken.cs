@@ -50,7 +50,7 @@ namespace CmC.Compiler.Syntax
                 context.EmitInstruction(new IRPop() { To = "ebx" });
 
                 //store ebx -> [eax]
-                context.EmitInstruction(new IRStoreRegister() { From = "ebx", To = "eax" });
+                context.EmitInstruction(new IRStoreRegister() { From = "ebx", To = "eax", OperandBytes = rightSideType.GetSize() }); //MB!
             }
         }
 

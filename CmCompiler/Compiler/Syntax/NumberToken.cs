@@ -23,7 +23,6 @@ namespace CmC.Compiler.Syntax
 
         public void Emit(CompilationContext context)
         {
-            //context.EmitInstruction(new Op() { Name = "push", Imm = new ImmediateValue(Value) });
             context.EmitInstruction(new IRPushImmediate() { Value = new ImmediateValue(Value) });
         }
 

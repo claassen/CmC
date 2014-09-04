@@ -11,12 +11,12 @@ namespace CmC.Compiler.IR
             Message = message;
         }
 
-        public byte[] GetImplementation(Architecture.IArchitecture arch)
+        public override byte[] GetImplementation(Architecture.IArchitecture arch)
         {
             return new byte[0];
         }
 
-        public string Display()
+        public override string Display()
         {
             return ";;" + Message;
         }

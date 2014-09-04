@@ -12,33 +12,64 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("POSTFIX_EXPRESSION", "(FUNCTION_CALL | PRIMARY_EXPRESSION) (('.'|'->') IDENTIFIER)?")]
+    [TokenExpression("POSTFIX_EXPRESSION", "(FUNCTION_CALL | PRIMARY_EXPRESSION) (('.'|'->') IDENTIFIER | '[' EXPRESSION ']')?")]
     public class PostfixExpressionToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
+        public bool IsFieldAccess;        //.
+        public bool IsPointerFieldAccess; //->
+        public bool IsArrayIndex;         //[EXPRESSION]
+
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
-            return new PostfixExpressionToken() { Tokens = tokens };
+            if (tokens.Count > 1)
+            {
+                string op = ((DefaultLanguageTerminalToken)tokens[1]).Value;
+
+                switch (op)
+                {
+                    case ".":
+                        return new PostfixExpressionToken() { Tokens = tokens, IsFieldAccess = true };
+                    case "->":
+                        return new PostfixExpressionToken() { Tokens = tokens, IsPointerFieldAccess = true };
+                    case "[":
+                        return new PostfixExpressionToken() { Tokens = tokens, IsArrayIndex = true };
+                    default:
+                        throw new Exception("This shouldn't happen");
+                }
+            }
+            else
+            {
+                return new PostfixExpressionToken() { Tokens = tokens };
+            }
         }
 
         public void Emit(CompilationContext context)
         {
-            if (Tokens.Count > 1)
+            if (IsFieldAccess || IsPointerFieldAccess || IsArrayIndex)
             {
                 if (Tokens[0] is FunctionCallToken)
                 {
-                    throw new Exception("Postfix operators not supported on function calls");
+                    throw new Exception("Postfix operators not (yet?) supported on function calls");
                 }
 
                 EmitAddress(context);
-
-                //context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
+                
+                //variable address -> eax
                 context.EmitInstruction(new IRPop() { To = "eax" });
 
-                //context.EmitInstruction(new Op() { Name = "load", R1 = "ebx", R2 = "eax" });
-                context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx" });
+                int valueSize = GetExpressionType(context).GetSize();
 
-                //context.EmitInstruction(new Op() { Name = "push", R1 = "ebx" });
-                context.EmitInstruction(new IRPushRegister() { From = "ebx" });
+                if (valueSize > 4)
+                {
+                    context.EmitInstruction(new IRMemCopy() { From = "eax", To = "sp", Length = new ImmediateValue(valueSize) });
+                    context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(valueSize) });
+                    context.EmitInstruction(new IRAdd() { Left = "sp", Right = "ebx", To = "sp" });
+                }
+                else
+                {
+                    context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx", OperandBytes = valueSize }); //MB!
+                    context.EmitInstruction(new IRPushRegister() { From = "ebx" });
+                }
             }
             else
             {
@@ -48,22 +79,20 @@ namespace CmC.Compiler.Syntax
 
         public ExpressionType GetExpressionType(CompilationContext context)
         {
-            if (Tokens.Count > 1)
+            if (IsFieldAccess || IsPointerFieldAccess)
             {
                 string fieldName = ((IdentifierToken)Tokens[2]).Name;
 
                 var leftHandSideType = ((IHasType)Tokens[0]).GetExpressionType(context);
 
-                string op = ((DefaultLanguageTerminalToken)Tokens[1]).Value;
-
-                if (op == ".")
+                if (IsFieldAccess)
                 {
                     if (leftHandSideType.IndirectionLevel != 0)
                     {
                         throw new UndefinedVariableException(leftHandSideType.ToString() + "." + fieldName);
                     }
                 }
-                else if (op == "->")
+                else if (IsPointerFieldAccess)
                 {
                     if (leftHandSideType.IndirectionLevel != 1)
                     {
@@ -93,6 +122,18 @@ namespace CmC.Compiler.Syntax
                     throw new UndefinedVariableException(leftHandSideType.Type.Name + "." + fieldName);
                 }
             }
+            else if (IsArrayIndex)
+            {
+                var type = ((IHasType)Tokens[0]).GetExpressionType(context);
+
+                return new ExpressionType()
+                {
+                    Type = type.Type,
+                    IndirectionLevel = type.IndirectionLevel - 1, //array access dereferences pointer
+                    IsArray = type.IsArray,
+                    ArrayLength = type.ArrayLength
+                };
+            }
             else
             {
                 return ((IHasType)Tokens[0]).GetExpressionType(context);
@@ -101,28 +142,30 @@ namespace CmC.Compiler.Syntax
 
         public void EmitAddress(CompilationContext context)
         {
-            if (Tokens.Count > 1)
+            if (IsFieldAccess || IsPointerFieldAccess || IsArrayIndex)
             {
                 ((IHasAddress)Tokens[0]).EmitAddress(context);
 
                 //Address of left hand side -> eax
-                //context.EmitInstruction(new Op() { Name = "pop", R1 = "eax" });
                 context.EmitInstruction(new IRPop() { To = "eax" });
 
-                string fieldName = ((IdentifierToken)Tokens[2]).Name;
+                string fieldName = "";
 
                 var leftHandSideType = ((IHasType)Tokens[0]).GetExpressionType(context);
 
-                string op = ((DefaultLanguageTerminalToken)Tokens[1]).Value;
+                if (IsFieldAccess || IsPointerFieldAccess)
+                {
+                    fieldName = ((IdentifierToken)Tokens[2]).Name;
+                }
 
-                if (op == ".")
+                if (IsFieldAccess)
                 {
                     if (leftHandSideType.IndirectionLevel != 0)
                     {
                         throw new UndefinedVariableException(leftHandSideType.ToString() + "." + fieldName);
                     }
                 }
-                else if (op == "->")
+                else if (IsPointerFieldAccess)
                 {
                     if (leftHandSideType.IndirectionLevel != 1)
                     {
@@ -130,42 +173,66 @@ namespace CmC.Compiler.Syntax
                     }
 
                     //Dereference pointer -> eax
-                    //context.EmitInstruction(new Op() { Name = "load", R1 = "ebx", R2 = "eax" });
-                    context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx" });
-
-                    //context.EmitInstruction(new Op() { Name = "mov", R1 = "ebx", R2 = "eax" });
+                    context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx", OperandBytes = 4 });
                     context.EmitInstruction(new IRMoveRegister() { From = "ebx", To = "eax" });
+                }
+                else if (IsArrayIndex)
+                {
+                    if (leftHandSideType.IndirectionLevel < 1)
+                    {
+                        throw new UndefinedVariableException(leftHandSideType.ToString() + "[]");
+                    }
                 }
                 else
                 {
                     throw new Exception("This shouldn't happen");
                 }
 
-                if (leftHandSideType.Type is CompositeTypeDef)
+                if (IsFieldAccess || IsPointerFieldAccess)
                 {
-                    var compTypeDef = (CompositeTypeDef)leftHandSideType.Type;
-
-                    if (compTypeDef.Fields.ContainsKey(fieldName))
+                    if (leftHandSideType.Type is CompositeTypeDef)
                     {
-                        int offset = compTypeDef.Fields[fieldName].Offset;
+                        var compTypeDef = (CompositeTypeDef)leftHandSideType.Type;
 
-                        //ecx = variable address + offset
-                        //context.EmitInstruction(new Op() { Name = "mov", R1 = "ebx", Imm = new ImmediateValue(offset) });
-                        context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(offset) });
-                        //context.EmitInstruction(new Op() { Name = "add", R1 = "eax", R2 = "ebx", R3 = "ecx" });
-                        context.EmitInstruction(new IRAdd() { Left = "eax", Right = "ebx", To = "ecx" });
+                        if (compTypeDef.Fields.ContainsKey(fieldName))
+                        {
+                            int offset = compTypeDef.Fields[fieldName].Offset;
 
-                        //context.EmitInstruction(new Op() { Name = "push", R1 = "ecx" });
-                        context.EmitInstruction(new IRPushRegister() { From = "ecx" });
+                            //ecx = variable address + offset
+                            context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(offset) });
+                            context.EmitInstruction(new IRAdd() { Left = "eax", Right = "ebx", To = "ecx" });
+                            context.EmitInstruction(new IRPushRegister() { From = "ecx" });
+                        }
+                        else
+                        {
+                            throw new UndefinedVariableException(leftHandSideType.Type.Name + "." + fieldName);
+                        }
                     }
                     else
                     {
                         throw new UndefinedVariableException(leftHandSideType.Type.Name + "." + fieldName);
                     }
                 }
-                else
+                else if (IsArrayIndex)
                 {
-                    throw new UndefinedVariableException(leftHandSideType.Type.Name + "." + fieldName);
+                    //Need to get size of underlying data type, not size of whole array
+                    int valueSize = leftHandSideType.GetDereferencedSize();
+
+                    //Get index value
+                    ((ICodeEmitter)Tokens[Tokens.Count - 2]).Emit(context);
+                    context.EmitInstruction(new IRPop() { To = "ebx" });
+
+                    //eax = pointer address, ebx = array index, ecx = type size
+                    context.EmitInstruction(new IRMoveImmediate() { To = "ecx", Value = new ImmediateValue(valueSize) });
+
+                    //ebx = index * size
+                    context.EmitInstruction(new IRMult() { Left = "ebx", Right = "ecx", To = "ebx" });
+
+                    //ecx = address + index * size
+                    context.EmitInstruction(new IRAdd() { Left = "eax", Right = "ebx", To = "ecx" });
+                    
+                    //push address
+                    context.EmitInstruction(new IRPushRegister() { From = "ecx" });
                 }
             }
             else

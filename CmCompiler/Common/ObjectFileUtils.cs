@@ -56,12 +56,14 @@ namespace CmC.Common
             }
 
             //Compute offsets
-            int relocationsOffset = 16;
+            int relocationsOffset = 24;
             int labelsOffset = relocationsOffset + (header.RelocationAddresses.Count * 4);
             int symbolTableOffset = labelsOffset + labelAddressTableData.Length;
             int dataOffset = symbolTableOffset + symbolTableData.Length;
 
             //Offset values
+            bw.Write(header.HasEntryPoint ? 1 : 0);
+            bw.Write(header.EntryPointFunctionLabel);
             bw.Write(header.RelocationAddresses.Count);             //# relocations
             bw.Write(header.LabelAddresses.Max(a => a.Index) + 1);  //# labels
             bw.Write(header.ExportedSymbols.Count);                 //# symbols
@@ -86,6 +88,8 @@ namespace CmC.Common
 
             using (var br = new BinaryReader(new FileStream(filePath, FileMode.Open)))
             {
+                int hasEntryPoint = br.ReadInt32();
+                int entryPointFunctionLabel = br.ReadInt32();
                 int numRelocations = br.ReadInt32();
                 int numLabels = br.ReadInt32();
                 int numSymbols = br.ReadInt32();
@@ -93,6 +97,9 @@ namespace CmC.Common
 
                 header.DataStart = dataOffset;
                 header.SizeOfDataAndCode = (int)br.BaseStream.Length - dataOffset;
+
+                header.HasEntryPoint = hasEntryPoint == 1;
+                header.EntryPointFunctionLabel = entryPointFunctionLabel;
 
                 //Read relocations
                 header.RelocationAddresses = new List<int>();

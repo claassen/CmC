@@ -15,14 +15,14 @@ namespace CmC.Compiler.IR
         public string To;
         public ImmediateValue Length;
 
-        public byte[] GetImplementation(IArchitecture arch)
+        public override byte[] GetImplementation(IArchitecture arch)
         {
             return arch.Implement(this);
         }
 
-        public string Display()
+        public override string Display()
         {
-            return "cpy [" + From + "] -> [" + To + "] : " + Length.Number;
+            return "cpy [" + From + "] -> [" + To + "] : " + Length.Value;
         }
     }
 }

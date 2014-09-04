@@ -51,6 +51,11 @@ namespace CmC.Compiler.Syntax
 
             string functionName = ((IdentifierToken)Tokens[1]).Name;
 
+            if (functionName.Equals("main", StringComparison.CurrentCultureIgnoreCase))
+            {
+                context.IsEntryPointFunction = true;
+            }
+
             if (!IsDefined && IsExported)
             {
                 throw new ExportUndefinedFunctionException(functionName);
@@ -85,6 +90,8 @@ namespace CmC.Compiler.Syntax
             {
                 throw new MissingReturnException(functionName);
             }
+
+            context.IsEntryPointFunction = false;
         }
     }
 }
