@@ -109,6 +109,7 @@
     <Compile Include="Compiler\IR\IRXOr.cs" />
     <Compile Include="Compiler\Syntax\CastExpression.cs" />
     <Compile Include="Compiler\Syntax\ForLoopToken.cs" />
+    <Compile Include="Compiler\Syntax\HeaderIncludeToken.cs" />
     <Compile Include="Compiler\Syntax\PostfixExpressionToken.cs" />
     <Compile Include="Compiler\Syntax\StringLiteralToken.cs" />
     <Compile Include="Compiler\Syntax\TokenInterfaces\IHasAddress.cs" />

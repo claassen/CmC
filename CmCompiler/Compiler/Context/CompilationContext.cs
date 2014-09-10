@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -207,6 +209,7 @@ namespace CmC.Compiler.Context
                 if (isDefined)
                 {
                     function.IsDefined = true;
+                    function.IsExported = isExported;
                     function.Address = new LabelAddressValue(CreateNewLabel());
                 }
             }
@@ -322,6 +325,16 @@ namespace CmC.Compiler.Context
             else
             {
                 throw new Exception("Undefined type: " + name);
+            }
+        }
+
+        public void ProcessHeader(string path)
+        {
+            using (var stream = new StreamReader(new FileStream(path, FileMode.Open)))
+            {
+                string source = stream.ReadToEnd();
+
+                CmCompiler.CompileToContext(source, this);
             }
         }
 

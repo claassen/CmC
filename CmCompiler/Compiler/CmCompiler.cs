@@ -27,121 +27,41 @@ namespace CmC.Compiler
 
         public static void Compile(string source, string outputObjFile, IArchitecture architecture)
         {
+            var context = new CompilationContext();
+
+            CompileToContext(source, context);
+
+            CreateObjectFile(outputObjFile, architecture, context.GetIR(), context.GetStringConstants(), context.GetGlobalVariables(), context.GetFunctions());
+        }
+
+        public static void CompileToContext(string source, CompilationContext context)
+        {
             var grammar = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(c => c.Namespace == "CmC.Compiler.Syntax")
                 .Where(c => typeof(ILanguageToken).IsAssignableFrom(c))
                 .Select(t => (ILanguageToken)Activator.CreateInstance(t, null));
 
             var generator = new ParserGenerator(grammar.ToList());
-            
+
             LanguageParser parser = generator.GetParser();
 
             var tokens = parser.Parse(source);
-
-            var context = new CompilationContext();
 
             foreach (var token in tokens)
             {
                 ((ICodeEmitter)token).Emit(context);
             }
-
-            CreateObjectFile(context, outputObjFile, architecture);
         }
 
-        public static void Compile(List<IRInstruction> ir, Dictionary<string, Function> functions, string outputObjFile, IArchitecture architecture)
+        public static void Compile(string outputObjFile, IArchitecture architecture, List<IRInstruction> ir, Dictionary<string, StringConstant> stringConstants = null, Dictionary<string, Variable> globalVariables = null, Dictionary<string, Function> functions = null)
         {
-            var header = new ObjectFileHeader();
+            ShowIR(ir);
 
-            header.RelocationAddresses = new List<int>();
-            header.LabelAddresses = new List<LabelAddressTableEntry>();
-            header.ExportedSymbols = new Dictionary<string, int>();
-
-            foreach (var function in functions)
-            {
-                if (function.Value.IsExported)
-                {
-                    header.ExportedSymbols.Add(function.Key, function.Value.Address.Value);
-                }
-                else if (function.Value.IsExtern)
-                {
-                    header.LabelAddresses.Add(
-                        new LabelAddressTableEntry()
-                        {
-                            Index = function.Value.Address.Value,
-                            IsExtern = true,
-                            SymbolName = function.Key
-                        }
-                    );
-                }
-                else
-                {
-                    if (function.Key.Equals("main", StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        header.HasEntryPoint = true;
-                        header.EntryPointFunctionLabel = function.Value.Address.Value;
-                    }
-                }
-            }
-
-            var code = new List<byte>();
-
-            int codeAddress = 0;
-
-            foreach (var i in ir)
-            {
-                if (i is IRComment)
-                {
-                    continue;
-                }
-
-                if (i is IRLabel)
-                {
-                    header.LabelAddresses.Add(
-                        new LabelAddressTableEntry()
-                        {
-                            Index = ((IRLabel)i).Index,
-                            Address = codeAddress
-                        }
-                    );
-                }
-
-                if (i is IRelocatableAddressValue && ((IRelocatableAddressValue)i).HasRelocatableAddressValue())
-                {
-                    int offset = architecture.GetRelocationOffset(i);
-                    header.RelocationAddresses.Add(codeAddress + offset);
-                }
-
-                byte[] machineInstruction = i.GetImplementation(architecture);
-                code.AddRange(machineInstruction.ToList());
-                codeAddress += machineInstruction.Length;
-            }
-
-            if (!String.IsNullOrEmpty(outputObjFile))
-            {
-                using (var sw = new BinaryWriter(new FileStream(outputObjFile, FileMode.Create)))
-                {
-                    ObjectFileUtils.WriteObjectFileHeader(header, sw);
-
-                    //Data section
-                    //for (int i = 0; i < globalDataSize; i++)
-                    //{
-                    //    //Zero global/static data memory
-                    //    sw.Write((byte)0);
-                    //}
-
-                    //Code section
-                    foreach (byte b in code)
-                    {
-                        sw.Write(b);
-                    }
-                }
-            }
+            CreateObjectFile(outputObjFile, architecture, ir, stringConstants, globalVariables, functions);
         }
 
-        private static void CreateObjectFile(CompilationContext context, string outputObjFile, IArchitecture architecture)
+        private static void CreateObjectFile(string outputObjFile, IArchitecture architecture, List<IRInstruction> ir, Dictionary<string, StringConstant> stringConstants, Dictionary<string, Variable> globalVariables, Dictionary<string, Function> functions)
         {
-            var ir = context.GetIR();
-
             ShowIR(ir);
 
             var header = new ObjectFileHeader();
@@ -151,88 +71,108 @@ namespace CmC.Compiler
             
             var code = new List<byte>();
 
-            int globalDataSize = 0;
+            int initializedDataSize = 0;
 
             //name => labelIndex
             header.ExportedSymbols = new Dictionary<string, int>();
 
-            foreach (var str in context.GetStringConstants())
-            {
-                header.LabelAddresses.Add(
-                        new LabelAddressTableEntry()
-                        {
-                            Index = str.Value.LabelAddress,
-                            Address = globalDataSize
-                        }
-                    );
+            #region String Constants
 
-                globalDataSize += str.Value.Value.Length + 1;
+            if (stringConstants != null)
+            {
+                foreach (var str in stringConstants)
+                {
+                    header.LabelAddresses.Add(
+                            new LabelAddressTableEntry()
+                            {
+                                Index = str.Value.LabelAddress,
+                                Address = initializedDataSize
+                            }
+                        );
+
+                    initializedDataSize += str.Value.Value.Length + 1;
+                }
             }
+
+            #endregion
 
             int uninitializedDataSize = 0;
 
-            foreach (var variable in context.GetGlobalVariables())
-            {
-                if (variable.Value.IsExported)
-                {
-                    header.ExportedSymbols.Add(variable.Key, variable.Value.Address.Value);
-                }
-                
-                if (variable.Value.IsExtern)
-                {
-                    header.LabelAddresses.Add(
-                        new LabelAddressTableEntry() 
-                        { 
-                            Index = variable.Value.Address.Value, 
-                            IsExtern = true, 
-                            SymbolName = variable.Key 
-                        }
-                    );
-                }
-                else
-                {
-                    header.LabelAddresses.Add(
-                        new LabelAddressTableEntry() 
-                        { 
-                            Index = variable.Value.Address.Value, 
-                            IsExtern = false, 
-                            Address = globalDataSize 
-                        }
-                    );
+            #region Global Variables
 
-                    globalDataSize += variable.Value.Type.GetSize();
-                    uninitializedDataSize += variable.Value.Type.GetSize();
-                }
-            }
-
-            foreach (var function in context.GetFunctions())
+            if (globalVariables != null)
             {
-                if (function.Value.IsExported)
+                foreach (var variable in globalVariables)
                 {
-                    header.ExportedSymbols.Add(function.Key, function.Value.Address.Value);
-                }
-                else if (function.Value.IsExtern)
-                {
-                    header.LabelAddresses.Add(
-                        new LabelAddressTableEntry()
-                        {
-                            Index = function.Value.Address.Value,
-                            IsExtern = true,
-                            SymbolName = function.Key
-                        }
-                    );
-                }
-                else
-                {
-                    if (function.Key.Equals("main", StringComparison.CurrentCultureIgnoreCase))
+                    if (variable.Value.IsExported)
                     {
-                        header.HasEntryPoint = true;
-                        header.EntryPointFunctionLabel = function.Value.Address.Value;
+                        header.ExportedSymbols.Add(variable.Key, variable.Value.Address.Value);
+                    }
+
+                    if (variable.Value.IsExtern)
+                    {
+                        header.LabelAddresses.Add(
+                            new LabelAddressTableEntry()
+                            {
+                                Index = variable.Value.Address.Value,
+                                IsExtern = true,
+                                SymbolName = variable.Key
+                            }
+                        );
+                    }
+                    else
+                    {
+                        header.LabelAddresses.Add(
+                            new LabelAddressTableEntry()
+                            {
+                                Index = variable.Value.Address.Value,
+                                IsExtern = false,
+                                Address = initializedDataSize
+                            }
+                        );
+
+                        uninitializedDataSize += variable.Value.Type.GetSize();
                     }
                 }
             }
 
-            int codeAddress = globalDataSize;
+            #endregion
+
+            #region Functions
+
+            if (functions != null)
+            {
+                foreach (var function in functions)
+                {
+                    if (function.Value.IsExported)
+                    {
+                        header.ExportedSymbols.Add(function.Key, function.Value.Address.Value);
+                    }
+                    else if (function.Value.IsExtern)
+                    {
+                        header.LabelAddresses.Add(
+                            new LabelAddressTableEntry()
+                            {
+                                Index = function.Value.Address.Value,
+                                IsExtern = true,
+                                SymbolName = function.Key
+                            }
+                        );
+                    }
+                    else
+                    {
+                        if (function.Key.Equals("main", StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            header.HasEntryPoint = true;
+                            header.EntryPointFunctionLabel = function.Value.Address.Value;
+                        }
+                    }
+                }
+            }
+
+            #endregion
+
+            int codeAddress = initializedDataSize + uninitializedDataSize;
 
             foreach (var i in ir)
             {
@@ -270,14 +210,18 @@ namespace CmC.Compiler
                     ObjectFileUtils.WriteObjectFileHeader(header, sw);
 
                     //Initialized data
-                    foreach (var str in context.GetStringConstants())
-                    {
-                        foreach (var ch in str.Value.Value.ToCharArray())
-                        {
-                            sw.Write((byte)ch);
-                        }
 
-                        sw.Write((byte)0); //0 terminated strings
+                    if (stringConstants != null)
+                    {
+                        foreach (var str in stringConstants)
+                        {
+                            foreach (var ch in str.Value.Value.ToCharArray())
+                            {
+                                sw.Write((byte)ch);
+                            }
+
+                            sw.Write((byte)0); //0 terminated strings
+                        }
                     }
 
                     //Uninitialized data

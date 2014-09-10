@@ -20,62 +20,13 @@ namespace CmCompilerTester
             //TODO: type sizes - equality expression (additive, multiplicative, boolean and bitwise only support 4 byte operands)
             //TODO: return values on stack - Not supported for now, can pass pointer arguments to accomplish the same thing
 
-            //try
-            //{
-            //    CmCompiler.Compile(
-            //        @"int x; int y = x = 1;",
-            //        @"C:\share\array.o"
-            //    );
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine(ex.ToString());
-            //}
+            using(var stream = new StreamReader(new FileStream(@"C:\VM\cmlib\cmlib.cm", FileMode.Open)))
+            {
+                CmCompiler.Compile(stream.ReadToEnd(), @"C:\\VM\\cmlib\\cmlib.o", new VMArchitecture());
+            }
 
-//            CmCompiler.Compile(
-//                @"typedef X { int x; int y; };
-//                  X x;
-//                  X[10] a;
-//                  a[0] = x;",
-//                @"C:\share\array.o"
-//            );
-
-
-
-
-//            CmCompiler.Compile(
-//                @"export int x;
-//                  extern int y;
-//                  y = 1;",
-//                @"C:\share\x.o"
-//            );
-
-//            CmCompiler.Compile(
-//                @"extern int x;
-//                  export int y;
-//                  x = 2;",
-//                @"C:\share\y.o"
-//            );
-
-//            CmLinker.Link(new List<string>()
-//            {
-//                @"C:\share\x.o",
-//                @"C:\share\y.o"
-//            }, @"C:\share\xy.exe", true);
-
-
-//            CmCompiler.Compile(
-//                @"int main() {
-//                      int x = 1;
-//                      int y = 2;
-//                      int z = x + y;
-//                      return 0;
-//                  }", @"C:\VM\test.o", new VMArchitecture()
-//            );
-
-            CreateBIOS();
-            CreateBootLoader();
-            
+            //CreateBIOS();
+            //CreateBootLoader();
         }
 
         static void CreateBIOS()
@@ -97,7 +48,7 @@ namespace CmCompilerTester
                 new IRJumpImmediate() { Address = new ImmediateValue(2048) }
             };
 
-            CmCompiler.Compile(bios, new Dictionary<string, Function>(), @"C:\VM\rom.o", new VMArchitecture());
+            CmCompiler.Compile(@"C:\VM\rom.o", new VMArchitecture(), bios);
             CmLinker.Link(new List<string>() { @"C:\VM\rom.o" }, @"C:\VM\VM.rom", false);
         }
 
@@ -127,7 +78,7 @@ namespace CmCompilerTester
 
             bootLoaderFunctions.Add("kernelinit", new Function() { IsDefined = false, Address = new LabelAddressValue(0) });
 
-            CmCompiler.Compile(bootLoader, bootLoaderFunctions, @"C:\VM\bootloader.o", new VMArchitecture());
+            CmCompiler.Compile(@"C:\VM\bootloader.o", new VMArchitecture(), bootLoader, null, null, bootLoaderFunctions);
             CmLinker.Link(new List<string>() { @"C:\VM\bootloader.o", @"C:\VM\bootloaderLib.o" }, @"C:\VM\bootloader.exe", false, 2048);
         }
     }

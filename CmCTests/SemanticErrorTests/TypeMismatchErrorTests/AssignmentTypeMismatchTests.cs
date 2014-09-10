@@ -54,12 +54,12 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
                   { 
                       int x; 
                       int y; 
-                  };
+                  }
                   typedef Y
                   {
                       int a;
                       X* px;
-                  };
+                  }
                   X x;
                   Y y;
                   y = x;"
@@ -75,12 +75,12 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
                   { 
                       int x; 
                       int y; 
-                  };
+                  }
                   typedef Y
                   {
                       int a;
                       X* px;
-                  };
+                  }
                   X x;
                   Y y;
                   x.x = y;"
@@ -96,12 +96,12 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
                   { 
                       int x; 
                       int y; 
-                  };
+                  }
                   typedef Y
                   {
                       int a;
                       X x;
-                  };
+                  }
                   X x;
                   Y y;
                   x.x = y.x;"

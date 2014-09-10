@@ -76,7 +76,7 @@ namespace CmCTests.SemanticErrorTests
         public void LargeReturnValuesNotSupportedTest()
         {
             CmCompiler.Compile(
-                @"typedef X { int x; int y; };
+                @"typedef X { int x; int y; }
                   X Test(int a);"
             );
         }
@@ -86,7 +86,7 @@ namespace CmCTests.SemanticErrorTests
         public void LargeReturnValuesNotSupportedTest2()
         {
             CmCompiler.Compile(
-                @"typedef X { int x; int y; };
+                @"typedef X { int x; int y; }
                   X Test(int a) {
                       X x;
                       x.x = 1;

@@ -5,28 +5,23 @@ using System.Text;
 using System.Threading.Tasks;
 using CmC.Compiler.Context;
 using CmC.Compiler.Syntax.TokenInterfaces;
-using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("PROGRAM", "(STATEMENT | FUNCTION_DEFINITION | TYPEDEF | INCLUDE)+")]
-    public class ProgramToken : ILanguageNonTerminalToken, ICodeEmitter
+    [TokenExpression("INCLUDE", "'#include' STRING")]
+    public class HeaderIncludeToken : ILanguageNonTerminalToken, ICodeEmitter
     {
+        public string IncludePath;
+
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
-            return new ProgramToken() { Tokens = tokens };
+            return new HeaderIncludeToken() { IncludePath = ((StringLiteralToken)tokens[1]).Value.Trim('"') };
         }
 
         public void Emit(CompilationContext context)
         {
-            foreach (var token in Tokens)
-            {
-                if (token is ICodeEmitter)
-                {
-                    ((ICodeEmitter)token).Emit(context);
-                }
-            }
+            context.ProcessHeader(IncludePath);
         }
     }
 }
