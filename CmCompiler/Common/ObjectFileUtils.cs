@@ -15,26 +15,29 @@ namespace CmC.Common
             byte[] labelAddressTableData;
             using (var stream = new BinaryWriter(new MemoryStream()))
             {
-                for (int i = 0; i < header.LabelAddresses.Max(a => a.Index) + 1; i++)
+                if (header.LabelAddresses.Count > 0)
                 {
-                    var addressRow = header.LabelAddresses.FirstOrDefault(a => a.Index == i);
+                    for (int i = 0; i < header.LabelAddresses.Max(a => a.Index) + 1; i++)
+                    {
+                        var addressRow = header.LabelAddresses.FirstOrDefault(a => a.Index == i);
 
-                    if (addressRow == null)
-                    {
-                        stream.Write(0); //type
-                        stream.Write(0); //value
-                    }
-                    else
-                    {
-                        if (addressRow.IsExtern)
+                        if (addressRow == null)
                         {
-                            stream.Write(2); //type
-                            stream.Write(addressRow.SymbolName);
+                            stream.Write(0); //type
+                            stream.Write(0); //value
                         }
                         else
                         {
-                            stream.Write(1);
-                            stream.Write(addressRow.Address);
+                            if (addressRow.IsExtern)
+                            {
+                                stream.Write(2); //type
+                                stream.Write(addressRow.SymbolName);
+                            }
+                            else
+                            {
+                                stream.Write(1);
+                                stream.Write(addressRow.Address);
+                            }
                         }
                     }
                 }
@@ -65,7 +68,14 @@ namespace CmC.Common
             bw.Write(header.HasEntryPoint ? 1 : 0);
             bw.Write(header.EntryPointFunctionLabel);
             bw.Write(header.RelocationAddresses.Count);             //# relocations
-            bw.Write(header.LabelAddresses.Max(a => a.Index) + 1);  //# labels
+            if (header.LabelAddresses.Count > 0)
+            {
+                bw.Write(header.LabelAddresses.Max(a => a.Index) + 1);  //# labels
+            }
+            else
+            {
+                bw.Write(0);
+            }
             bw.Write(header.ExportedSymbols.Count);                 //# symbols
             bw.Write(dataOffset);                                   //where data section starts
 

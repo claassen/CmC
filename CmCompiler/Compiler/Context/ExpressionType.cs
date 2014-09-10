@@ -22,7 +22,7 @@ namespace CmC.Compiler.Context
             }
             else if (IsArray)
             {
-                return Type.Size * ArrayLength;
+                return Type.Size; // *ArrayLength;
             }
             else
             {

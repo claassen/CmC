@@ -11,7 +11,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("RETURN_STATEMENT", "'return' EXPRESSION")]
+    [TokenExpression("RETURN_STATEMENT", "'return' EXPRESSION ';'")]
     public class ReturnStatementToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)

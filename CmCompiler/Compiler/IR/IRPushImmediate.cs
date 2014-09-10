@@ -3,7 +3,7 @@ using CmC.Compiler.IR.Interface;
 
 namespace CmC.Compiler.IR
 {
-    public class IRPushImmediate : IRInstruction
+    public class IRPushImmediate : IRInstruction, IRelocatableAddressValue
     {
         public ImmediateValue Value;
 
@@ -15,6 +15,16 @@ namespace CmC.Compiler.IR
         public override string Display()
         {
             return "push " + Value;
+        }
+
+        public bool HasRelocatableAddressValue()
+        {
+            return Value is LabelAddressValue;
+        }
+
+        public int GetLabelIndex()
+        {
+            return ((LabelAddressValue)Value).Value;
         }
     }
 }

@@ -52,6 +52,7 @@
     <Compile Include="Compiler\Context\CompositeTypeDef.cs" />
     <Compile Include="Compiler\Context\Field.cs" />
     <Compile Include="Compiler\Context\Function.cs" />
+    <Compile Include="Compiler\Context\StringConstant.cs" />
     <Compile Include="Compiler\Context\TypeDef.cs" />
     <Compile Include="Compiler\Context\Variable.cs" />
     <Compile Include="Compiler\Exceptions\ArgumentCountMismatchException.cs" />
@@ -71,6 +72,8 @@
     <Compile Include="Compiler\IR\IRComment.cs" />
     <Compile Include="Compiler\IR\IRCompareImmediate.cs" />
     <Compile Include="Compiler\IR\IRCompareRegister.cs" />
+    <Compile Include="Compiler\IR\IRDiskRead.cs" />
+    <Compile Include="Compiler\IR\IRDiskWrite.cs" />
     <Compile Include="Compiler\IR\IRDiv.cs" />
     <Compile Include="Compiler\IR\Interface\IRInstruction.cs" />
     <Compile Include="Compiler\IR\IRHalt.cs" />
@@ -101,9 +104,13 @@
     <Compile Include="Compiler\IR\IRStoreRegister.cs" />
     <Compile Include="Compiler\IR\IRStoreRegisterPlusImmediate.cs" />
     <Compile Include="Compiler\IR\IRSub.cs" />
+    <Compile Include="Compiler\IR\IRSysEnt.cs" />
+    <Compile Include="Compiler\IR\IRSysEx.cs" />
     <Compile Include="Compiler\IR\IRXOr.cs" />
     <Compile Include="Compiler\Syntax\CastExpression.cs" />
+    <Compile Include="Compiler\Syntax\ForLoopToken.cs" />
     <Compile Include="Compiler\Syntax\PostfixExpressionToken.cs" />
+    <Compile Include="Compiler\Syntax\StringLiteralToken.cs" />
     <Compile Include="Compiler\Syntax\TokenInterfaces\IHasAddress.cs" />
     <Compile Include="Compiler\Syntax\TokenInterfaces\IHasType.cs" />
     <Compile Include="Compiler\Context\ImmediateValue.cs" />

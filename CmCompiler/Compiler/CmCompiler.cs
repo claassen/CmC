@@ -48,6 +48,96 @@ namespace CmC.Compiler
             CreateObjectFile(context, outputObjFile, architecture);
         }
 
+        public static void Compile(List<IRInstruction> ir, Dictionary<string, Function> functions, string outputObjFile, IArchitecture architecture)
+        {
+            var header = new ObjectFileHeader();
+
+            header.RelocationAddresses = new List<int>();
+            header.LabelAddresses = new List<LabelAddressTableEntry>();
+            header.ExportedSymbols = new Dictionary<string, int>();
+
+            foreach (var function in functions)
+            {
+                if (function.Value.IsExported)
+                {
+                    header.ExportedSymbols.Add(function.Key, function.Value.Address.Value);
+                }
+                else if (function.Value.IsExtern)
+                {
+                    header.LabelAddresses.Add(
+                        new LabelAddressTableEntry()
+                        {
+                            Index = function.Value.Address.Value,
+                            IsExtern = true,
+                            SymbolName = function.Key
+                        }
+                    );
+                }
+                else
+                {
+                    if (function.Key.Equals("main", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        header.HasEntryPoint = true;
+                        header.EntryPointFunctionLabel = function.Value.Address.Value;
+                    }
+                }
+            }
+
+            var code = new List<byte>();
+
+            int codeAddress = 0;
+
+            foreach (var i in ir)
+            {
+                if (i is IRComment)
+                {
+                    continue;
+                }
+
+                if (i is IRLabel)
+                {
+                    header.LabelAddresses.Add(
+                        new LabelAddressTableEntry()
+                        {
+                            Index = ((IRLabel)i).Index,
+                            Address = codeAddress
+                        }
+                    );
+                }
+
+                if (i is IRelocatableAddressValue && ((IRelocatableAddressValue)i).HasRelocatableAddressValue())
+                {
+                    int offset = architecture.GetRelocationOffset(i);
+                    header.RelocationAddresses.Add(codeAddress + offset);
+                }
+
+                byte[] machineInstruction = i.GetImplementation(architecture);
+                code.AddRange(machineInstruction.ToList());
+                codeAddress += machineInstruction.Length;
+            }
+
+            if (!String.IsNullOrEmpty(outputObjFile))
+            {
+                using (var sw = new BinaryWriter(new FileStream(outputObjFile, FileMode.Create)))
+                {
+                    ObjectFileUtils.WriteObjectFileHeader(header, sw);
+
+                    //Data section
+                    //for (int i = 0; i < globalDataSize; i++)
+                    //{
+                    //    //Zero global/static data memory
+                    //    sw.Write((byte)0);
+                    //}
+
+                    //Code section
+                    foreach (byte b in code)
+                    {
+                        sw.Write(b);
+                    }
+                }
+            }
+        }
+
         private static void CreateObjectFile(CompilationContext context, string outputObjFile, IArchitecture architecture)
         {
             var ir = context.GetIR();
@@ -65,6 +155,21 @@ namespace CmC.Compiler
 
             //name => labelIndex
             header.ExportedSymbols = new Dictionary<string, int>();
+
+            foreach (var str in context.GetStringConstants())
+            {
+                header.LabelAddresses.Add(
+                        new LabelAddressTableEntry()
+                        {
+                            Index = str.Value.LabelAddress,
+                            Address = globalDataSize
+                        }
+                    );
+
+                globalDataSize += str.Value.Value.Length + 1;
+            }
+
+            int uninitializedDataSize = 0;
 
             foreach (var variable in context.GetGlobalVariables())
             {
@@ -96,6 +201,7 @@ namespace CmC.Compiler
                     );
 
                     globalDataSize += variable.Value.Type.GetSize();
+                    uninitializedDataSize += variable.Value.Type.GetSize();
                 }
             }
 
@@ -163,10 +269,20 @@ namespace CmC.Compiler
                 {
                     ObjectFileUtils.WriteObjectFileHeader(header, sw);
 
-                    //Data section
-                    for (int i = 0; i < globalDataSize; i++)
+                    //Initialized data
+                    foreach (var str in context.GetStringConstants())
                     {
-                        //Zero global/static data memory
+                        foreach (var ch in str.Value.Value.ToCharArray())
+                        {
+                            sw.Write((byte)ch);
+                        }
+
+                        sw.Write((byte)0); //0 terminated strings
+                    }
+
+                    //Uninitialized data
+                    for (int i = 0; i < uninitializedDataSize; i++)
+                    {
                         sw.Write((byte)0);
                     }
 

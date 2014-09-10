@@ -35,11 +35,14 @@ namespace CmC.Compiler.Context
 
         public bool IsEntryPointFunction;
 
+        public Dictionary<string, StringConstant> _stringConstants;
+
         public CompilationContext()
         {
             _varSymbolTables = new Dictionary<string, Variable>[100];
             _functionSymbolTable = new Dictionary<string, Function>();
             _globalVarSymbolTable = new Dictionary<string, Variable>();
+            _stringConstants = new Dictionary<string, StringConstant>();
 
             //Start at global scope
             _currentScopeLevel = -1;
@@ -51,6 +54,7 @@ namespace CmC.Compiler.Context
             _instructions = new List<IRInstruction>();
 
             _types = new Dictionary<string, TypeDef>();
+            _types.Add("byte", new TypeDef() { Name = "byte", Size = 1 });
             _types.Add("int", new TypeDef() { Name = "int", Size = 4 });
             _types.Add("bool", new TypeDef() { Name = "bool", Size = 4 });
 
@@ -266,6 +270,35 @@ namespace CmC.Compiler.Context
             {
                 throw new UndefinedFunctionException(funcName);
             }
+        }
+
+        public void AddStringConstant(string value)
+        {
+            if (!_stringConstants.ContainsKey(value))
+            {
+                _stringConstants.Add(value, new StringConstant()
+                {
+                    LabelAddress = CreateNewLabel(),
+                    Value = value.Substring(1, value.Length - 2)
+                });
+            }
+        }
+
+        public int GetStringConstantLabelAddress(string value)
+        {
+            if (_stringConstants.ContainsKey(value))
+            {
+                return _stringConstants[value].LabelAddress;
+            }
+            else
+            {
+                throw new Exception("String constant not defined: " + value);
+            }
+        }
+
+        public Dictionary<string, StringConstant> GetStringConstants()
+        {
+            return _stringConstants;
         }
 
         public void AddTypeDef(TypeDef type)

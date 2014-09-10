@@ -80,5 +80,15 @@ namespace CmCTests.ValidSemanticsTests
                 @"C:\share\array.o"
             );
         }
+
+        [TestMethod]
+        public void ArrayToArrayAssignment_Test()
+        {
+            CmCompiler.Compile(
+                @"int[10] x;
+                  int[5] y = x;",
+                @"C:\share\array.o"
+            );
+        }
     }
 }

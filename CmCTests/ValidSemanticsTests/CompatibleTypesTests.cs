@@ -50,5 +50,15 @@ namespace CmCTests.ValidSemanticsTests
                   bool res = 5 || a ^ b;"
             );
         }
+
+        [TestMethod]
+        public void CompatibleTypeBoolean_Test5()
+        {
+            CmCompiler.Compile(
+                @"int a;
+                  int b;
+                  bool res = a < 5 && b != 1;"
+            );
+        }
     }
 }

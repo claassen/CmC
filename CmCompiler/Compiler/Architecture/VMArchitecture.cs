@@ -48,8 +48,7 @@ namespace CmC.Compiler.Architecture
         SYSENT,
         SYSEX,
         FSREAD,
-        FSWRITE,
-        SETIDT
+        FSWRITE
     }
 
     public class VMArchitecture : IArchitecture
@@ -85,10 +84,18 @@ namespace CmC.Compiler.Architecture
                     return 1;
                 case "ecx":
                     return 2;
+                case "edx":
+                    return 3;
                 case "sp":
                     return 4;
                 case "bp":
                     return 5;
+                case "ip":
+                    return 6;
+                case "idt":
+                    return 7;
+                case "cr":
+                    return 8;
                 default:
                     throw new Exception("Unknown register name");
             }
@@ -267,6 +274,27 @@ namespace CmC.Compiler.Architecture
         public byte[] Implement(IRHalt ir)
         {
             return Encode(OpCode.HALT, 0, 0, 0, 0, false);
+        }
+
+
+        public byte[] Implement(IRDiskRead ir)
+        {
+            return Encode(OpCode.FSREAD, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandBytes, true, ir.Length.Value);
+        }
+
+        public byte[] Implement(IRDiskWrite ir)
+        {
+            return Encode(OpCode.FSWRITE, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandBytes, true, ir.Length.Value);
+        }
+
+        public byte[] Implement(IRSysEnt ir)
+        {
+            return Encode(OpCode.SYSENT, 0, 0, 0, ir.OperandBytes, true, ir.InterruptNumber.Value);
+        }
+
+        public byte[] Implement(IRSysEx ir)
+        {
+            return Encode(OpCode.SYSEX, 0, 0, 0, ir.OperandBytes, false);
         }
     }
 }

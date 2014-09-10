@@ -10,7 +10,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("FUNCTION_BODY", "'{' (STATEMENT)* '}'")]
+    [TokenExpression("FUNCTION_BODY", "'{' (STATEMENT | RETURN_STATEMENT)* '}'")]
     public class FunctionBodyToken : ILanguageNonTerminalToken, ICodeEmitter
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
