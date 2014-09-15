@@ -14,7 +14,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void ArrayDeclaration_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int[10] x;"
             );
         }
@@ -22,7 +22,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void ArrayDeclarationExport_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"export int[10] x;"
             );
         }
@@ -30,7 +30,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void ArrayAssignment_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int[10] x;
                   x[1] = 1;"
             );
@@ -39,55 +39,60 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void ArrayOfPointersAssignment_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int x; int y;
                   int*[10] a;
-                  a[0] = &x; a[1] = &y;",
-                @"C:\share\array.o"
+                  a[0] = &x; a[1] = &y;"
             );
         }
 
         [TestMethod]
         public void PointerAsArrayAssignment_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int x; int y;
                   int* a;
-                  a[0] = x; a[1] = y;",
-                @"C:\share\array.o"
+                  a[0] = x; a[1] = y;"
             );
         }
 
         [TestMethod]
         public void PointerAsArrayAssignment_Test2()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int x; int y;
                   int** a;
-                  a[0] = &x; a[1] = &y;",
-                @"C:\share\array.o"
+                  a[0] = &x; a[1] = &y;"
             );
         }
 
         [TestMethod]
         public void ArrayOfPointersAsMultiDimensionalArrayAssignment_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int x; int y;
                   int*[10] a;
                   (a[0])[0] = x; 
-                  (a[1])[1] = y;",
-                @"C:\share\array.o"
+                  (a[1])[1] = y;"
             );
         }
 
         [TestMethod]
         public void ArrayToArrayAssignment_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int[10] x;
-                  int[5] y = x;",
-                @"C:\share\array.o"
+                  int[5] y = x;"
+            );
+        }
+
+        [TestMethod]
+        public void AddressOfArrayIsSameAsArray_Test()
+        {
+            CmCompiler.CompileText(
+                @"int[10] x;
+                  int* p = x;
+                  int* q = &x;"
             );
         }
     }

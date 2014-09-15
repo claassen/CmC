@@ -16,7 +16,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void TypeMismatchAssignmentFromVariable_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"bool b;
                   int x = 0;
                   x = b;"
@@ -27,7 +27,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void TypeMismatchAssignmentFromExpression_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int x = 0;
                   int y = 1;
                   bool b;
@@ -39,7 +39,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void TypeMismatchAssignmentFromNumber_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"bool b;
                   b = 5;"
             );
@@ -49,7 +49,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void TypeMismatchCustomTypeAssignment_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"typedef X 
                   { 
                       int x; 
@@ -70,7 +70,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void TypeMismatchCustomTypeFieldAssignment_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"typedef X 
                   { 
                       int x; 
@@ -91,7 +91,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void TypeMismatchCustomTypeFieldAssignment_Test2()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"typedef X 
                   { 
                       int x; 
@@ -112,7 +112,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void TypeMismatchIndirectionLevelAssignment_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int y = 0;
                   int x;
                   x = &y;"
@@ -123,7 +123,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void TypeMismatchIndirectionLevelAssignment_Test2()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int y = 0;
                   int* x;
                   x = y;"
@@ -134,7 +134,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void TypeMismatchIndirectionLevelAssignment_Test3()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int x = 0;
                   int *y;
                   y = &x;
@@ -147,7 +147,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void TypeMismatchIndirectionLevelAssignment_Test4()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int* x;
                   int y;
                   y = *(*x);"
@@ -158,7 +158,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void TypeMismatchIndirectionLevelAssignment_Test5()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int* x;
                   int* y;
                   y = &x;"

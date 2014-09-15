@@ -14,6 +14,7 @@ namespace CmC.Compiler.Architecture
         ADDR,
         ANDR,
         CALL,
+        RET,
         CMPI,
         CMPR,
         DIVR,
@@ -51,7 +52,7 @@ namespace CmC.Compiler.Architecture
         FSWRITE
     }
 
-    public class VMArchitecture : IArchitecture
+    public class RIVMArchitecture : IArchitecture
     {
         private byte[] Encode(OpCode opCode, int r1, int r2, int r3, int operandSize, bool hasImmediate, int immediate = 0)
         {
@@ -108,127 +109,127 @@ namespace CmC.Compiler.Architecture
 
         public byte[] Implement(IRAdd ir)
         {
-            return Encode(OpCode.ADDR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandBytes, false);
+            return Encode(OpCode.ADDR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandSize, false);
         }
 
         public byte[] Implement(IRAnd ir)
         {
-            return Encode(OpCode.ANDR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandBytes, false);
+            return Encode(OpCode.ANDR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandSize, false);
         }
 
         public byte[] Implement(IRCall ir)
         {
-            throw new NotImplementedException();
+            return Encode(OpCode.CALL, 0, 0, 0, ir.OperandSize, true, ir.Address.Value);
         }
 
         public byte[] Implement(IRCompareImmediate ir)
         {
-            return Encode(OpCode.CMPI, GetRegisterIndex(ir.Left), 0, 0, ir.OperandBytes, true, ir.Right.Value);
+            return Encode(OpCode.CMPI, GetRegisterIndex(ir.Left), 0, 0, ir.OperandSize, true, ir.Right.Value);
         }
 
         public byte[] Implement(IRCompareRegister ir)
         {
-            return Encode(OpCode.CMPR, GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), 0, ir.OperandBytes, false);
+            return Encode(OpCode.CMPR, GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), 0, ir.OperandSize, false);
         }
 
         public byte[] Implement(IRDiv ir)
         {
-            return Encode(OpCode.DIVR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandBytes, false);
+            return Encode(OpCode.DIVR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandSize, false);
         }
 
         public byte[] Implement(IRJumpEQ ir)
         {
-            return Encode(OpCode.JEQI, 0, 0, 0, ir.OperandBytes, true, ir.Address.Value);
+            return Encode(OpCode.JEQI, 0, 0, 0, ir.OperandSize, true, ir.Address.Value);
         }
 
         public byte[] Implement(IRJumpGE ir)
         {
-            return Encode(OpCode.JGEI, 0, 0, 0, ir.OperandBytes, true, ir.Address.Value);
+            return Encode(OpCode.JGEI, 0, 0, 0, ir.OperandSize, true, ir.Address.Value);
         }
 
         public byte[] Implement(IRJumpGT ir)
         {
-            return Encode(OpCode.JGTI, 0, 0, 0, ir.OperandBytes, true, ir.Address.Value);
+            return Encode(OpCode.JGTI, 0, 0, 0, ir.OperandSize, true, ir.Address.Value);
         }
 
         public byte[] Implement(IRJumpImmediate ir)
         {
-            return Encode(OpCode.JMPI, 0, 0, 0, ir.OperandBytes, true, ir.Address.Value);
+            return Encode(OpCode.JMPI, 0, 0, 0, ir.OperandSize, true, ir.Address.Value);
         }
 
         public byte[] Implement(IRJumpLE ir)
         {
-            return Encode(OpCode.JLEI, 0, 0, 0, ir.OperandBytes, true, ir.Address.Value);
+            return Encode(OpCode.JLEI, 0, 0, 0, ir.OperandSize, true, ir.Address.Value);
         }
 
         public byte[] Implement(IRJumpLT ir)
         {
-            return Encode(OpCode.JLTI, 0, 0, 0, ir.OperandBytes, true, ir.Address.Value);
+            return Encode(OpCode.JLTI, 0, 0, 0, ir.OperandSize, true, ir.Address.Value);
         }
 
         public byte[] Implement(IRJumpNE ir)
         {
-            return Encode(OpCode.JNEI, 0, 0, 0, ir.OperandBytes, true, ir.Address.Value);
+            return Encode(OpCode.JNEI, 0, 0, 0, ir.OperandSize, true, ir.Address.Value);
         }
 
         public byte[] Implement(IRJumpRegister ir)
         {
-            return Encode(OpCode.JMPR, GetRegisterIndex(ir.Address), 0, 0, ir.OperandBytes, false);
+            return Encode(OpCode.JMPR, GetRegisterIndex(ir.Address), 0, 0, ir.OperandSize, false);
         }
 
         public byte[] Implement(IRLoadImmediate ir)
         {
-            return Encode(OpCode.LOADI, GetRegisterIndex(ir.To), 0, 0, ir.OperandBytes, true, ir.Address.Value);
+            return Encode(OpCode.LOADI, GetRegisterIndex(ir.To), 0, 0, ir.OperandSize, true, ir.Address.Value);
         }
 
         public byte[] Implement(IRLoadRegister ir)
         {
-            return Encode(OpCode.LOADR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandBytes, false);
+            return Encode(OpCode.LOADR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandSize, false);
         }
 
         public byte[] Implement(IRLoadRegisterPlusImmediate ir)
         {
-            return Encode(OpCode.LOADIR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandBytes, true, ir.Offset.Value);
+            return Encode(OpCode.LOADIR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandSize, true, ir.Offset.Value);
         }
 
         public byte[] Implement(IRMoveImmediate ir)
         {
-            return Encode(OpCode.MOVI, GetRegisterIndex(ir.To), 0, 0, ir.OperandBytes, true, ir.Value.Value);
+            return Encode(OpCode.MOVI, GetRegisterIndex(ir.To), 0, 0, ir.OperandSize, true, ir.Value.Value);
         }
 
         public byte[] Implement(IRMoveRegister ir)
         {
-            return Encode(OpCode.MOVR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandBytes, false);
+            return Encode(OpCode.MOVR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandSize, false);
         }
 
         public byte[] Implement(IRMult ir)
         {
-            return Encode(OpCode.MULTR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandBytes, false);
+            return Encode(OpCode.MULTR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandSize, false);
         }
 
         public byte[] Implement(IRNoop ir)
         {
-            return Encode(OpCode.NOOP, 0, 0, 0, ir.OperandBytes, false);
+            return Encode(OpCode.NOOP, 0, 0, 0, ir.OperandSize, false);
         }
 
         public byte[] Implement(IROr ir)
         {
-            return Encode(OpCode.ORR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandBytes, false);
+            return Encode(OpCode.ORR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandSize, false);
         }
 
         public byte[] Implement(IRPop ir)
         {
-            return Encode(OpCode.POPR, GetRegisterIndex(ir.To), 0, 0, ir.OperandBytes, false);
+            return Encode(OpCode.POPR, GetRegisterIndex(ir.To), 0, 0, ir.OperandSize, false);
         }
 
         public byte[] Implement(IRPushImmediate ir)
         {
-            return Encode(OpCode.PUSHI, 0, 0, 0, ir.OperandBytes, true, ir.Value.Value);
+            return Encode(OpCode.PUSHI, 0, 0, 0, ir.OperandSize, true, ir.Value.Value);
         }
 
         public byte[] Implement(IRPushRegister ir)
         {
-            return Encode(OpCode.PUSHR, GetRegisterIndex(ir.From), 0, 0, ir.OperandBytes, false);
+            return Encode(OpCode.PUSHR, GetRegisterIndex(ir.From), 0, 0, ir.OperandSize, false);
         }
 
         public byte[] Implement(IRShiftLeft ir)
@@ -243,32 +244,32 @@ namespace CmC.Compiler.Architecture
 
         public byte[] Implement(IRStoreImmediate ir)
         {
-            return Encode(OpCode.STOREI, GetRegisterIndex(ir.From), 0, 0, ir.OperandBytes, true, ir.To.Value);
+            return Encode(OpCode.STOREI, GetRegisterIndex(ir.From), 0, 0, ir.OperandSize, true, ir.To.Value);
         }
 
         public byte[] Implement(IRStoreRegister ir)
         {
-            return Encode(OpCode.STORER, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandBytes, false);
+            return Encode(OpCode.STORER, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandSize, false);
         }
 
         public byte[] Implement(IRStoreRegisterPlusImmediate ir)
         {
-            return Encode(OpCode.STOREIR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandBytes, true, ir.Offset.Value);
+            return Encode(OpCode.STOREIR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandSize, true, ir.Offset.Value);
         }
 
         public byte[] Implement(IRSub ir)
         {
-            return Encode(OpCode.SUBR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandBytes, false);
+            return Encode(OpCode.SUBR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandSize, false);
         }
 
         public byte[] Implement(IRXOr ir)
         {
-            return Encode(OpCode.XORR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandBytes, false);
+            return Encode(OpCode.XORR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandSize, false);
         }
 
         public byte[] Implement(IRMemCopy ir)
         {
-            return Encode(OpCode.MEMCPY, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandBytes, true, ir.Length.Value);
+            return Encode(OpCode.MEMCPY, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandSize, true, ir.Length.Value);
         }
 
         public byte[] Implement(IRHalt ir)
@@ -276,25 +277,19 @@ namespace CmC.Compiler.Architecture
             return Encode(OpCode.HALT, 0, 0, 0, 0, false);
         }
 
-
-        public byte[] Implement(IRDiskRead ir)
-        {
-            return Encode(OpCode.FSREAD, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandBytes, true, ir.Length.Value);
-        }
-
-        public byte[] Implement(IRDiskWrite ir)
-        {
-            return Encode(OpCode.FSWRITE, GetRegisterIndex(ir.To), GetRegisterIndex(ir.From), 0, ir.OperandBytes, true, ir.Length.Value);
-        }
-
         public byte[] Implement(IRSysEnt ir)
         {
-            return Encode(OpCode.SYSENT, 0, 0, 0, ir.OperandBytes, true, ir.InterruptNumber.Value);
+            return Encode(OpCode.SYSENT, 0, 0, 0, ir.OperandSize, true, ir.InterruptNumber.Value);
         }
 
         public byte[] Implement(IRSysEx ir)
         {
-            return Encode(OpCode.SYSEX, 0, 0, 0, ir.OperandBytes, false);
+            return Encode(OpCode.SYSEX, 0, 0, 0, ir.OperandSize, false);
+        }
+
+        public byte[] Implement(IRRet ir)
+        {
+            return Encode(OpCode.RET, 0, 0, 0, ir.OperandSize, false);
         }
     }
 }

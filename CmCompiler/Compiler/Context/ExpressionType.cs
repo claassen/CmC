@@ -20,12 +20,9 @@ namespace CmC.Compiler.Context
             {
                 return Type.Size;
             }
-            else if (IsArray)
-            {
-                return Type.Size; // *ArrayLength;
-            }
             else
             {
+                //Pointer or address-of
                 return 4;
             }
         }
@@ -80,7 +77,11 @@ namespace CmC.Compiler.Context
 
         public override string ToString()
         {
-            if (IndirectionLevel >= 0)
+            if (IsArray)
+            {
+                return Type.Name + "[]";
+            }
+            else if (IndirectionLevel >= 0)
             {
                 return Type.Name + String.Join("", Enumerable.Range(0, IndirectionLevel).Select(_ => "*"));
             }

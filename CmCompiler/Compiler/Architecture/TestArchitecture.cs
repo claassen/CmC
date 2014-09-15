@@ -219,17 +219,6 @@ namespace CmC.Compiler.Architecture
             return BitConverter.GetBytes(count++);
         }
 
-
-        public byte[] Implement(IRDiskRead ir)
-        {
-            throw new NotImplementedException();
-        }
-
-        public byte[] Implement(IRDiskWrite ir)
-        {
-            throw new NotImplementedException();
-        }
-
         public byte[] Implement(IRSysEnt ir)
         {
             throw new NotImplementedException();
@@ -238,6 +227,12 @@ namespace CmC.Compiler.Architecture
         public byte[] Implement(IRSysEx ir)
         {
             throw new NotImplementedException();
+        }
+
+
+        public byte[] Implement(IRRet ir)
+        {
+            return BitConverter.GetBytes(count++);
         }
     }
 }

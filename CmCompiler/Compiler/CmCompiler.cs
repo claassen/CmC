@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CmC.Common;
 using CmC.Compiler.Architecture;
@@ -20,24 +21,52 @@ namespace CmC.Compiler
 {
     public static class CmCompiler
     {
-        public static void Compile(string source, string outputObjFile = "")
+        public static void CompileFile(string path, CompilerOptions options)
         {
-            Compile(source, outputObjFile, new TestArchitecture());
+            string objFileName =
+                !String.IsNullOrEmpty(options.ObjectFileName) ? options.ObjectFileName :
+                //Path.GetFullPath(
+                    Path.Combine(
+                        Path.GetDirectoryName(path),
+                        Path.GetFileNameWithoutExtension(path) + ".o"
+                    );
+                //);
+
+            using (var stream = new StreamReader(new FileStream(path, FileMode.Open)))
+            {
+                CompileText(stream.ReadToEnd(), objFileName, options.Architecture);
+            }
         }
 
-        public static void Compile(string source, string outputObjFile, IArchitecture architecture)
+        public static void CompileText(string source)
         {
+            CompileText(source, "", new TestArchitecture());
+        }
+
+        public static void CompileText(string source, string outputObjFile, IArchitecture architecture)
+        {
+            Regex removeComments = new Regex("//.*(\r\n|\n)");
+
+            source = removeComments.Replace(source, "\n");
+
             var context = new CompilationContext();
 
-            CompileToContext(source, context);
+            ProcessSourceText(source, context);
 
             CreateObjectFile(outputObjFile, architecture, context.GetIR(), context.GetStringConstants(), context.GetGlobalVariables(), context.GetFunctions());
         }
 
-        public static void CompileToContext(string source, CompilationContext context)
+        public static void CompileIR(string outputObjFile, IArchitecture architecture, List<IRInstruction> ir, Dictionary<string, StringConstant> stringConstants = null, Dictionary<string, Variable> globalVariables = null, Dictionary<string, Function> functions = null)
+        {
+            ShowIR(ir);
+
+            CreateObjectFile(outputObjFile, architecture, ir, stringConstants, globalVariables, functions);
+        }
+
+        internal static void ProcessSourceText(string source, CompilationContext context)
         {
             var grammar = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(c => c.Namespace == "CmC.Compiler.Syntax")
+                .Where(c => c.Namespace == "CmC.Compiler.Syntax" || c.Namespace == "CmC.Compiler.Syntax.Assembly")
                 .Where(c => typeof(ILanguageToken).IsAssignableFrom(c))
                 .Select(t => (ILanguageToken)Activator.CreateInstance(t, null));
 
@@ -51,13 +80,6 @@ namespace CmC.Compiler
             {
                 ((ICodeEmitter)token).Emit(context);
             }
-        }
-
-        public static void Compile(string outputObjFile, IArchitecture architecture, List<IRInstruction> ir, Dictionary<string, StringConstant> stringConstants = null, Dictionary<string, Variable> globalVariables = null, Dictionary<string, Function> functions = null)
-        {
-            ShowIR(ir);
-
-            CreateObjectFile(outputObjFile, architecture, ir, stringConstants, globalVariables, functions);
         }
 
         private static void CreateObjectFile(string outputObjFile, IArchitecture architecture, List<IRInstruction> ir, Dictionary<string, StringConstant> stringConstants, Dictionary<string, Variable> globalVariables, Dictionary<string, Function> functions)
@@ -127,7 +149,7 @@ namespace CmC.Compiler
                             {
                                 Index = variable.Value.Address.Value,
                                 IsExtern = false,
-                                Address = initializedDataSize
+                                Address = initializedDataSize + uninitializedDataSize
                             }
                         );
 

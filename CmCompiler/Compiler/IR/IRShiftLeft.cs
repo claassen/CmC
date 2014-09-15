@@ -9,7 +9,6 @@ namespace CmC.Compiler.IR
             return arch.Implement(this);
         }
 
-
         public override string Display()
         {
             throw new System.NotImplementedException();

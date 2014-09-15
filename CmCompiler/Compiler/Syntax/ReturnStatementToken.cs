@@ -55,9 +55,11 @@ namespace CmC.Compiler.Syntax
             else
             {
                 //Pop return address off stack and jump
-                context.EmitInstruction(new IRPop() { To = "ebx" });
+                context.EmitInstruction(new IRRet());
+                
+                //context.EmitInstruction(new IRPop() { To = "ebx" });
 
-                context.EmitInstruction(new IRJumpRegister() { Address = "ebx" });
+                //context.EmitInstruction(new IRJumpRegister() { Address = "ebx" });
             }
         }
 

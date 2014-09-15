@@ -19,49 +19,35 @@ namespace CmCompilerTester
         {
             //TODO: type sizes - equality expression (additive, multiplicative, boolean and bitwise only support 4 byte operands)
             //TODO: return values on stack - Not supported for now, can pass pointer arguments to accomplish the same thing
-
-            using(var stream = new StreamReader(new FileStream(@"C:\VM\cmlib\cmlib.cm", FileMode.Open)))
-            {
-                CmCompiler.Compile(stream.ReadToEnd(), @"C:\\VM\\cmlib\\cmlib.o", new VMArchitecture());
-            }
-
+            
+            CmCompiler.CompileText(
+                @"int[10] a;
+                  int* p = &a;"
+            );
+                        
             //CreateBIOS();
             //CreateBootLoader();
         }
 
         static void CreateBIOS()
         {
-            //BIOS
-            var bios = new List<IRInstruction>()
-            {
-                //Initialize BIOS stack to address 512
-                new IRMoveImmediate() { To = "bp", Value = new ImmediateValue(4096) },
-                new IRMoveImmediate() { To = "sp", Value = new ImmediateValue(4096) },
-                //Set IDTPointer to 1024 (start of RAM)
-                new IRMoveImmediate() { To = "idt", Value = new ImmediateValue(1024) },
-                //Set up IDT
+            CmCompiler.CompileFile(@"C:\VM\cmlib\cmlib.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
 
-                //Copy bootloader to RAM
-                new IRMoveImmediate() { To = "eax", Value = new ImmediateValue(2048) },
-                new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(0) },
-                new IRDiskRead() { To = "eax", From = "ebx", Length = new ImmediateValue(512) },
-                new IRJumpImmediate() { Address = new ImmediateValue(2048) }
-            };
+            CmCompiler.CompileFile(@"C:\VM\bios.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
 
-            CmCompiler.Compile(@"C:\VM\rom.o", new VMArchitecture(), bios);
-            CmLinker.Link(new List<string>() { @"C:\VM\rom.o" }, @"C:\VM\VM.rom", false);
+            CmLinker.Link(new List<string>() { @"C:\VM\bios.o", @"C:\VM\cmlib\cmlib.o" }, @"C:\VM\bios.exe", false);
         }
 
         static void CreateBootLoader()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"export int kernelinit() 
                   { 
                       return 0; 
                   }
                   byte* s = ""abcdefgh"";",
                 @"C:\VM\bootloaderLib.o",
-                new VMArchitecture()
+                new RIVMArchitecture()
             );
 
             
@@ -78,7 +64,7 @@ namespace CmCompilerTester
 
             bootLoaderFunctions.Add("kernelinit", new Function() { IsDefined = false, Address = new LabelAddressValue(0) });
 
-            CmCompiler.Compile(@"C:\VM\bootloader.o", new VMArchitecture(), bootLoader, null, null, bootLoaderFunctions);
+            CmCompiler.CompileIR(@"C:\VM\bootloader.o", new RIVMArchitecture(), bootLoader, null, null, bootLoaderFunctions);
             CmLinker.Link(new List<string>() { @"C:\VM\bootloader.o", @"C:\VM\bootloaderLib.o" }, @"C:\VM\bootloader.exe", false, 2048);
         }
     }

@@ -41,7 +41,8 @@ namespace CmC.Compiler.Context
 
         public override string ToString()
         {
-            return "bp + " + Value;
+            return "!STACK!" + Value.ToString();
+            //return "bp + " + Value;
         }
     }
 

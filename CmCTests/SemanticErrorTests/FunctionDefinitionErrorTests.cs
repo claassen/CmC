@@ -16,7 +16,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(MissingReturnException))]
         public void MissingReturn_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int Test(int x, int y, int z) {
                       int temp = x + y;
                   }"
@@ -27,7 +27,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(UndefinedVariableException))]
         public void UndefinedArgumentVariable_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int Test(int x, int y) {
                       return z;
                   }"
@@ -38,7 +38,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(DuplicateFunctionDefinitionException))]
         public void DuplicateFunctionDefinition_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int Test(int x, int y) {
                       return x;
                   }
@@ -52,7 +52,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(DuplicateFunctionDefinitionException))]
         public void DuplicateFunctionDefinition_Test2()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int Test(int x, int y) {
                       return x;
                   }
@@ -66,7 +66,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(ExportUndefinedFunctionException))]
         public void ExportUndefinedFunction_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"export int Test(int x, int y);"
             );
         }
@@ -75,7 +75,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(LargeReturnValuesNotSupportedException))]
         public void LargeReturnValuesNotSupportedTest()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"typedef X { int x; int y; }
                   X Test(int a);"
             );
@@ -85,7 +85,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(LargeReturnValuesNotSupportedException))]
         public void LargeReturnValuesNotSupportedTest2()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"typedef X { int x; int y; }
                   X Test(int a) {
                       X x;

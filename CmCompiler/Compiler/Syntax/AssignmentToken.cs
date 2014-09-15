@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CmC.Compiler.Context;
+using CmC.Compiler.Exceptions;
 using CmC.Compiler.IR;
 using CmC.Compiler.Syntax.TokenInterfaces;
 using ParserGen.Parser;
@@ -26,31 +27,38 @@ namespace CmC.Compiler.Syntax
             var leftSideType = ((IHasType)Tokens[0]).GetExpressionType(context);
             var rightSideType = ((IHasType)Tokens[2]).GetExpressionType(context);
 
+            if (leftSideType.IsArray)
+            {
+                throw new TypeMismatchException(new ExpressionType() { IsArray = true, Type = leftSideType.Type, ArrayLength = leftSideType.ArrayLength }, rightSideType);
+            }
+
             ExpressionType.CheckTypesMatch(leftSideType, rightSideType);
 
-            ((IHasAddress)Tokens[0]).EmitAddress(context);
-
-            //Dest address -> eax
-            context.EmitInstruction(new IRPop() { To = "eax" });
-
-            //value -> stack
+            //right hand side value -> stack
             ((ICodeEmitter)Tokens[2]).Emit(context);
 
             if (rightSideType.GetSize() > 4)
             {
+                //[sp] -> [destination]
+                //Dest address -> eax
+                ((IHasAddress)Tokens[0]).EmitAddress(context);
+                context.EmitInstruction(new IRPop() { To = "eax" });
+
                 //sp -= size of value
                 context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(rightSideType.GetSize()) });
                 context.EmitInstruction(new IRSub() { Left = "sp", Right = "ebx", To = "sp" });
-                //[sp] -> [destination]
-                context.EmitInstruction(new IRMemCopy() { From = "ebx", To = "eax", Length = new ImmediateValue(rightSideType.GetSize()) });
+
+                context.EmitInstruction(new IRMemCopy() { From = "sp", To = "eax", Length = new ImmediateValue(rightSideType.GetSize()) });
             }
             else
             {
+                //store ebx -> [destination]
+                ((IHasAddress)Tokens[0]).EmitAddress(context);
+                context.EmitInstruction(new IRPop() { To = "eax" });
+
                 //Store assign value in ebx
                 context.EmitInstruction(new IRPop() { To = "ebx" });
-
-                //store ebx -> [eax]
-                context.EmitInstruction(new IRStoreRegister() { From = "ebx", To = "eax", OperandBytes = rightSideType.GetSize() }); //MB!
+                context.EmitInstruction(new IRStoreRegister() { From = "ebx", To = "eax", OperandSize = rightSideType.GetSize() }); //MB!
             }
         }
 

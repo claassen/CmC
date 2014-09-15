@@ -15,7 +15,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void DeclarationBeforeDefinitionTest()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int Test(int x);
                   int Test(int x) {
                       return x;
@@ -27,7 +27,7 @@ namespace CmCTests.ValidSemanticsTests
         [ExpectedException(typeof(DuplicateFunctionDefinitionException))]
         public void DeclarationAfterDefinitionTest()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int Test(int x) {
                       return x;
                   }
@@ -39,7 +39,7 @@ namespace CmCTests.ValidSemanticsTests
         [ExpectedException(typeof(FunctionSignatureMismatchException))]
         public void DefinitionDoesNotMatchDeclarationTest()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int Test(int x);
                   int Test(int x, int y) {
                       return 0;
@@ -51,7 +51,7 @@ namespace CmCTests.ValidSemanticsTests
         [ExpectedException(typeof(FunctionSignatureMismatchException))]
         public void MultipleDeclarationsSignatureMismatchTest()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int Test(int x);
                   int Test(int x, int y) {
                       return 0;

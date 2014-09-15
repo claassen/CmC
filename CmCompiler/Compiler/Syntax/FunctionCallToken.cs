@@ -48,7 +48,7 @@ namespace CmC.Compiler.Syntax
                 for (int i = Tokens.Count - 1; i > 0; i--)
                 {
                     var argType = ((IHasType)Tokens[i]).GetExpressionType(context);
-                    var paramType = function.ParameterTypes[function.ParameterTypes.Count - (Tokens.Count - 1)];
+                    var paramType = function.ParameterTypes[function.ParameterTypes.Count - 1 - (Tokens.Count - 1 - i)];
 
                     ExpressionType.CheckTypesMatch(paramType, argType);
 
@@ -65,17 +65,17 @@ namespace CmC.Compiler.Syntax
                 throw new ArgumentCountMismatchException(functionName, function.ParameterTypes.Count, argumentCount);
             }
 
-            var returnLabel = new LabelAddressValue(context.CreateNewLabel());
-
-            //Push return address on stack and jump to function
-            context.EmitInstruction(new IRPushImmediate() { Value = returnLabel });
+            //var returnLabel = new LabelAddressValue(context.CreateNewLabel());
 
             //Set base pointer to be the top of current function's stack which will be the bottom
             //of the called function's stack
             context.EmitInstruction(new IRMoveRegister() { From = "sp", To = "bp" });
-            
-            //Jump to function location
-            context.EmitInstruction(new IRJumpImmediate() { Address = function.Address });
+
+            ////Push return address on stack
+            //context.EmitInstruction(new IRPushImmediate() { Value = returnLabel });
+            ////Jump to function location
+            //context.EmitInstruction(new IRJumpImmediate() { Address = function.Address });
+            context.EmitInstruction(new IRCall() { Address = function.Address });
 
             //Resume here, reclaim space from arguments pushed on stack
             context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(argumentsSize) });

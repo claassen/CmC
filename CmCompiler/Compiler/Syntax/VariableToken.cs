@@ -42,8 +42,10 @@ namespace CmC.Compiler.Syntax
 
             if (variable.Type.GetSize() > 4)
             {
+                //ARRAYS!
+
                 //Variable address -> eax
-                context.EmitInstruction(new IRMoveImmediate() { To = "eax", Value = variable.Address });
+                context.EmitInstruction(new IRMoveImmediate() { To = "eax", Value = variable.Address }); //STACK!!!
                 //[eax] -> [sp] 
                 context.EmitInstruction(new IRMemCopy() { From = "eax", To = "sp", Length = new ImmediateValue(variable.Type.GetSize()) });
                 //size -> ebx
@@ -53,17 +55,24 @@ namespace CmC.Compiler.Syntax
             }
             else
             {
-                //[address] -> eax
-                if (variable.Address is StackAddressValue)
+                if (variable.Type.IsArray)
                 {
-                    context.EmitInstruction(new IRLoadRegisterPlusImmediate() { To = "eax", From = "bp", Offset = new ImmediateValue(variable.Address.Value), OperandBytes = variable.Type.GetSize() });
+                    EmitAddress(context);
                 }
                 else
                 {
-                    context.EmitInstruction(new IRLoadImmediate() { To = "eax", Address = variable.Address, OperandBytes = variable.Type.GetSize() });
-                }
+                    //[address] -> eax
+                    if (variable.Address is StackAddressValue)
+                    {
+                        context.EmitInstruction(new IRLoadRegisterPlusImmediate() { To = "eax", From = "bp", Offset = new ImmediateValue(variable.Address.Value), OperandSize = variable.Type.GetSize() });
+                    }
+                    else
+                    {
+                        context.EmitInstruction(new IRLoadImmediate() { To = "eax", Address = variable.Address, OperandSize = variable.Type.GetSize() });
+                    }
 
-                context.EmitInstruction(new IRPushRegister() { From = "eax" });
+                    context.EmitInstruction(new IRPushRegister() { From = "eax" });
+                }
             }
         }
 

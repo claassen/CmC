@@ -18,7 +18,7 @@ namespace CmC.Compiler.IR
 
         public override string Display()
         {
-            return "LABEL " + Index + ": ";
+            return "LABEL" + Index + ": ";
         }
     }
 }

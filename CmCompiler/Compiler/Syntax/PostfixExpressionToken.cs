@@ -67,7 +67,7 @@ namespace CmC.Compiler.Syntax
                 }
                 else
                 {
-                    context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx", OperandBytes = valueSize }); //MB!
+                    context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx", OperandSize = valueSize }); //MB!
                     context.EmitInstruction(new IRPushRegister() { From = "ebx" });
                 }
             }
@@ -130,8 +130,8 @@ namespace CmC.Compiler.Syntax
                 {
                     Type = type.Type,
                     IndirectionLevel = type.IndirectionLevel - 1, //array access dereferences pointer
-                    IsArray = type.IsArray,
-                    ArrayLength = type.ArrayLength
+                    //IsArray = type.IsArray,
+                    //ArrayLength = type.ArrayLength
                 };
             }
             else
@@ -173,7 +173,7 @@ namespace CmC.Compiler.Syntax
                     }
 
                     //Dereference pointer -> eax
-                    context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx", OperandBytes = 4 });
+                    context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx", OperandSize = 4 });
                     context.EmitInstruction(new IRMoveRegister() { From = "ebx", To = "eax" });
                 }
                 else if (IsArrayIndex)

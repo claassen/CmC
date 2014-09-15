@@ -51,7 +51,7 @@ namespace CmC.Compiler.Syntax
                     else
                     {
                         //value at memory[eax] -> ebx
-                        context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx", OperandBytes = valueSize });
+                        context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx", OperandSize = valueSize });
 
                         context.EmitInstruction(new IRPushRegister() { From = "ebx" });
                     }
@@ -77,7 +77,14 @@ namespace CmC.Compiler.Syntax
                 }
                 else if (op == "&")
                 {
-                    return new ExpressionType() { Type = type.Type, IndirectionLevel = type.IndirectionLevel + 1 };
+                    if (type.IsArray)
+                    {
+                        return new ExpressionType() { Type = type.Type, IndirectionLevel = type.IndirectionLevel };
+                    }
+                    else
+                    {
+                        return new ExpressionType() { Type = type.Type, IndirectionLevel = type.IndirectionLevel + 1 };
+                    }
                 }
                 else
                 {

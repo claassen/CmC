@@ -16,7 +16,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void ArrayIndexOnNonArray_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int x;
                   x[1] = 1;"
             );
@@ -26,7 +26,7 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void ArrayIndexOnNonArray_Test2()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int[10] x;
                   (x[1])[2] = 1;"
             );
@@ -36,11 +36,10 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void ArrayOfPointersAssignmentError_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int x; int y;
                   int*[10] a;
-                  a[0] = x; a[1] = y;",
-                @"C:\share\array.o"
+                  a[0] = x; a[1] = y;"
             );
         }
 
@@ -48,11 +47,31 @@ namespace CmCTests.SemanticErrorTests
         [ExpectedException(typeof(TypeMismatchException))]
         public void PointerAsArrayAssignmentError_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"int x; int y;
                   int* a;
-                  a[0] = &x; a[1] = &y;",
-                @"C:\share\array.o"
+                  a[0] = &x; a[1] = &y;"
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(TypeMismatchException))]
+        public void AssignmentToArrayVariable_Test()
+        {
+            CmCompiler.CompileText(
+                @"int[10] a;
+                  a = 1;"
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(TypeMismatchException))]
+        public void AssignmentToArrayVariable_Test2()
+        {
+            CmCompiler.CompileText(
+                @"int[10] a;
+                  int[10] b;
+                  a = b;"
             );
         }
     }

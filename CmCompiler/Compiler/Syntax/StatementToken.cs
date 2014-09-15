@@ -10,7 +10,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("STATEMENT", "((VARIABLE_DEFINITION|ASSIGNMENT|FUNCTION_CALL) ';' | CONDITIONAL | FOR_LOOP)")]
+    [TokenExpression("STATEMENT", "((VARIABLE_DEFINITION|ASSIGNMENT|FUNCTION_CALL) ';' | CONDITIONAL | FOR_LOOP | INLINE_ASM)")]
     public class StatementToken : ILanguageNonTerminalToken, ICodeEmitter
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)

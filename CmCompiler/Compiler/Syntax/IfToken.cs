@@ -29,9 +29,7 @@ namespace CmC.Compiler.Syntax
             ((ICodeEmitter)Tokens[1]).Emit(context);
 
             context.EmitInstruction(new IRPop() { To = "eax" });
-
             context.EmitInstruction(new IRCompareImmediate() { Left = "eax", Right = new ImmediateValue(0) });
-            
             context.EmitInstruction(new IRJumpEQ() { Address = new LabelAddressValue(elseBranchLabel) });
 
             context.EmitComment(";Then");

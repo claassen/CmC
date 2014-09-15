@@ -114,7 +114,7 @@ namespace CmC.Compiler.Syntax
                     //Memory copy
 
                     //Dest address -> eax
-                    context.EmitInstruction(new IRMoveImmediate() { To = "eax", Value = variable.Address });
+                    context.EmitInstruction(new IRMoveImmediate() { To = "eax", Value = variable.Address }); //STACK!!!!
 
                     //Source address -> ebx
                     ((IHasAddress)Tokens[3]).EmitAddress(context);
@@ -130,7 +130,14 @@ namespace CmC.Compiler.Syntax
 
                     context.EmitInstruction(new IRPop() { To = "eax" });
 
-                    context.EmitInstruction(new IRStoreImmediate() { From = "eax", To = variable.Address, OperandBytes = expressionType.GetSize() });
+                    if (variable.Address is StackAddressValue)
+                    {
+                        context.EmitInstruction(new IRStoreRegisterPlusImmediate() { From = "eax", To = "bp", Offset = new ImmediateValue(variable.Address.Value), OperandSize = expressionType.GetSize() });
+                    }
+                    else
+                    {
+                        context.EmitInstruction(new IRStoreImmediate() { From = "eax", To = variable.Address, OperandSize = expressionType.GetSize() });
+                    }
                 }
             }
         }

@@ -24,9 +24,9 @@ namespace CmC.Compiler.Syntax
             { 
                 Tokens = tokens,
                 Initializer = (ICodeEmitter)tokens[1],
-                Condition = (ICodeEmitter)tokens[3],
-                Update = (ICodeEmitter)tokens[5],
-                Body = tokens.Skip(7).ToList()
+                Condition = (ICodeEmitter)tokens[2],
+                Update = (ICodeEmitter)tokens[3],
+                Body = tokens.Skip(5).ToList()
             };
         }
 

@@ -18,7 +18,7 @@ namespace CmC.Compiler.Context
         private int _currentScopeLevel;
         private Stack<int> _stackOffsets;
 
-        private int _functionArgStackOffset;
+        private int _functionArgBPOffset;
         private int _functionLocalVarSize;
 
         private int _labelCount;
@@ -38,6 +38,8 @@ namespace CmC.Compiler.Context
         public bool IsEntryPointFunction;
 
         public Dictionary<string, StringConstant> _stringConstants;
+
+        private Dictionary<string, int> _namedLabels;
 
         public CompilationContext()
         {
@@ -61,11 +63,23 @@ namespace CmC.Compiler.Context
             _types.Add("bool", new TypeDef() { Name = "bool", Size = 4 });
 
             ConditionalElseBranchLabels = new Stack<int>();
+
+            _namedLabels = new Dictionary<string, int>();
         }
 
-        public void EmitLabel(int labelIndex)
+        public void EmitLabel(int labelIndex, string labelName = "")
         {
             _instructions.Add(new IRLabel(labelIndex));
+
+            if (!String.IsNullOrEmpty(labelName))
+            {
+                _namedLabels.Add(labelName, labelIndex);
+            }
+        }
+
+        public int GetLabelIndex(string labelName)
+        {
+            return _namedLabels[labelName];
         }
 
         public void EmitInstruction(IRInstruction ir)
@@ -87,7 +101,7 @@ namespace CmC.Compiler.Context
             if (isFunction)
             {
                 _stackOffsets.Push(0);
-                _functionArgStackOffset = -1;
+                _functionArgBPOffset = 0;
                 _functionLocalVarSize = 0;
                 _functionHasReturn = false;
                 _inPossiblyNonExecutedBlock = false;
@@ -210,7 +224,7 @@ namespace CmC.Compiler.Context
                 {
                     function.IsDefined = true;
                     function.IsExported = isExported;
-                    function.Address = new LabelAddressValue(CreateNewLabel());
+                    //function.Address = new LabelAddressValue(CreateNewLabel());
                 }
             }
             else
@@ -219,7 +233,7 @@ namespace CmC.Compiler.Context
                     name,
                     new Function()
                     {
-                        Address = isDefined ? new LabelAddressValue(CreateNewLabel()) : new LabelAddressValue(-1),
+                        Address = new LabelAddressValue(CreateNewLabel()),
                         ReturnType = returnType,
                         ParameterTypes = parameterTypes,
                         IsDefined = isDefined,
@@ -236,8 +250,8 @@ namespace CmC.Compiler.Context
 
         public void AddFunctionArgSymbol(string name, ExpressionType type)
         {
-            _varSymbolTables[_currentScopeLevel].Add(name, new Variable() { Address = new StackAddressValue(_functionArgStackOffset), Type = type });
-            _functionArgStackOffset -= type.GetSize();
+            _functionArgBPOffset -= type.GetSize();
+            _varSymbolTables[_currentScopeLevel].Add(name, new Variable() { Address = new StackAddressValue(_functionArgBPOffset), Type = type });
         }
 
         public Variable GetVariable(string varName)
@@ -334,7 +348,7 @@ namespace CmC.Compiler.Context
             {
                 string source = stream.ReadToEnd();
 
-                CmCompiler.CompileToContext(source, this);
+                CmCompiler.ProcessSourceText(source, this);
             }
         }
 

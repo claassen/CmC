@@ -12,6 +12,6 @@ namespace CmC.Compiler.IR.Interface
     {
         public abstract byte[] GetImplementation(IArchitecture arch);
         public abstract string Display();
-        public int OperandBytes = 4;
+        public int OperandSize = 4;
     }
 }

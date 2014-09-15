@@ -14,7 +14,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void FieldAssignment_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"typedef X { int x; int y; }
                   X myX;
                   myX.x = 0;
@@ -25,7 +25,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void FieldAssignmentNested_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"typedef X { int x; int y; }
                   typedef Y { X x; }
                   Y myY;
@@ -36,7 +36,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void PointerFieldAssignment_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"typedef X { int x; int y; }
                   X* myX;
                   myX->x = 0;
@@ -47,7 +47,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void PointerFieldAssignmentNested_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"typedef X { int x; int y; }
                   typedef Y { X* x; }
                   Y* myY;

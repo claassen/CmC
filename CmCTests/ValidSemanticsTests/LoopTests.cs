@@ -14,7 +14,7 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void BasicForLoop_Test()
         {
-            CmCompiler.Compile(
+            CmCompiler.CompileText(
                 @"for(int i = 0; i < 10; i = i + 1)
                   {
                       int j = i;
