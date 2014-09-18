@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CmC.Compiler.Context;
+using CmC.Compiler.Exceptions;
 using CmC.Compiler.IR;
 using CmC.Compiler.Syntax.TokenInterfaces;
 using ParserGen.Parser;
@@ -11,76 +12,85 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("VARIABLE_DEFINITION", "('export'|'extern')? TYPE_SPECIFIER ('[' NUMBER ']')? IDENTIFIER ('=' EXPRESSION)?")]
+    [TokenExpression("VARIABLE_DEFINITION", "('static'|'export'|'extern')? TYPE_SPECIFIER IDENTIFIER ('=' EXPRESSION)?")]
     public class VariableDefinitionToken : ILanguageNonTerminalToken, ICodeEmitter
     {
         private bool IsExported;
         private bool IsExtern;
-        private bool IsArray;
-        private int ArrayLength;
+        private bool IsStatic;
+        //private bool IsArray;
+        //private int ArrayLength;
 
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
-            bool isArray = false;
-            int arrayLength = 0;
+            //bool isArray = false;
+            //int arrayLength = 0;
 
             if (tokens[0] is DefaultLanguageTerminalToken)
             {
                 string storageModifier = ((DefaultLanguageTerminalToken)tokens[0]).Value;
 
-                if (tokens.Count > 3 && tokens[3] is NumberToken)
-                {
-                    //Array type
-                    isArray = true;
-                    arrayLength = ((NumberToken)tokens[3]).Value;
-                    tokens.RemoveAt(2); //[
-                    tokens.RemoveAt(2); //#
-                    tokens.RemoveAt(2); //]
-                }
+                //if (tokens.Count > 3 && tokens[3] is NumberToken)
+                //{
+                //    //Array type
+                //    isArray = true;
+                //    arrayLength = ((NumberToken)tokens[3]).Value;
+                //    tokens.RemoveAt(2); //[
+                //    tokens.RemoveAt(2); //#
+                //    tokens.RemoveAt(2); //]
+                //}
 
-                if (storageModifier == "extern")
+                bool isStatic = false;
+                bool isExtern = false; 
+                bool isExported = false;
+
+                if (storageModifier == "static")
                 {
-                    return new VariableDefinitionToken()
-                    {
-                        IsExtern = true,
-                        Tokens = tokens.Skip(1).ToList(),
-                        IsArray = isArray,
-                        ArrayLength = arrayLength
-                    };
+                    isStatic = true;
+                }
+                else if (storageModifier == "extern")
+                {
+                    isStatic = true;
+                    isExtern = true;
                 }
                 else if (storageModifier == "export")
                 {
-                    return new VariableDefinitionToken()
-                    {
-                        IsExported = true,
-                        Tokens = tokens.Skip(1).ToList(),
-                        IsArray = isArray,
-                        ArrayLength = arrayLength
-                    };
+                    isStatic = true;
+                    isExported = true;
                 }
                 else
                 {
                     throw new Exception("This shouldn't happen");
                 }
-            }
-            else
-            {
-                if (tokens.Count > 3 && tokens[2] is NumberToken)
+
+                return new VariableDefinitionToken()
                 {
-                    //Array type
-                    isArray = true;
-                    arrayLength = ((NumberToken)tokens[2]).Value;
-                    tokens.RemoveAt(1); //[
-                    tokens.RemoveAt(1); //#
-                    tokens.RemoveAt(1); //]
-                }
+                    IsStatic = isStatic,
+                    IsExtern = isExtern,
+                    IsExported = isExported,
+                    Tokens = tokens.Skip(1).ToList(),
+                    //IsArray = isArray,
+                    //ArrayLength = arrayLength
+                };
             }
+            //else
+            //{
+            //    if (tokens.Count > 3 && tokens[2] is NumberToken)
+            //    {
+            //        //Array type
+            //        isArray = true;
+            //        arrayLength = ((NumberToken)tokens[2]).Value;
+            //        tokens.RemoveAt(1); //[
+            //        tokens.RemoveAt(1); //#
+            //        tokens.RemoveAt(1); //]
+            //    }
+            //}
 
             return new VariableDefinitionToken() 
             { 
                 Tokens = tokens, 
-                IsArray = isArray, 
-                ArrayLength = arrayLength 
+                //IsArray = isArray, 
+                //ArrayLength = arrayLength 
             };
         }
 
@@ -89,17 +99,14 @@ namespace CmC.Compiler.Syntax
             context.EmitComment(";Variable definition");
 
             var type = ((IHasType)Tokens[0]).GetExpressionType(context);
-
-            if (IsArray)
-            {
-                type.IsArray = true;
-                type.ArrayLength = ArrayLength;
-                type.IndirectionLevel++;
-            }
-
             string variableName = ((IdentifierToken)Tokens[1]).Name;
 
-            context.AddVariableSymbol(variableName, type, IsExported, IsExtern);
+            if (type.IsArray && type.ArrayLength == -1)
+            {
+                throw new MissingArraySizeSpecifierException(variableName);
+            }
+
+            context.AddVariableSymbol(variableName, type, IsStatic, IsExported, IsExtern);
 
             if (Tokens.Count > 2)
             {

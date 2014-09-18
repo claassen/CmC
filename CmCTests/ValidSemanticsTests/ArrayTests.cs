@@ -95,5 +95,33 @@ namespace CmCTests.ValidSemanticsTests
                   int* q = &x;"
             );
         }
+
+        [TestMethod]
+        public void ArrayFunctionArgument_Test()
+        {
+            CmCompiler.CompileText(
+                @"int Test(int[] a) { return 0; }"
+            );
+        }
+
+        [TestMethod]
+        public void ArrayFunctionArgumentCalledWithArray_Test()
+        {
+            CmCompiler.CompileText(
+                @"int Test(int[] a) { return 0; }
+                  int[10] a;
+                  Test(a);"
+            );
+        }
+
+        [TestMethod]
+        public void ArrayFunctionArgumentCalledWithPointer_Test()
+        {
+            CmCompiler.CompileText(
+                @"int Test(int[] a) { return 0; }
+                  int* a;
+                  Test(a);"
+            );
+        }
     }
 }

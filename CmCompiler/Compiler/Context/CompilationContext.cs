@@ -48,8 +48,8 @@ namespace CmC.Compiler.Context
             _globalVarSymbolTable = new Dictionary<string, Variable>();
             _stringConstants = new Dictionary<string, StringConstant>();
 
-            //Start at global scope
-            _currentScopeLevel = -1;
+            //Start at global scope (no more "global" scope, will use "static" keyword for that)
+            _currentScopeLevel = 0; // -1;
             _varSymbolTables[0] = new Dictionary<string, Variable>();
 
             _stackOffsets = new Stack<int>();
@@ -141,10 +141,15 @@ namespace CmC.Compiler.Context
             return _functionHasReturn;
         }
 
-        public void AddVariableSymbol(string name, ExpressionType type, bool isExported, bool isExtern)
+        public void AddVariableSymbol(string name, ExpressionType type, bool isStatic, bool isExported, bool isExtern)
         {
-            if (_currentScopeLevel == -1)
+            if (isStatic)
             {
+                if (_currentScopeLevel != 0)
+                {
+                    throw new Exception("Cannot use static storage duration on non-global variables");
+                }
+
                 //Global scope
                 _globalVarSymbolTable.Add(
                     name, 
@@ -159,11 +164,6 @@ namespace CmC.Compiler.Context
             }
             else
             {
-                if (isExported || isExtern)
-                {
-                    throw new Exception("Cannot export or extern non global variables");
-                }
-
                 //Function or block scope
                 int currentStackOffset = _stackOffsets.Pop();
                 _varSymbolTables[_currentScopeLevel].Add(

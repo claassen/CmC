@@ -47,7 +47,10 @@ namespace CmC.Compiler.Architecture
         byte[] Implement(IRXOr ir);
         byte[] Implement(IRMemCopy ir);
         byte[] Implement(IRHalt ir);
-        byte[] Implement(IRSysEnt ir);
-        byte[] Implement(IRSysEx ir);
+        byte[] Implement(IRInt ir);
+        byte[] Implement(IRIRet ir);
+        byte[] Implement(IRSetIDT ir);
+        byte[] Implement(IRSetPT ir);
+        byte[] Implement(IRArchitectureSpecificAsm ir);
     }
 }

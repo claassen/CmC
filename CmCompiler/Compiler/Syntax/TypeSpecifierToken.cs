@@ -10,7 +10,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("TYPE_SPECIFIER", "TYPE ('*')*")]
+    [TokenExpression("TYPE_SPECIFIER", "TYPE ('*')* ('[' (NUMBER)? ']')?")]
     public class TypeSpecifierToken : ILanguageNonTerminalToken, IHasType
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
@@ -32,6 +32,22 @@ namespace CmC.Compiler.Syntax
                     if (((DefaultLanguageTerminalToken)Tokens[i]).Value == "*")
                     {
                         type.IndirectionLevel++;
+                    }
+                    else if (((DefaultLanguageTerminalToken)Tokens[i]).Value == "[")
+                    {
+                        type.IsArray = true;
+                        type.IndirectionLevel++;
+
+                        if (Tokens[i + 1] is NumberToken)
+                        {
+                            type.ArrayLength = ((NumberToken)Tokens[i + 1]).Value;
+                        }
+                        else
+                        {
+                            type.ArrayLength = -1;
+                        }
+
+                        break;
                     }
                 }
             }

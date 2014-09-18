@@ -74,5 +74,15 @@ namespace CmCTests.SemanticErrorTests
                   a = b;"
             );
         }
+
+        
+        [TestMethod]
+        [ExpectedException(typeof(MissingArraySizeSpecifierException))]
+        public void MissingArraySizeSpecifier_Test()
+        {
+            CmCompiler.CompileText(
+                @"int[] a;"
+            );
+        }
     }
 }

@@ -66,7 +66,7 @@ namespace CmC.Compiler
         internal static void ProcessSourceText(string source, CompilationContext context)
         {
             var grammar = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(c => c.Namespace == "CmC.Compiler.Syntax" || c.Namespace == "CmC.Compiler.Syntax.Assembly")
+                .Where(c => c.Namespace == "CmC.Compiler.Syntax" /*|| c.Namespace == "CmC.Compiler.Syntax.Assembly"*/)
                 .Where(c => typeof(ILanguageToken).IsAssignableFrom(c))
                 .Select(t => (ILanguageToken)Activator.CreateInstance(t, null));
 

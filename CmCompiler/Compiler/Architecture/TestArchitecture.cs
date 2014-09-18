@@ -219,12 +219,12 @@ namespace CmC.Compiler.Architecture
             return BitConverter.GetBytes(count++);
         }
 
-        public byte[] Implement(IRSysEnt ir)
+        public byte[] Implement(IRInt ir)
         {
             throw new NotImplementedException();
         }
 
-        public byte[] Implement(IRSysEx ir)
+        public byte[] Implement(IRIRet ir)
         {
             throw new NotImplementedException();
         }
@@ -233,6 +233,23 @@ namespace CmC.Compiler.Architecture
         public byte[] Implement(IRRet ir)
         {
             return BitConverter.GetBytes(count++);
+        }
+
+
+        public byte[] Implement(IRArchitectureSpecificAsm ir)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public byte[] Implement(IRSetIDT ir)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] Implement(IRSetPT ir)
+        {
+            throw new NotImplementedException();
         }
     }
 }

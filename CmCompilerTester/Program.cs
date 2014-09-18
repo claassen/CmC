@@ -20,12 +20,12 @@ namespace CmCompilerTester
             //TODO: type sizes - equality expression (additive, multiplicative, boolean and bitwise only support 4 byte operands)
             //TODO: return values on stack - Not supported for now, can pass pointer arguments to accomplish the same thing
             
-            CmCompiler.CompileText(
-                @"int[10] a;
-                  int* p = &a;"
-            );
+//            CmCompiler.CompileText(
+//                @"int test() { return 0; }
+//                  int* p = &test;"
+//            );
                         
-            //CreateBIOS();
+            CreateBIOS();
             //CreateBootLoader();
         }
 
