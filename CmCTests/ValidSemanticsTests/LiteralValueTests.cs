@@ -15,7 +15,7 @@ namespace CmCTests.ValidSemanticsTests
         public void DecimalNumberLiteral_Test()
         {
             CmCompiler.CompileText(
-                @"int x = 42;"
+                @"int x = 42a;"
             );
         }
 
