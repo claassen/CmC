@@ -10,7 +10,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("PROGRAM", "(STATEMENT | FUNCTION_DEFINITION | TYPEDEF | INCLUDE)+")]
+    [TokenExpression("PROGRAM", "(STATEMENT | FUNCTION_DEFINITION | TYPEDEF)+")]
     public class ProgramToken : ILanguageNonTerminalToken, ICodeEmitter
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)

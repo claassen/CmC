@@ -24,7 +24,7 @@ namespace CmC.Compiler.Syntax
         public void Emit(CompilationContext context)
         {
             var grammar = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
-                .Where(c => c.Namespace == "CmC.Compiler.Syntax.Assembly")
+                .Where(c => c.Namespace == "CmC.Compiler.Syntax.Assembly" || c.Namespace == "Cmc.Compiler.Syntax.Common")
                 .Where(c => typeof(ILanguageToken).IsAssignableFrom(c))
                 .Select(t => (ILanguageToken)Activator.CreateInstance(t, null)).ToList();
 

@@ -23,31 +23,29 @@ namespace CmC.Compiler
     {
         public static void CompileFile(string path, CompilerOptions options)
         {
-            string objFileName =
-                !String.IsNullOrEmpty(options.ObjectFileName) ? options.ObjectFileName :
-                //Path.GetFullPath(
-                    Path.Combine(
-                        Path.GetDirectoryName(path),
-                        Path.GetFileNameWithoutExtension(path) + ".o"
-                    );
-                //);
+            string objFileName = !String.IsNullOrEmpty(options.ObjectFileName) 
+                ? options.ObjectFileName 
+                : Path.Combine(
+                    Path.GetDirectoryName(path),
+                    Path.GetFileNameWithoutExtension(path) + ".o"
+                );
 
             using (var stream = new StreamReader(new FileStream(path, FileMode.Open)))
             {
-                CompileText(stream.ReadToEnd(), objFileName, options.Architecture);
+                CompileText(stream.ReadToEnd(), objFileName, Path.GetDirectoryName(path), options.Architecture);
             }
         }
 
         public static void CompileText(string source)
         {
-            CompileText(source, "", new TestArchitecture());
+            CompileText(source, "", "", new TestArchitecture());
         }
 
-        public static void CompileText(string source, string outputObjFile, IArchitecture architecture)
+        public static void CompileText(string source, string outputObjFile, string sourceFolder, IArchitecture architecture)
         {
-            Regex removeComments = new Regex("//.*(\r\n|\n)");
-
-            source = removeComments.Replace(source, "\n");
+            CompilerUtils.ProcessIncludes(ref source, sourceFolder);
+            CompilerUtils.RemoveComments(ref source);
+            CompilerUtils.ProcessMacros(ref source);
 
             var context = new CompilationContext();
 
@@ -66,7 +64,7 @@ namespace CmC.Compiler
         internal static void ProcessSourceText(string source, CompilationContext context)
         {
             var grammar = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(c => c.Namespace == "CmC.Compiler.Syntax" /*|| c.Namespace == "CmC.Compiler.Syntax.Assembly"*/)
+                .Where(c => c.Namespace == "CmC.Compiler.Syntax" || c.Namespace == "CmC.Compiler.Syntax.Common")
                 .Where(c => typeof(ILanguageToken).IsAssignableFrom(c))
                 .Select(t => (ILanguageToken)Activator.CreateInstance(t, null));
 

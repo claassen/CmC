@@ -62,6 +62,7 @@
     <Compile Include="ValidSemanticsTests\CompatibleTypesTests.cs" />
     <Compile Include="ValidSemanticsTests\FunctionDeclarationTests.cs" />
     <Compile Include="ValidSemanticsTests\IndirectionLevelTests.cs" />
+    <Compile Include="ValidSemanticsTests\LiteralValueTests.cs" />
     <Compile Include="ValidSemanticsTests\LoopTests.cs" />
     <Compile Include="ValidSemanticsTests\TypedefTests.cs" />
   </ItemGroup>

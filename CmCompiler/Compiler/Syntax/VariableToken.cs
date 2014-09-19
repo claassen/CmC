@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CmC.Compiler.Context;
 using CmC.Compiler.IR;
+using CmC.Compiler.Syntax.Common;
 using CmC.Compiler.Syntax.TokenInterfaces;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;

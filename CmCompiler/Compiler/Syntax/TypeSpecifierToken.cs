@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CmC.Compiler.Context;
+using CmC.Compiler.Syntax.Common;
 using CmC.Compiler.Syntax.TokenInterfaces;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
@@ -40,7 +41,7 @@ namespace CmC.Compiler.Syntax
 
                         if (Tokens[i + 1] is NumberToken)
                         {
-                            type.ArrayLength = ((NumberToken)Tokens[i + 1]).Value;
+                            type.ArrayLength = ((NumberToken)Tokens[i + 1]).GetValue(context).Value;
                         }
                         else
                         {

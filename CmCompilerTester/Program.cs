@@ -26,7 +26,7 @@ namespace CmCompilerTester
 //            );
                         
             CreateBIOS();
-            //CreateBootLoader();
+            CreateBootLoader();
         }
 
         static void CreateBIOS()
@@ -41,31 +41,15 @@ namespace CmCompilerTester
         static void CreateBootLoader()
         {
             CmCompiler.CompileText(
-                @"export int kernelinit() 
-                  { 
-                      return 0; 
-                  }
-                  byte* s = ""abcdefgh"";",
-                @"C:\VM\bootloaderLib.o",
+                @"byte* s = ""abcdefghijklmnopqrstuvwxyz"";",
+                @"C:\VM\bootloader.o",
+                "",
                 new RIVMArchitecture()
             );
 
-            
-            var bootLoader = new List<IRInstruction>()
-            {
-                //Enter protected mode
-                new IRPushImmediate() { Value = new LabelAddressValue(1) },
-                new IRJumpImmediate() { Address = new LabelAddressValue(0) },
-                new IRLabel(1),
-                new IRMoveImmediate() { To = "cr", Value = new ImmediateValue(1) }
-            };
+            int loadAddress = 0; //?
 
-            var bootLoaderFunctions = new Dictionary<string, Function>();
-
-            bootLoaderFunctions.Add("kernelinit", new Function() { IsDefined = false, Address = new LabelAddressValue(0) });
-
-            CmCompiler.CompileIR(@"C:\VM\bootloader.o", new RIVMArchitecture(), bootLoader, null, null, bootLoaderFunctions);
-            CmLinker.Link(new List<string>() { @"C:\VM\bootloader.o", @"C:\VM\bootloaderLib.o" }, @"C:\VM\bootloader.exe", false, 2048);
+            CmLinker.Link(new List<string>() { @"C:\VM\bootloader.o" }, @"C:\VM\bootloader.exe", false, loadAddress);
         }
     }
 }

@@ -14,57 +14,51 @@ namespace CmC.Compiler.Context
 {
     public class CompilationContext
     {
-        private Dictionary<string, Variable>[] _varSymbolTables;
-        private int _currentScopeLevel;
-        private Stack<int> _stackOffsets;
-
-        private int _functionArgBPOffset;
-        private int _functionLocalVarSize;
-
-        private int _labelCount;
+        public Dictionary<string, StringConstant> StringConstants;
+        public Stack<int> ConditionalElseBranchLabels;
+        public bool IsEntryPointFunction;
 
         private List<IRInstruction> _instructions;
-
+        private Dictionary<string, TypeDef> _types;
         private Dictionary<string, Function> _functionSymbolTable;
         private Dictionary<string, Variable> _globalVarSymbolTable;
-
+        private Dictionary<string, Variable>[] _varSymbolTables;
+        private Dictionary<string, int> _namedLabels;
+        private int _currentScopeLevel;
+        private Stack<int> _stackOffsets;
+        private int _functionArgBPOffset;
+        private int _functionLocalVarSize;
+        private int _labelCount;
         private bool _functionHasReturn;
         private bool _inPossiblyNonExecutedBlock;
 
-        private Dictionary<string, TypeDef> _types;
-
-        public Stack<int> ConditionalElseBranchLabels;
-
-        public bool IsEntryPointFunction;
-
-        public Dictionary<string, StringConstant> _stringConstants;
-
-        private Dictionary<string, int> _namedLabels;
-
         public CompilationContext()
         {
-            _varSymbolTables = new Dictionary<string, Variable>[100];
+            StringConstants = new Dictionary<string, StringConstant>();
+            ConditionalElseBranchLabels = new Stack<int>();
+
+            _instructions = new List<IRInstruction>();
+            _types = new Dictionary<string, TypeDef>();
             _functionSymbolTable = new Dictionary<string, Function>();
             _globalVarSymbolTable = new Dictionary<string, Variable>();
-            _stringConstants = new Dictionary<string, StringConstant>();
+            _varSymbolTables = new Dictionary<string, Variable>[100];
+            _namedLabels = new Dictionary<string, int>();
 
-            //Start at global scope (no more "global" scope, will use "static" keyword for that)
-            _currentScopeLevel = 0; // -1;
+            Init();
+        }
+
+        private void Init()
+        {
+            //0 = global scope
             _varSymbolTables[0] = new Dictionary<string, Variable>();
+            _currentScopeLevel = 0;
 
             _stackOffsets = new Stack<int>();
             _stackOffsets.Push(0);
-            
-            _instructions = new List<IRInstruction>();
 
-            _types = new Dictionary<string, TypeDef>();
             _types.Add("byte", new TypeDef() { Name = "byte", Size = 1 });
             _types.Add("int", new TypeDef() { Name = "int", Size = 4 });
             _types.Add("bool", new TypeDef() { Name = "bool", Size = 4 });
-
-            ConditionalElseBranchLabels = new Stack<int>();
-
-            _namedLabels = new Dictionary<string, int>();
         }
 
         public void EmitLabel(int labelIndex, string labelName = "")
@@ -291,9 +285,9 @@ namespace CmC.Compiler.Context
 
         public void AddStringConstant(string value)
         {
-            if (!_stringConstants.ContainsKey(value))
+            if (!StringConstants.ContainsKey(value))
             {
-                _stringConstants.Add(value, new StringConstant()
+                StringConstants.Add(value, new StringConstant()
                 {
                     LabelAddress = CreateNewLabel(),
                     Value = value.Substring(1, value.Length - 2)
@@ -303,9 +297,9 @@ namespace CmC.Compiler.Context
 
         public int GetStringConstantLabelAddress(string value)
         {
-            if (_stringConstants.ContainsKey(value))
+            if (StringConstants.ContainsKey(value))
             {
-                return _stringConstants[value].LabelAddress;
+                return StringConstants[value].LabelAddress;
             }
             else
             {
@@ -315,7 +309,7 @@ namespace CmC.Compiler.Context
 
         public Dictionary<string, StringConstant> GetStringConstants()
         {
-            return _stringConstants;
+            return StringConstants;
         }
 
         public void AddTypeDef(TypeDef type)
@@ -339,16 +333,6 @@ namespace CmC.Compiler.Context
             else
             {
                 throw new Exception("Undefined type: " + name);
-            }
-        }
-
-        public void ProcessHeader(string path)
-        {
-            using (var stream = new StreamReader(new FileStream(path, FileMode.Open)))
-            {
-                string source = stream.ReadToEnd();
-
-                CmCompiler.ProcessSourceText(source, this);
             }
         }
 

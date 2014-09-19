@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CmC.Compiler.Context;
+using CmC.Compiler.Syntax.Common.Interface;
+using CmC.Compiler.Syntax.Common;
 using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax.Assembly
 {
     [TokenExpression("IMM_VAR", "'&' IDENTIFIER")]
-    public class VariableAddressToken : ILanguageNonTerminalToken
+    public class VariableAddressToken : ILanguageNonTerminalToken, IHasValue
     {
         public string VariableName;
 
