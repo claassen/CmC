@@ -17,7 +17,7 @@ namespace CmC.Compiler.Syntax
 
         public override ILanguageToken Create(string expressionValue)
         {
-            return new StringLiteralToken() { Value = expressionValue };
+            return new StringLiteralToken() { Value = expressionValue.Replace("\\n", "\n") };
         }
 
         public void Emit(CompilationContext context)

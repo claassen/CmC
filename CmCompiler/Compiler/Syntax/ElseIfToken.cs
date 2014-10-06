@@ -45,6 +45,9 @@ namespace CmC.Compiler.Syntax
                 ((ICodeEmitter)Tokens[i]).Emit(context);
             }
 
+            //Skip the rest of the conditional blocks
+            context.EmitInstruction(new IRJumpImmediate() { Address = new LabelAddressValue(context.ConditionalEndLabels.Peek()) });
+
             context.EndScope(false);
         }
     }

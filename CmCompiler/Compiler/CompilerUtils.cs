@@ -37,7 +37,7 @@ namespace CmC.Compiler
                     ProcessIncludes(ref includedSource, Path.GetDirectoryName(includePath));
 
                     source = source.Replace("#include " + matches[i].Groups[1].Value, "");
-                    source = includedSource + "\n" + source;
+                    source = includedSource + " \n " + source;
                 }
             }
         }
@@ -46,17 +46,17 @@ namespace CmC.Compiler
         {
             var macros = new Dictionary<string, string>();
 
-            var matches = Regex.Matches(source, "#define ([^ \n\r]+) ([^ \n\r]+)");
+            var matches = Regex.Matches(source, "#define ([^ \n\r]+) +([^\n\r]+)");
 
-            for (int i = 0; i < matches.Count; i++)
+            while (matches.Count > 0)
             {
-                macros.Add(matches[i].Groups[1].Value, matches[i].Groups[2].Value);
-            }
+                string key = matches[0].Groups[1].Value;
+                string value = matches[0].Groups[2].Value;
 
-            foreach (var macro in macros)
-            {
-                source = source.Replace("#define " + macro.Key + " " + macro.Value, "");
-                source = source.Replace(macro.Key, macro.Value);
+                source = Regex.Replace(source, "#define " + key + " +" + Regex.Escape(value), "");
+                source = source.Replace(key, value);
+
+                matches = Regex.Matches(source, "#define ([^ \n\r]+) +([^\n\r]+)");
             }
         }
     }

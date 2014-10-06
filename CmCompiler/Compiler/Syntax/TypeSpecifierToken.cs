@@ -11,7 +11,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("TYPE_SPECIFIER", "TYPE ('*')* ('[' (NUMBER)? ']')?")]
+    [TokenExpression("TYPE_SPECIFIER", "(TYPE ('*')* ('[' (NUMBER)? ']')? | FUNC_TYPE_SPECIFIER)")]
     public class TypeSpecifierToken : ILanguageNonTerminalToken, IHasType
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
@@ -21,36 +21,45 @@ namespace CmC.Compiler.Syntax
 
         public ExpressionType GetExpressionType(CompilationContext context)
         {
-            var type = new ExpressionType() 
-            { 
-                Type = context.GetTypeDef(((TypeToken)Tokens[0]).GetTypeName())
-            };
+            ExpressionType type = null;
 
-            for (int i = 1; i < Tokens.Count; i++)
+            if (Tokens[0] is TypeToken)
             {
-                if (Tokens[i] is DefaultLanguageTerminalToken)
+                type = new ExpressionType()
                 {
-                    if (((DefaultLanguageTerminalToken)Tokens[i]).Value == "*")
-                    {
-                        type.IndirectionLevel++;
-                    }
-                    else if (((DefaultLanguageTerminalToken)Tokens[i]).Value == "[")
-                    {
-                        type.IsArray = true;
-                        type.IndirectionLevel++;
+                    Type = context.GetTypeDef(((TypeToken)Tokens[0]).GetTypeName())
+                };
 
-                        if (Tokens[i + 1] is NumberToken)
+                for (int i = 1; i < Tokens.Count; i++)
+                {
+                    if (Tokens[i] is DefaultLanguageTerminalToken)
+                    {
+                        if (((DefaultLanguageTerminalToken)Tokens[i]).Value == "*")
                         {
-                            type.ArrayLength = ((NumberToken)Tokens[i + 1]).GetValue(context).Value;
+                            type.IndirectionLevel++;
                         }
-                        else
+                        else if (((DefaultLanguageTerminalToken)Tokens[i]).Value == "[")
                         {
-                            type.ArrayLength = -1;
-                        }
+                            type.IsArray = true;
+                            type.IndirectionLevel++;
 
-                        break;
+                            if (Tokens[i + 1] is NumberToken)
+                            {
+                                type.ArrayLength = ((NumberToken)Tokens[i + 1]).GetValue(context).Value;
+                            }
+                            else
+                            {
+                                type.ArrayLength = -1;
+                            }
+
+                            break;
+                        }
                     }
                 }
+            }
+            else if (Tokens[0] is FuncTypeSpecifierToken)
+            {
+                type = ((FuncTypeSpecifierToken)Tokens[0]).GetExpressionType(context);
             }
 
             return type;

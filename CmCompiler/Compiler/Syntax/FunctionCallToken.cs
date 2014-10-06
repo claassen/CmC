@@ -13,7 +13,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("FUNCTION_CALL", "IDENTIFIER '(' (EXPRESSION (',' EXPRESSION)*)? ')'")]
+    [TokenExpression("FUNCTION_CALL", "PRIMARY_EXPRESSION '(' (EXPRESSION (',' EXPRESSION)*)? ')'")]
     public class FunctionCallToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
@@ -25,11 +25,17 @@ namespace CmC.Compiler.Syntax
         {
             context.EmitComment(";Function call");
 
-            string functionName = ((IdentifierToken)Tokens[0]).Name;
+            var type = ((IHasType)Tokens[0]).GetExpressionType(context);
 
-            var function = context.GetFunction(functionName);
+            if (!type.IsFunction)
+            {
+                throw new Exception("Can't call expression type: " + type + " as a function");
+            }
 
-            if (function.ReturnType.GetSize() > 4)
+            ExpressionType returnType = type.ReturnType;
+            List<ExpressionType> parameterTypes = type.ArgumentTypes;
+            
+            if (returnType.GetSize() > 4)
             {
                 //Make space for return value in caller stack
                 //context.EmitInstruction(new IRMoveImmediate() { To = "eax", Value = new ImmediateValue(function.ReturnType.GetSize()) });
@@ -49,7 +55,7 @@ namespace CmC.Compiler.Syntax
                 for (int i = Tokens.Count - 1; i > 0; i--)
                 {
                     var argType = ((IHasType)Tokens[i]).GetExpressionType(context);
-                    var paramType = function.ParameterTypes[function.ParameterTypes.Count - 1 - (Tokens.Count - 1 - i)];
+                    var paramType = parameterTypes[parameterTypes.Count - 1 - (Tokens.Count - 1 - i)];
 
                     ExpressionType.CheckTypesMatch(paramType, argType);
 
@@ -61,31 +67,35 @@ namespace CmC.Compiler.Syntax
                 }
             }
 
-            if (argumentCount != function.ParameterTypes.Count)
+            if (argumentCount != parameterTypes.Count)
             {
-                throw new ArgumentCountMismatchException(functionName, function.ParameterTypes.Count, argumentCount);
+                throw new ArgumentCountMismatchException(Tokens[0].ToString(), parameterTypes.Count, argumentCount);
             }
 
-            //var returnLabel = new LabelAddressValue(context.CreateNewLabel());
+            var returnLabel = new LabelAddressValue(context.CreateNewLabel());
+
+            //Expression value -> eax
+            ((ICodeEmitter)Tokens[0]).Emit(context);
+            context.EmitInstruction(new IRPop() { To = "eax" });
 
             //Set base pointer to be the top of current function's stack which will be the bottom
             //of the called function's stack
             context.EmitInstruction(new IRMoveRegister() { From = "sp", To = "bp" });
 
-            ////Push return address on stack
-            //context.EmitInstruction(new IRPushImmediate() { Value = returnLabel });
-            ////Jump to function location
-            //context.EmitInstruction(new IRJumpImmediate() { Address = function.Address });
-            context.EmitInstruction(new IRCall() { Address = function.Address });
+            //Push return address
+            context.EmitInstruction(new IRPushImmediate() { Value = returnLabel });
+            
+            context.EmitInstruction(new IRJumpRegister() { Address = "eax" });
 
             //Resume here, reclaim space from arguments pushed on stack
+            context.EmitLabel(returnLabel.Value);
             context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(argumentsSize) });
             context.EmitInstruction(new IRSub() { To = "sp", Left = "sp", Right = "ebx" });
 
             //Reset base pointer
             context.EmitInstruction(new IRPop() { To = "bp" });
 
-            if (function.ReturnType.GetSize() > 4)
+            if (returnType.GetSize() > 4)
             {
                 //Return value is already on stack
                 throw new LargeReturnValuesNotSupportedException();

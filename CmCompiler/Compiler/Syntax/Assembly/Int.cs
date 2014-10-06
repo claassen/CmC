@@ -10,7 +10,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax.Assembly
 {
-    [TokenExpression("INT", "'_int' IMMEDIATE")]
+    [TokenExpression("INT", "'int' IMMEDIATE")]
     public class Int : ILanguageNonTerminalToken, ICodeEmitter
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)

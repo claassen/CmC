@@ -130,6 +130,7 @@ namespace CmC.Common
                     {
                         case 0: //null entry
                             header.LabelAddresses.Add(null);
+                            br.ReadInt32();
                             break;
                         case 1: //internal address
                             header.LabelAddresses.Add(

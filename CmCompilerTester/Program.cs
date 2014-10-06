@@ -19,23 +19,18 @@ namespace CmCompilerTester
         {
             //TODO: type sizes - equality expression (additive, multiplicative, boolean and bitwise only support 4 byte operands)
             //TODO: return values on stack - Not supported for now, can pass pointer arguments to accomplish the same thing
-            
-//            CmCompiler.CompileText(
-//                @"int test() { return 0; }
-//                  int* p = &test;"
-//            );
-                        
+                
             CreateBIOS();
-            CreateBootLoader();
+            //CreateBootLoader();
         }
 
         static void CreateBIOS()
         {
             CmCompiler.CompileFile(@"C:\VM\cmlib\cmlib.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
 
-            CmCompiler.CompileFile(@"C:\VM\bios.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
+            CmCompiler.CompileFile(@"C:\VM\rivm\bios\bios.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
 
-            CmLinker.Link(new List<string>() { @"C:\VM\bios.o", @"C:\VM\cmlib\cmlib.o" }, @"C:\VM\bios.exe", false);
+            CmLinker.Link(new List<string>() { @"C:\VM\rivm\bios\bios.o", @"C:\VM\cmlib\cmlib.o" }, @"C:\VM\bios.exe", false, 0x000F0000);
         }
 
         static void CreateBootLoader()
@@ -47,9 +42,7 @@ namespace CmCompilerTester
                 new RIVMArchitecture()
             );
 
-            int loadAddress = 0; //?
-
-            CmLinker.Link(new List<string>() { @"C:\VM\bootloader.o" }, @"C:\VM\bootloader.exe", false, loadAddress);
+            CmLinker.Link(new List<string>() { @"C:\VM\bootloader.o" }, @"C:\VM\bootloader.exe", false, 0x00007C00);
         }
     }
 }

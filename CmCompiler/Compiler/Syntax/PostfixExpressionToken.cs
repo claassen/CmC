@@ -13,7 +13,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("POSTFIX_EXPRESSION", "(FUNCTION_CALL | PRIMARY_EXPRESSION) (('.'|'->') IDENTIFIER | '[' EXPRESSION ']')?")]
+    [TokenExpression("POSTFIX_EXPRESSION", "(PRIMARY_EXPRESSION (('.'|'->') IDENTIFIER | '[' EXPRESSION ']')? | FUNCTION_CALL)")]
     public class PostfixExpressionToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public bool IsFieldAccess;        //.
@@ -131,8 +131,6 @@ namespace CmC.Compiler.Syntax
                 {
                     Type = type.Type,
                     IndirectionLevel = type.IndirectionLevel - 1, //array access dereferences pointer
-                    //IsArray = type.IsArray,
-                    //ArrayLength = type.ArrayLength
                 };
             }
             else

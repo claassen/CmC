@@ -5,17 +5,28 @@ using System.Text;
 using System.Threading.Tasks;
 using CmC.Compiler.Context;
 using CmC.Compiler.IR;
+using CmC.Compiler.Syntax.Common;
 using CmC.Compiler.Syntax.TokenInterfaces;
 using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax.Assembly
 {
-    [TokenExpression("LOAD", "'load' REGISTER '<-' (REGISTER | IMMEDIATE | REG_PLUS_IMM)")]
+    [TokenExpression("LOAD", "'load' (SIZE_MOD)? REGISTER '<-' (REGISTER | IMMEDIATE | REG_PLUS_IMM)")]
     public class Load : ILanguageNonTerminalToken, ICodeEmitter
     {
+        public int NumBytes;
+
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
-            return new Load() { Tokens = tokens };
+            int numBytes = 4;
+
+            if (tokens[1] is DataSizeModifierToken)
+            {
+                numBytes = ((DataSizeModifierToken)tokens[1]).Size;
+                tokens.RemoveAt(1);
+            }
+
+            return new Load() { Tokens = tokens , NumBytes = numBytes };
         }
 
         public void Emit(CompilationContext context)
@@ -24,7 +35,7 @@ namespace CmC.Compiler.Syntax.Assembly
 
             if (Tokens[3] is RegisterToken)
             {
-                context.EmitInstruction(new IRLoadRegister() { To = destination, From = ((RegisterToken)Tokens[3]).Name });
+                context.EmitInstruction(new IRLoadRegister() { To = destination, From = ((RegisterToken)Tokens[3]).Name, OperandSize = NumBytes });
             }
             else if (Tokens[3] is ImmediateValueToken)
             {
@@ -32,18 +43,18 @@ namespace CmC.Compiler.Syntax.Assembly
 
                 if (address is StackAddressValue)
                 {
-                    context.EmitInstruction(new IRLoadRegisterPlusImmediate() { To = destination, From = "bp", Offset = new ImmediateValue(address.Value) });
+                    context.EmitInstruction(new IRLoadRegisterPlusImmediate() { To = destination, From = "bp", Offset = new ImmediateValue(address.Value), OperandSize = NumBytes });
                 }
                 else
                 {
-                    context.EmitInstruction(new IRLoadImmediate() { To = destination, Address = address });
+                    context.EmitInstruction(new IRLoadImmediate() { To = destination, Address = address, OperandSize = NumBytes });
                 }
             }
             else if (Tokens[3] is RegisterPlusImmediateToken)
             {
                 var regPlusImmediateToken = (RegisterPlusImmediateToken)Tokens[3];
 
-                context.EmitInstruction(new IRLoadRegisterPlusImmediate() { To = destination, From = regPlusImmediateToken.Register, Offset = regPlusImmediateToken.GetImmediateValue(context) });
+                context.EmitInstruction(new IRLoadRegisterPlusImmediate() { To = destination, From = regPlusImmediateToken.Register, Offset = regPlusImmediateToken.GetImmediateValue(context), OperandSize = NumBytes });
             }
         }
     }

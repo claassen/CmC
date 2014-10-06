@@ -55,10 +55,10 @@ namespace CmC.Compiler.Syntax
                         context.EmitInstruction(new IRJumpNE() { Address = trueLabel });
                         break;
                     case ">":
-                        context.EmitInstruction(new IRJumpLT() { Address = trueLabel });
+                        context.EmitInstruction(new IRJumpGT() { Address = trueLabel });
                         break;
                     case "<":
-                        context.EmitInstruction(new IRJumpGT() { Address = trueLabel });
+                        context.EmitInstruction(new IRJumpLT() { Address = trueLabel });
                         break;
                     case ">=":
                         context.EmitInstruction(new IRJumpGE() { Address = trueLabel });

@@ -10,7 +10,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax.Assembly
 {
-    [TokenExpression("HALT", "'hlt'")]
+    [TokenExpression("HALT", "'halt'")]
     public class Halt : ILanguageTerminalToken, ICodeEmitter
     {
         public override ILanguageToken Create(string expressionValue)

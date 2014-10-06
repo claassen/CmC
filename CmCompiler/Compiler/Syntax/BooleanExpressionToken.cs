@@ -64,7 +64,7 @@ namespace CmC.Compiler.Syntax
                 var skipTrueLabel = new LabelAddressValue(context.CreateNewLabel());
 
                 context.EmitInstruction(new IRPushImmediate() { Value = new ImmediateValue(0) });
-                context.EmitInstruction(new IRJumpImmediate() { Address = trueLabel });
+                context.EmitInstruction(new IRJumpImmediate() { Address = skipTrueLabel });
                 context.EmitLabel(trueLabel.Value);
                 context.EmitInstruction(new IRPushImmediate() { Value = new ImmediateValue(1) });
                 context.EmitLabel(skipTrueLabel.Value);

@@ -81,7 +81,7 @@ namespace CmC.Compiler.Syntax
 
             if (IsDefined)
             {
-                context.EmitLabel(context.GetLastCreatedLabelNumber());
+                context.EmitLabel(context.GetFunction(functionName).Address.Value);
                 ((ICodeEmitter)Tokens.Last()).Emit(context);
             }
 

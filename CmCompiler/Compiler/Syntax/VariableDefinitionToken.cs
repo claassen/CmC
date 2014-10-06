@@ -109,6 +109,12 @@ namespace CmC.Compiler.Syntax
 
             context.AddVariableSymbol(variableName, type, IsStatic, IsExported, IsExtern);
 
+            if (!IsStatic)
+            {
+                context.EmitInstruction(new IRMoveImmediate() { To = "eax", Value = new ImmediateValue(type.GetSize()) });
+                context.EmitInstruction(new IRAdd() { Left = "sp", Right = "eax", To = "sp" });
+            }
+
             if (Tokens.Count > 2)
             {
                 var expressionType = ((IHasType)Tokens[3]).GetExpressionType(context);

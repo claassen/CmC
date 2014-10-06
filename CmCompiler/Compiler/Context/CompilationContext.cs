@@ -16,6 +16,7 @@ namespace CmC.Compiler.Context
     {
         public Dictionary<string, StringConstant> StringConstants;
         public Stack<int> ConditionalElseBranchLabels;
+        public Stack<int> ConditionalEndLabels;
         public bool IsEntryPointFunction;
 
         private List<IRInstruction> _instructions;
@@ -36,6 +37,7 @@ namespace CmC.Compiler.Context
         {
             StringConstants = new Dictionary<string, StringConstant>();
             ConditionalElseBranchLabels = new Stack<int>();
+            ConditionalEndLabels = new Stack<int>();
 
             _instructions = new List<IRInstruction>();
             _types = new Dictionary<string, TypeDef>();
@@ -94,7 +96,7 @@ namespace CmC.Compiler.Context
 
             if (isFunction)
             {
-                _stackOffsets.Push(0);
+                _stackOffsets.Push(4);
                 _functionArgBPOffset = 0;
                 _functionLocalVarSize = 0;
                 _functionHasReturn = false;
@@ -218,7 +220,6 @@ namespace CmC.Compiler.Context
                 {
                     function.IsDefined = true;
                     function.IsExported = isExported;
-                    //function.Address = new LabelAddressValue(CreateNewLabel());
                 }
             }
             else

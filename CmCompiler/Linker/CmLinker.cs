@@ -40,8 +40,10 @@ namespace CmC.Linker
                     }
                 }
 
-                objDataOffset += header.SizeOfDataAndCode;
+                objDataOffset += header.SizeOfDataAndCode; // +header.SizeOfData;
             }
+
+            //TODO: get size of all code
 
             if (createExecutable && !foundEntryPoint)
             {
@@ -59,6 +61,7 @@ namespace CmC.Linker
             {
                 if (createExecutable)
                 {
+                    loadAddress += 4;
                     sw.Write(0); //temporary until entry point address is resolved
                 }
 

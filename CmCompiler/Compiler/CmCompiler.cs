@@ -82,6 +82,7 @@ namespace CmC.Compiler
 
         private static void CreateObjectFile(string outputObjFile, IArchitecture architecture, List<IRInstruction> ir, Dictionary<string, StringConstant> stringConstants, Dictionary<string, Variable> globalVariables, Dictionary<string, Function> functions)
         {
+            Console.WriteLine("\n\n::" + outputObjFile + "::\n");
             ShowIR(ir);
 
             var header = new ObjectFileHeader();
@@ -91,72 +92,8 @@ namespace CmC.Compiler
             
             var code = new List<byte>();
 
-            int initializedDataSize = 0;
-
             //name => labelIndex
             header.ExportedSymbols = new Dictionary<string, int>();
-
-            #region String Constants
-
-            if (stringConstants != null)
-            {
-                foreach (var str in stringConstants)
-                {
-                    header.LabelAddresses.Add(
-                            new LabelAddressTableEntry()
-                            {
-                                Index = str.Value.LabelAddress,
-                                Address = initializedDataSize
-                            }
-                        );
-
-                    initializedDataSize += str.Value.Value.Length + 1;
-                }
-            }
-
-            #endregion
-
-            int uninitializedDataSize = 0;
-
-            #region Global Variables
-
-            if (globalVariables != null)
-            {
-                foreach (var variable in globalVariables)
-                {
-                    if (variable.Value.IsExported)
-                    {
-                        header.ExportedSymbols.Add(variable.Key, variable.Value.Address.Value);
-                    }
-
-                    if (variable.Value.IsExtern)
-                    {
-                        header.LabelAddresses.Add(
-                            new LabelAddressTableEntry()
-                            {
-                                Index = variable.Value.Address.Value,
-                                IsExtern = true,
-                                SymbolName = variable.Key
-                            }
-                        );
-                    }
-                    else
-                    {
-                        header.LabelAddresses.Add(
-                            new LabelAddressTableEntry()
-                            {
-                                Index = variable.Value.Address.Value,
-                                IsExtern = false,
-                                Address = initializedDataSize + uninitializedDataSize
-                            }
-                        );
-
-                        uninitializedDataSize += variable.Value.Type.GetSize();
-                    }
-                }
-            }
-
-            #endregion
 
             #region Functions
 
@@ -192,7 +129,7 @@ namespace CmC.Compiler
 
             #endregion
 
-            int codeAddress = initializedDataSize + uninitializedDataSize;
+            int codeAddress = 0; 
 
             foreach (var i in ir)
             {
@@ -214,8 +151,8 @@ namespace CmC.Compiler
 
                 if (i is IRelocatableAddressValue && ((IRelocatableAddressValue)i).HasRelocatableAddressValue())
                 {
-                    int offset = architecture.GetRelocationOffset(i);
-                    header.RelocationAddresses.Add(codeAddress + offset);
+                    int relocOffset = architecture.GetRelocationOffset(i);
+                    header.RelocationAddresses.Add(codeAddress + relocOffset);
                 }
 
                 byte[] machineInstruction = i.GetImplementation(architecture);
@@ -223,14 +160,89 @@ namespace CmC.Compiler
                 codeAddress += machineInstruction.Length;
             }
 
+            int offset = codeAddress;
+            int initializedDataSize = 0;
+
+            #region String Constants
+
+            if (stringConstants != null)
+            {
+                foreach (var str in stringConstants)
+                {
+                    header.LabelAddresses.Add(
+                        new LabelAddressTableEntry()
+                        {
+                            Index = str.Value.LabelAddress,
+                            Address = offset + initializedDataSize
+                        }
+                    );
+
+                    initializedDataSize += str.Value.Value.Length + 1;
+                }
+            }
+
+            #endregion
+
+            offset += initializedDataSize;
+            int uninitializedDataSize = 0;
+
+            #region Global Variables
+
+            if (globalVariables != null)
+            {
+                foreach (var variable in globalVariables)
+                {
+                    if (variable.Value.IsExported)
+                    {
+                        header.ExportedSymbols.Add(variable.Key, variable.Value.Address.Value);
+                    }
+
+                    if (variable.Value.IsExtern)
+                    {
+                        header.LabelAddresses.Add(
+                            new LabelAddressTableEntry()
+                            {
+                                Index = variable.Value.Address.Value,
+                                IsExtern = true,
+                                SymbolName = variable.Key
+                            }
+                        );
+                    }
+                    else
+                    {
+                        header.LabelAddresses.Add(
+                            new LabelAddressTableEntry()
+                            {
+                                Index = variable.Value.Address.Value,
+                                IsExtern = false,
+                                Address = offset + uninitializedDataSize
+                            }
+                        );
+
+                        uninitializedDataSize += variable.Value.Type.GetSize();
+                    }
+                }
+            }
+
+            #endregion
+
+            offset += uninitializedDataSize;
+
+            header.SizeOfDataAndCode = offset;
+
             if (!String.IsNullOrEmpty(outputObjFile))
             {
                 using (var sw = new BinaryWriter(new FileStream(outputObjFile, FileMode.Create)))
                 {
                     ObjectFileUtils.WriteObjectFileHeader(header, sw);
 
-                    //Initialized data
+                    //Code section
+                    foreach (byte b in code)
+                    {
+                        sw.Write(b);
+                    }
 
+                    //Initialized data
                     if (stringConstants != null)
                     {
                         foreach (var str in stringConstants)
@@ -248,12 +260,6 @@ namespace CmC.Compiler
                     for (int i = 0; i < uninitializedDataSize; i++)
                     {
                         sw.Write((byte)0);
-                    }
-
-                    //Code section
-                    foreach (byte b in code)
-                    {
-                        sw.Write(b);
                     }
                 }
             }

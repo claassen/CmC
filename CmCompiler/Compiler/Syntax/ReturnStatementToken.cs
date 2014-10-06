@@ -43,8 +43,9 @@ namespace CmC.Compiler.Syntax
             int localVarsSize = context.GetFunctionLocalVarSize();
 
             //Reclaim local variables from stack space
-            context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(localVarsSize) });
-            context.EmitInstruction(new IRSub() { To = "sp", Left = "sp", Right = "ebx" });
+            //context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(localVarsSize) });
+            //context.EmitInstruction(new IRSub() { To = "sp", Left = "sp", Right = "ebx" });
+            context.EmitInstruction(new IRMoveRegister() { To = "sp", From = "bp" });
 
             if (context.IsEntryPointFunction)
             {

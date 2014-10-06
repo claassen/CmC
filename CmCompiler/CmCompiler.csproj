@@ -118,6 +118,7 @@
     <Compile Include="Compiler\Syntax\Assembly\Cli.cs" />
     <Compile Include="Compiler\Syntax\Assembly\Cmp.cs" />
     <Compile Include="Compiler\Syntax\Assembly\Cpy.cs" />
+    <Compile Include="Compiler\Syntax\Assembly\DataSizeModifierToken.cs" />
     <Compile Include="Compiler\Syntax\Common\DecimalNumberToken.cs" />
     <Compile Include="Compiler\Syntax\Assembly\Div.cs" />
     <Compile Include="Compiler\Syntax\Assembly\Halt.cs" />
@@ -150,6 +151,7 @@
     <Compile Include="Compiler\Syntax\Assembly\Xor.cs" />
     <Compile Include="Compiler\Syntax\CastExpression.cs" />
     <Compile Include="Compiler\Syntax\ForLoopToken.cs" />
+    <Compile Include="Compiler\Syntax\FuncTypeSpecifierToken.cs" />
     <Compile Include="Compiler\Syntax\InlineAssemblyBlockToken.cs" />
     <Compile Include="Compiler\Syntax\PostfixExpressionToken.cs" />
     <Compile Include="Compiler\Syntax\StringLiteralToken.cs" />

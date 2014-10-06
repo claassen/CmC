@@ -14,6 +14,10 @@ namespace CmC.Compiler.Context
         public bool IsArray;
         public int ArrayLength;
 
+        public bool IsFunction;
+        public ExpressionType ReturnType;
+        public List<ExpressionType> ArgumentTypes;
+
         public int GetSize()
         {
             if (IndirectionLevel == 0)
@@ -56,6 +60,26 @@ namespace CmC.Compiler.Context
             if (t1.IndirectionLevel != t2.IndirectionLevel)
             {
                 throw new TypeMismatchException(t1, t2);
+            }
+
+            if (t1.IsFunction != t2.IsFunction)
+            {
+                throw new TypeMismatchException(t1, t2);
+            }
+
+            if (t1.IsFunction)
+            {
+                CheckTypesMatch(t1.ReturnType, t2.ReturnType);
+
+                if (t1.ArgumentTypes.Count != t2.ArgumentTypes.Count)
+                {
+                    throw new TypeMismatchException(t1, t2);
+                }
+
+                for (int i = 0; i < t1.ArgumentTypes.Count; i++)
+                {
+                    CheckTypesMatch(t1.ArgumentTypes[i], t2.ArgumentTypes[i]);
+                }
             }
         }
 

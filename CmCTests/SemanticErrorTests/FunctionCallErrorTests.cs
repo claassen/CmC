@@ -38,7 +38,7 @@ namespace CmCTests.SemanticErrorTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(UndefinedFunctionException))]
+        [ExpectedException(typeof(UndefinedVariableException))]
         public void UndefinedFunction_Test()
         {
             CmCompiler.CompileText(
@@ -47,7 +47,7 @@ namespace CmCTests.SemanticErrorTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(UndefinedFunctionException))]
+        [ExpectedException(typeof(UndefinedVariableException))]
         public void UndefinedFunctionCallBeforeDefinition_Test()
         {
             CmCompiler.CompileText(
