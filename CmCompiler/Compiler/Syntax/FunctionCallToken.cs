@@ -46,8 +46,13 @@ namespace CmC.Compiler.Syntax
             //Push base pointer on stack
             context.EmitInstruction(new IRPushRegister() { From = "bp" });
 
-            int argumentCount = 0;
+            int argumentCount = Tokens.Count - 1;
             int argumentsSize = 0;
+
+            if (argumentCount != parameterTypes.Count)
+            {
+                throw new ArgumentCountMismatchException(Tokens[0].ToString(), parameterTypes.Count, argumentCount);
+            }
 
             if (Tokens.Count > 1)
             {
@@ -65,11 +70,6 @@ namespace CmC.Compiler.Syntax
                     argumentCount++;
                     argumentsSize += argType.GetSize();
                 }
-            }
-
-            if (argumentCount != parameterTypes.Count)
-            {
-                throw new ArgumentCountMismatchException(Tokens[0].ToString(), parameterTypes.Count, argumentCount);
             }
 
             var returnLabel = new LabelAddressValue(context.CreateNewLabel());
@@ -109,11 +109,9 @@ namespace CmC.Compiler.Syntax
 
         public ExpressionType GetExpressionType(CompilationContext context)
         {
-            string functionName = ((IdentifierToken)Tokens[0]).Name;
+            var funcType = ((IHasType)Tokens[0]).GetExpressionType(context);
 
-            var function = context.GetFunction(functionName);
-
-            return function.ReturnType;
+            return funcType.ReturnType;
         }
 
         public void EmitAddress(CompilationContext context)

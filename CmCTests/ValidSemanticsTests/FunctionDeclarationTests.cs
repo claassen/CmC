@@ -60,6 +60,17 @@ namespace CmCTests.ValidSemanticsTests
         }
 
         //TODO: instead of requiring declaration before use just wait for linker to
-        //catch missing definition
+        //catch missing definition?
+
+        [TestMethod]
+        public void Test()
+        {
+            CmCompiler.CompileText(
+                @"int Test(int x) { 
+                    return 0; 
+                  }
+                  int x = Test(1);"
+            );
+        }
     }
 }

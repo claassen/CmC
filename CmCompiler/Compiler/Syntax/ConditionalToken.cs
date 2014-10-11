@@ -35,7 +35,7 @@ namespace CmC.Compiler.Syntax
             //it can't know if there is going to be another Else if or Else which will pop it. We fix this 
             //by having Else always push a new label as well so we always are left with an unused label on the 
             //ConditionalElseBranch label stack at the end of a ConditionalToken
-            context.ConditionalElseBranchLabels.Pop();
+            context.EmitLabel(context.ConditionalElseBranchLabels.Pop());
 
             context.EmitLabel(context.ConditionalEndLabels.Pop());
         }

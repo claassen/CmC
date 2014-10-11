@@ -23,7 +23,7 @@ namespace CmC.Compiler.Syntax
 
             var argumentTypes = new List<ExpressionType>();
 
-            for (int i = 1; i < Tokens.Count; i+=2)
+            for (int i = 1; i < Tokens.Count; i++)
             {
                 argumentTypes.Add(((TypeSpecifierToken)Tokens[i]).GetExpressionType(context));
             }

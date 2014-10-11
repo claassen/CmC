@@ -21,7 +21,8 @@ namespace CmCompilerTester
             //TODO: return values on stack - Not supported for now, can pass pointer arguments to accomplish the same thing
                 
             CreateBIOS();
-            //CreateBootLoader();
+            CreateBootLoader();
+            CreateKernel();
         }
 
         static void CreateBIOS()
@@ -43,6 +44,13 @@ namespace CmCompilerTester
             );
 
             CmLinker.Link(new List<string>() { @"C:\VM\bootloader.o" }, @"C:\VM\bootloader.exe", false, 0x00007C00);
+        }
+
+        static void CreateKernel()
+        {
+            CmCompiler.CompileFile(@"C:\VM\kernel\kernel.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
+
+            CmLinker.Link(new List<string>() { @"C:\VM\kernel\kernel.o", @"C:\VM\cmlib\cmlib.o" }, @"C:\VM\kernel.exe", false, 0);
         }
     }
 }
