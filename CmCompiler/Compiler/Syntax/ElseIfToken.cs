@@ -38,7 +38,7 @@ namespace CmC.Compiler.Syntax
 
             context.EmitComment(";Then");
 
-            context.NewScope(false);
+            context.NewScope();
 
             for (int i = 4; i < Tokens.Count - 1; i++)
             {

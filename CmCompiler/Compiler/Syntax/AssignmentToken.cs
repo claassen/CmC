@@ -32,6 +32,15 @@ namespace CmC.Compiler.Syntax
                 throw new TypeMismatchException(new ExpressionType() { IsArray = true, Type = leftSideType.Type, ArrayLength = leftSideType.ArrayLength }, rightSideType);
             }
 
+            if (leftSideType.GetSize() == 0)
+            {
+                throw new VoidAssignmentException("to");
+            }
+            else if (rightSideType.GetSize() == 0)
+            {
+                throw new VoidAssignmentException("from");
+            }
+
             ExpressionType.CheckTypesMatch(leftSideType, rightSideType);
 
             //right hand side value -> stack

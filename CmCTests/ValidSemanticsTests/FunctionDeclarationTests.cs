@@ -59,17 +59,24 @@ namespace CmCTests.ValidSemanticsTests
             );
         }
 
-        //TODO: instead of requiring declaration before use just wait for linker to
-        //catch missing definition?
-
         [TestMethod]
-        public void Test()
+        public void VoidFunctionNoReturn_Test()
         {
             CmCompiler.CompileText(
-                @"int Test(int x) { 
-                    return 0; 
-                  }
-                  int x = Test(1);"
+                @"void Test() {
+                      int x = 0;
+                  }"
+            );
+        }
+
+        [TestMethod]
+        public void VoidFunctionWithReturn_Test()
+        {
+            CmCompiler.CompileText(
+                @"void Test() {
+                      int x = 0;
+                      return;
+                  }"
             );
         }
     }

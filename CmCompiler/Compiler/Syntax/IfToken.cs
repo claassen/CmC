@@ -34,7 +34,7 @@ namespace CmC.Compiler.Syntax
 
             context.EmitComment(";Then");
 
-            context.NewScope(false);
+            context.NewScope();
             context.StartPossiblyNonExecutedBlock();
 
             for (int i = 3; i < Tokens.Count - 1; i++)

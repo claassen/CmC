@@ -95,5 +95,27 @@ namespace CmCTests.SemanticErrorTests
                   }"
             );
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(TypeMismatchException))]
+        public void FunctionReturnTypeMismatch_Test()
+        {
+            CmCompiler.CompileText(
+                @"byte Test() {
+                      return (int)0;
+                  }"
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(TypeMismatchException))]
+        public void FunctionReturnTypeVoidMismatch_Test()
+        {
+            CmCompiler.CompileText(
+                @"void Test() {
+                      return 0;
+                  }"
+            );
+        }
     }
 }

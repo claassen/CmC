@@ -8,10 +8,11 @@ using CmC.Compiler.IR;
 using CmC.Compiler.Syntax.TokenInterfaces;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
+using CmC.Compiler.Exceptions;
 
 namespace CmC.Compiler.Syntax
 {
-    [TokenExpression("RETURN_STATEMENT", "'return' EXPRESSION ';'")]
+    [TokenExpression("RETURN_STATEMENT", "'return' (EXPRESSION)? ';'")]
     public class ReturnStatementToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
@@ -25,28 +26,35 @@ namespace CmC.Compiler.Syntax
 
             context.ReportReturnStatement();
 
-            ((ICodeEmitter)Tokens[1]).Emit(context);
+            var returnType = new ExpressionType() { Type = new TypeDef() { Name = "void", Size = 0 } };
 
-            //Caller saves registers
+            if (Tokens.Count > 1)
+            {
+                returnType = ((IHasType)Tokens[1]).GetExpressionType(context);
 
-            if (((IHasType)Tokens[1]).GetExpressionType(context).GetSize() > 4)
-            {
-                //Return value gets placed space allocated in caller's stack
-                throw new Exception("Large return values not supported");
-            }
-            else
-            {
-                //Return value from function goes in eax
-                context.EmitInstruction(new IRPop() { To = "eax" });
+                ((ICodeEmitter)Tokens[1]).Emit(context);
+
+                //Caller saves registers
+
+                if (returnType.GetSize() > 4)
+                {
+                    //Return value gets placed space allocated in caller's stack
+                    throw new Exception("Large return values not supported");
+                }
+                else
+                {
+                    //Return value from function goes in eax
+                    context.EmitInstruction(new IRPop() { To = "eax" });
+                }
             }
 
             int localVarsSize = context.GetFunctionLocalVarSize();
 
             //Reclaim local variables from stack space
-            //context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(localVarsSize) });
-            //context.EmitInstruction(new IRSub() { To = "sp", Left = "sp", Right = "ebx" });
             context.EmitInstruction(new IRMoveRegister() { To = "sp", From = "bp" });
 
+            ExpressionType.CheckTypesMatch(context.GetCurrentFunctionReturnType(), returnType);
+            
             if (context.IsEntryPointFunction)
             {
                 //At this point the return value of the function is still in eax and we simple halt execution
@@ -57,10 +65,6 @@ namespace CmC.Compiler.Syntax
             {
                 //Pop return address off stack and jump
                 context.EmitInstruction(new IRRet());
-                
-                //context.EmitInstruction(new IRPop() { To = "ebx" });
-
-                //context.EmitInstruction(new IRJumpRegister() { Address = "ebx" });
             }
         }
 

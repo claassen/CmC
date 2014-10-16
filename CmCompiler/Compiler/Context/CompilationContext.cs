@@ -30,6 +30,7 @@ namespace CmC.Compiler.Context
         private int _functionArgBPOffset;
         private int _functionLocalVarSize;
         private int _labelCount;
+        private ExpressionType _functionReturnType;
         private bool _functionHasReturn;
         private bool _inPossiblyNonExecutedBlock;
 
@@ -58,6 +59,7 @@ namespace CmC.Compiler.Context
             _stackOffsets = new Stack<int>();
             _stackOffsets.Push(0);
 
+            _types.Add("void", new TypeDef() { Name = "void", Size = 0 });
             _types.Add("byte", new TypeDef() { Name = "byte", Size = 1 });
             _types.Add("int", new TypeDef() { Name = "int", Size = 4 });
             _types.Add("bool", new TypeDef() { Name = "bool", Size = 4 });
@@ -88,20 +90,23 @@ namespace CmC.Compiler.Context
             _instructions.Add(new IRComment(text));
         }
 
-        public void NewScope(bool isFunction)
+        public void NewScope()
         {
             _currentScopeLevel++;
 
             _varSymbolTables[_currentScopeLevel] = new Dictionary<string, Variable>();
+        }
 
-            if (isFunction)
-            {
-                _stackOffsets.Push(4);
-                _functionArgBPOffset = 0;
-                _functionLocalVarSize = 0;
-                _functionHasReturn = false;
-                _inPossiblyNonExecutedBlock = false;
-            }
+        public void NewFunctionScope(ExpressionType returnType)
+        {
+            NewScope();
+
+            _stackOffsets.Push(4);
+            _functionArgBPOffset = 0;
+            _functionLocalVarSize = 0;
+            _functionHasReturn = false;
+            _inPossiblyNonExecutedBlock = false;
+            _functionReturnType = returnType;
         }
 
         public void EndScope(bool isFunction)
@@ -122,6 +127,11 @@ namespace CmC.Compiler.Context
         public void EndPossiblyNonExecutedBlock()
         {
             _inPossiblyNonExecutedBlock = false;
+        }
+
+        public ExpressionType GetCurrentFunctionReturnType()
+        {
+            return _functionReturnType;
         }
 
         public void ReportReturnStatement()
@@ -249,6 +259,24 @@ namespace CmC.Compiler.Context
             _varSymbolTables[_currentScopeLevel].Add(name, new Variable() { Address = new StackAddressValue(_functionArgBPOffset), Type = type });
         }
 
+        public bool IsVariableDefined(string name)
+        {
+            for (int i = _currentScopeLevel; i >= 0; i--)
+            {
+                if (_varSymbolTables[i].ContainsKey(name))
+                {
+                    return true;
+                }
+            }
+
+            if (_globalVarSymbolTable.ContainsKey(name))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public Variable GetVariable(string varName)
         {
             for (int i = _currentScopeLevel; i >= 0; i--)
@@ -270,6 +298,11 @@ namespace CmC.Compiler.Context
         public Dictionary<string, Variable> GetGlobalVariables()
         {
             return _globalVarSymbolTable;
+        }
+
+        public bool IsFunctionDefined(string name)
+        {
+            return _functionSymbolTable.ContainsKey(name);
         }
 
         public Function GetFunction(string funcName)

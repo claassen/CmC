@@ -62,7 +62,7 @@ namespace CmC.Compiler.Syntax
                 throw new ExportUndefinedFunctionException(functionName);
             }
 
-            context.NewScope(true);
+            context.NewFunctionScope(returnType);
 
             var parameterTypes = new List<ExpressionType>();
 
@@ -83,14 +83,14 @@ namespace CmC.Compiler.Syntax
             {
                 context.EmitLabel(context.GetFunction(functionName).Address.Value);
                 ((ICodeEmitter)Tokens.Last()).Emit(context);
+
+                if (returnType.GetSize() > 0 && !context.FunctionHasReturn())
+                {
+                    throw new MissingReturnException(functionName);
+                }
             }
 
             context.EndScope(true);
-
-            if (IsDefined && !context.FunctionHasReturn())
-            {
-                throw new MissingReturnException(functionName);
-            }
 
             context.IsEntryPointFunction = false;
         }

@@ -29,7 +29,7 @@ namespace CmC.Compiler.Syntax
 
             context.EmitComment(";Then");
 
-            context.NewScope(false);
+            context.NewScope();
             context.StartPossiblyNonExecutedBlock();
 
             foreach (var token in Tokens)

@@ -68,6 +68,7 @@
     <Compile Include="Compiler\Exceptions\UndefinedFunctionException.cs" />
     <Compile Include="Compiler\Exceptions\UndefinedVariableException.cs" />
     <Compile Include="Compiler\Exceptions\UnresolvedExternalSymbolException.cs" />
+    <Compile Include="Compiler\Exceptions\VoidAssignmentException.cs" />
     <Compile Include="Compiler\IR\Interface\IRelocatableAddressValue.cs" />
     <Compile Include="Compiler\IR\IRAdd.cs" />
     <Compile Include="Compiler\IR\IRAnd.cs" />

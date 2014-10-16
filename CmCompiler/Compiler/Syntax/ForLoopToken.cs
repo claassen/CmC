@@ -34,7 +34,7 @@ namespace CmC.Compiler.Syntax
         {
             context.EmitComment(";For");
 
-            context.NewScope(false);
+            context.NewScope();
             context.StartPossiblyNonExecutedBlock();
 
             int testLabel = context.CreateNewLabel();

@@ -19,27 +19,12 @@ namespace CmC.Compiler.Syntax
         private bool IsExported;
         private bool IsExtern;
         private bool IsStatic;
-        //private bool IsArray;
-        //private int ArrayLength;
-
+        
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
-            //bool isArray = false;
-            //int arrayLength = 0;
-
             if (tokens[0] is DefaultLanguageTerminalToken)
             {
                 string storageModifier = ((DefaultLanguageTerminalToken)tokens[0]).Value;
-
-                //if (tokens.Count > 3 && tokens[3] is NumberToken)
-                //{
-                //    //Array type
-                //    isArray = true;
-                //    arrayLength = ((NumberToken)tokens[3]).Value;
-                //    tokens.RemoveAt(2); //[
-                //    tokens.RemoveAt(2); //#
-                //    tokens.RemoveAt(2); //]
-                //}
 
                 bool isStatic = false;
                 bool isExtern = false; 
@@ -70,28 +55,12 @@ namespace CmC.Compiler.Syntax
                     IsExtern = isExtern,
                     IsExported = isExported,
                     Tokens = tokens.Skip(1).ToList(),
-                    //IsArray = isArray,
-                    //ArrayLength = arrayLength
                 };
             }
-            //else
-            //{
-            //    if (tokens.Count > 3 && tokens[2] is NumberToken)
-            //    {
-            //        //Array type
-            //        isArray = true;
-            //        arrayLength = ((NumberToken)tokens[2]).Value;
-            //        tokens.RemoveAt(1); //[
-            //        tokens.RemoveAt(1); //#
-            //        tokens.RemoveAt(1); //]
-            //    }
-            //}
-
+            
             return new VariableDefinitionToken() 
             { 
                 Tokens = tokens, 
-                //IsArray = isArray, 
-                //ArrayLength = arrayLength 
             };
         }
 
@@ -120,6 +89,15 @@ namespace CmC.Compiler.Syntax
                 var expressionType = ((IHasType)Tokens[3]).GetExpressionType(context);
 
                 var variable = context.GetVariable(variableName);
+
+                if (variable.Type.GetSize() == 0)
+                {
+                    throw new VoidAssignmentException("to");
+                }
+                else if (expressionType.GetSize() == 0)
+                {
+                    throw new VoidAssignmentException("from");
+                }
 
                 ExpressionType.CheckTypesMatch(variable.Type, expressionType);
 

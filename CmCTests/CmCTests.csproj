@@ -57,6 +57,7 @@
     <Compile Include="SemanticErrorTests\TypeMismatchErrorTests\AssignmentTypeMismatchTests.cs" />
     <Compile Include="SemanticErrorTests\TypeMismatchErrorTests\BinaryOperatorTypeMismatchTests.cs" />
     <Compile Include="SemanticErrorTests\TypeMismatchErrorTests\DefinitionTypeMismatchTests.cs" />
+    <Compile Include="SemanticErrorTests\TypeMismatchErrorTests\VoidTypeTests.cs" />
     <Compile Include="SemanticErrorTests\VariableDefinitionErrorTests.cs" />
     <Compile Include="ValidSemanticsTests\ArrayTests.cs" />
     <Compile Include="ValidSemanticsTests\CompatibleTypesTests.cs" />

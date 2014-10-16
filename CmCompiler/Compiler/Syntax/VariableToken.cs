@@ -101,33 +101,27 @@ namespace CmC.Compiler.Syntax
 
         public ExpressionType GetExpressionType(CompilationContext context)
         {
-            try
+            if (context.IsVariableDefined(Name))
             {
                 var variable = context.GetVariable(Name);
 
                 return variable.Type;
             }
-            catch (UndefinedVariableException)
+            else if (context.IsFunctionDefined(Name))
             {
-                try
-                {
-                    var function = context.GetFunction(Name);
+                var function = context.GetFunction(Name);
 
-                    return new ExpressionType()
-                    {
-                        IsFunction = true,
-                        ReturnType = function.ReturnType,
-                        ArgumentTypes = function.ParameterTypes,
-                        Type = new TypeDef()
-                        {
-                            Name = "Function"
-                        },
-                        IndirectionLevel = 1
-                    };
-                }
-                catch (UndefinedFunctionException)
+                return new ExpressionType()
                 {
-                }
+                    IsFunction = true,
+                    ReturnType = function.ReturnType,
+                    ArgumentTypes = function.ParameterTypes,
+                    Type = new TypeDef()
+                    {
+                        Name = "Function"
+                    },
+                    IndirectionLevel = 1
+                };
             }
 
             throw new UndefinedVariableException(Name);
