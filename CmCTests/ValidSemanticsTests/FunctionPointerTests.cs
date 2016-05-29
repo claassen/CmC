@@ -68,11 +68,18 @@ namespace CmCTests.ValidSemanticsTests
                 @"int Test(int x, byte* y) { return 0; }
                   (int)(int, byte*) fp = Test;
                   
-                  int x;
                   byte* b;
-                  x = Test(0, b);
-                  //fp(x, b);
+                  int x = Test(0, b);
+                  int y = fp(x, b);
                  "
+            );
+        }
+
+        [TestMethod]
+        public void ArrayOfFunctionPointers_Test()
+        {
+            CmCompiler.CompileText(
+                @"(int)(int,int)[10] fpArray;"
             );
         }
     }

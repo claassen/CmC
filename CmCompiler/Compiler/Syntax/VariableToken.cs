@@ -113,12 +113,12 @@ namespace CmC.Compiler.Syntax
 
                 return new ExpressionType()
                 {
-                    IsFunction = true,
-                    ReturnType = function.ReturnType,
-                    ArgumentTypes = function.ParameterTypes,
                     Type = new TypeDef()
                     {
-                        Name = "Function"
+                        Name = "Function",
+                        IsFunction = true,
+                        ReturnType = function.ReturnType,
+                        ArgumentTypes = function.ParameterTypes
                     },
                     IndirectionLevel = 1
                 };

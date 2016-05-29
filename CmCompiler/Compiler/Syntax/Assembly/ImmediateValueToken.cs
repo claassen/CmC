@@ -9,7 +9,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax.Assembly
 {
-    [TokenExpression("IMMEDIATE", "(NUMBER | IMM_VAR)")]
+    [TokenExpression("IMMEDIATE", "(NUMBER | IMM_VAR | IMM_LABEL)")]
     public class ImmediateValueToken : ILanguageNonTerminalToken, IHasValue
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)

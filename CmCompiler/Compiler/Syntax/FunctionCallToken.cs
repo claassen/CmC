@@ -27,13 +27,13 @@ namespace CmC.Compiler.Syntax
 
             var type = ((IHasType)Tokens[0]).GetExpressionType(context);
 
-            if (!type.IsFunction)
+            if (!type.Type.IsFunction)
             {
                 throw new Exception("Can't call expression type: " + type + " as a function");
             }
 
-            ExpressionType returnType = type.ReturnType;
-            List<ExpressionType> parameterTypes = type.ArgumentTypes;
+            ExpressionType returnType = type.Type.ReturnType;
+            List<ExpressionType> parameterTypes = type.Type.ArgumentTypes;
             
             if (returnType.GetSize() > 4)
             {
@@ -111,7 +111,7 @@ namespace CmC.Compiler.Syntax
         {
             var funcType = ((IHasType)Tokens[0]).GetExpressionType(context);
 
-            return funcType.ReturnType;
+            return funcType.Type.ReturnType;
         }
 
         public void EmitAddress(CompilationContext context)

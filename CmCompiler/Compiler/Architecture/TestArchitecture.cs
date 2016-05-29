@@ -27,7 +27,7 @@ namespace CmC.Compiler.Architecture
             return BitConverter.GetBytes(count++);
         }
 
-        public byte[] Implement(IRCall ir)
+        public byte[] Implement(IRCallImmediate ir)
         {
             return BitConverter.GetBytes(
                 (long)((long)(count++) << 32 | (uint)ir.Address.Value)
@@ -248,6 +248,11 @@ namespace CmC.Compiler.Architecture
         }
 
         public byte[] Implement(IRSetPT ir)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] Implement(IRBreak ir)
         {
             throw new NotImplementedException();
         }

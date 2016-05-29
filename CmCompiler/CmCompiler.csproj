@@ -73,7 +73,8 @@
     <Compile Include="Compiler\IR\IRAdd.cs" />
     <Compile Include="Compiler\IR\IRAnd.cs" />
     <Compile Include="Compiler\IR\IRArchitectureSpecificAsm.cs" />
-    <Compile Include="Compiler\IR\IRCall.cs" />
+    <Compile Include="Compiler\IR\IRBreak.cs" />
+    <Compile Include="Compiler\IR\IRCallImmediate.cs" />
     <Compile Include="Compiler\IR\IRComment.cs" />
     <Compile Include="Compiler\IR\IRCompareImmediate.cs" />
     <Compile Include="Compiler\IR\IRCompareRegister.cs" />
@@ -116,6 +117,8 @@
     <Compile Include="Compiler\Syntax\Assembly\Add.cs" />
     <Compile Include="Compiler\Syntax\Assembly\And.cs" />
     <Compile Include="Compiler\Syntax\Assembly\AssemblyInstructionToken.cs" />
+    <Compile Include="Compiler\Syntax\Assembly\Brk.cs" />
+    <Compile Include="Compiler\Syntax\Assembly\Call.cs" />
     <Compile Include="Compiler\Syntax\Assembly\Cli.cs" />
     <Compile Include="Compiler\Syntax\Assembly\Cmp.cs" />
     <Compile Include="Compiler\Syntax\Assembly\Cpy.cs" />

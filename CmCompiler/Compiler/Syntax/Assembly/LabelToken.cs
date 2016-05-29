@@ -9,7 +9,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax.Assembly
 {
-    [TokenExpression("REGEX:LABEL", "'[A-Z]+:'")]
+    [TokenExpression("REGEX:LABEL", "'[a-zA-Z_][a-zA-Z0-9_]*:'")]
     public class LabelToken : ILanguageTerminalToken, ICodeEmitter
     {
         public string Name;

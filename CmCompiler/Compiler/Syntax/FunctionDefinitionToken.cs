@@ -9,6 +9,7 @@ using CmC.Compiler.Syntax.Common;
 using CmC.Compiler.Syntax.TokenInterfaces;
 using ParserGen.Parser;
 using ParserGen.Parser.Tokens;
+using CmC.Compiler.IR;
 
 namespace CmC.Compiler.Syntax
 {
@@ -84,9 +85,17 @@ namespace CmC.Compiler.Syntax
                 context.EmitLabel(context.GetFunction(functionName).Address.Value);
                 ((ICodeEmitter)Tokens.Last()).Emit(context);
 
-                if (returnType.GetSize() > 0 && !context.FunctionHasReturn())
+                if (!context.FunctionHasReturn())
                 {
-                    throw new MissingReturnException(functionName);
+                    if (returnType.GetSize() > 0)
+                    {
+                        throw new MissingReturnException(functionName);
+
+                    }
+                    else
+                    {
+                        new ReturnStatementToken() { Tokens = new List<ILanguageToken>() }.Emit(context);
+                    }
                 }
             }
 

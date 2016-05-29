@@ -7,32 +7,44 @@ using CmC.Compiler.Context;
 using CmC.Compiler.Syntax.Common.Interface;
 using CmC.Compiler.Syntax.Common;
 using ParserGen.Parser.Tokens;
+using CmC.Compiler.Exceptions;
 
 namespace CmC.Compiler.Syntax.Assembly
 {
     [TokenExpression("IMM_VAR", "'&' IDENTIFIER")]
     public class VariableAddressToken : ILanguageNonTerminalToken, IHasValue
     {
-        public string VariableName;
+        public string Identifier;
 
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
-            return new VariableAddressToken() { VariableName = ((IdentifierToken)tokens[1]).Name };
+            return new VariableAddressToken() { Identifier = ((IdentifierToken)tokens[1]).Name };
         }
 
         public ImmediateValue GetValue(CompilationContext context)
         {
-            var variable = context.GetVariable(VariableName);
-
-            //TODO: how to handle stack address values?
-
-            if (variable.Address is StackAddressValue)
+            if (context.IsVariableDefined(Identifier))
             {
-                //throw new Exception("Stack address values not supported for assembly variable references");
-                return new ImmediateValue(variable.Address.Value);
+                var variable = context.GetVariable(Identifier);
+
+                //Note: variable address must be used as [bp + &variable] if the variable is a stack address to get
+                //the correct address
+                if (variable.Address is StackAddressValue)
+                {
+                    //throw new Exception("Stack address values not supported for assembly variable references");
+                    return new ImmediateValue(variable.Address.Value);
+                }
+
+                return variable.Address;
+            }
+            else if (context.IsFunctionDefined(Identifier))
+            {
+                var function = context.GetFunction(Identifier);
+
+                return function.Address;
             }
 
-            return variable.Address;
+            throw new UndefinedVariableException(Identifier);
         }
     }
 }

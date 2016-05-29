@@ -14,9 +14,9 @@ namespace CmC.Compiler.Context
         public bool IsArray;
         public int ArrayLength;
 
-        public bool IsFunction;
-        public ExpressionType ReturnType;
-        public List<ExpressionType> ArgumentTypes;
+        //public bool IsFunction;
+        //public ExpressionType ReturnType;
+        //public List<ExpressionType> ArgumentTypes;
 
         public int GetSize()
         {
@@ -62,23 +62,23 @@ namespace CmC.Compiler.Context
                 throw new TypeMismatchException(t1, t2);
             }
 
-            if (t1.IsFunction != t2.IsFunction)
+            if (t1.Type.IsFunction != t2.Type.IsFunction)
             {
                 throw new TypeMismatchException(t1, t2);
             }
 
-            if (t1.IsFunction)
+            if (t1.Type.IsFunction)
             {
-                CheckTypesMatch(t1.ReturnType, t2.ReturnType);
+                CheckTypesMatch(t1.Type.ReturnType, t2.Type.ReturnType);
 
-                if (t1.ArgumentTypes.Count != t2.ArgumentTypes.Count)
+                if (t1.Type.ArgumentTypes.Count != t2.Type.ArgumentTypes.Count)
                 {
                     throw new TypeMismatchException(t1, t2);
                 }
 
-                for (int i = 0; i < t1.ArgumentTypes.Count; i++)
+                for (int i = 0; i < t1.Type.ArgumentTypes.Count; i++)
                 {
-                    CheckTypesMatch(t1.ArgumentTypes[i], t2.ArgumentTypes[i]);
+                    CheckTypesMatch(t1.Type.ArgumentTypes[i], t2.Type.ArgumentTypes[i]);
                 }
             }
         }
@@ -119,7 +119,7 @@ namespace CmC.Compiler.Context
         {
             var other = (ExpressionType)obj;
 
-            return this.Type == other.Type && this.IndirectionLevel == other.IndirectionLevel;
+            return this.Type.Equals(other.Type) && this.IndirectionLevel == other.IndirectionLevel;
         }
 
         public override int GetHashCode()

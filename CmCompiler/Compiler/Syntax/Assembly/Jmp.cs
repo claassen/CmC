@@ -10,7 +10,8 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax.Assembly
 {
-    [TokenExpression("JMP", "JMP_OP (REGISTER|IMMEDIATE|IMM_LABEL)")]
+    //[TokenExpression("JMP", "JMP_OP (REGISTER|IMMEDIATE|IMM_LABEL)")]
+    [TokenExpression("JMP", "JMP_OP (REGISTER|IMMEDIATE)")]
     public class Jmp : ILanguageNonTerminalToken, ICodeEmitter
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
@@ -35,14 +36,14 @@ namespace CmC.Compiler.Syntax.Assembly
             {
                 ImmediateValue address = null;
 
-                if (Tokens[1] is ImmediateValueToken)
-                {
+                //if (Tokens[1] is ImmediateValueToken)
+                //{
                     address = ((ImmediateValueToken)Tokens[1]).GetValue(context);
-                }
-                else if (Tokens[1] is LabelAddressToken)
-                {
-                    address = ((LabelAddressToken)Tokens[1]).GetValue(context);
-                }
+                //}
+                //else if (Tokens[1] is LabelAddressToken)
+                //{
+                //    address = ((LabelAddressToken)Tokens[1]).GetValue(context);
+                //}
 
                 switch(((JmpOp)Tokens[0]).Condition)
                 {

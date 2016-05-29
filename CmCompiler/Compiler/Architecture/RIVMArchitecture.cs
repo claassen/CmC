@@ -52,7 +52,9 @@ namespace CmC.Compiler.Architecture
         STI,    //enable interrupts
         SETIDT, //set IDT base pointer
         SETPT,  //set page table base pointer
-        TLBI    //invalidate TLB
+        TLBI,   //invalidate TLB
+
+        BRK     //Debug break
     } //max 64 op codes
 
     public enum Register
@@ -137,6 +139,9 @@ namespace CmC.Compiler.Architecture
                 case "tlbi":
                     code = OpCode.TLBI;
                     break;
+                case "brk":
+                    code = OpCode.BRK;
+                    break;
                 default:
                     throw new Exception("Unknown assembly instruction: " + ir.Instruction);
             }
@@ -154,7 +159,7 @@ namespace CmC.Compiler.Architecture
             return Encode(OpCode.ANDR, GetRegisterIndex(ir.To), GetRegisterIndex(ir.Left), GetRegisterIndex(ir.Right), ir.OperandSize, false);
         }
 
-        public byte[] Implement(IRCall ir)
+        public byte[] Implement(IRCallImmediate ir)
         {
             return Encode(OpCode.CALL, 0, 0, 0, ir.OperandSize, true, ir.Address.Value);
         }
@@ -337,6 +342,11 @@ namespace CmC.Compiler.Architecture
         public byte[] Implement(IRSetPT ir)
         {
             return Encode(OpCode.SETPT, 0, 0, 0, 4, true, ir.Address.Value);
+        }
+
+        public byte[] Implement(IRBreak ir)
+        {
+            return Encode(OpCode.BRK, 0, 0, 0, 4, false);
         }
     }
 }

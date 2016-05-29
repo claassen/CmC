@@ -31,21 +31,23 @@ namespace CmCompilerTester
             CmCompiler.CompileFile(@"C:\VM\cmlib\stdlib.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
             CmCompiler.CompileFile(@"C:\VM\cmlib\disk.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
             CmCompiler.CompileFile(@"C:\VM\cmlib\graphics.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
-            CmCompiler.CompileFile(@"C:\VM\cmlib\rivm\ivt.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
+            CmCompiler.CompileFile(@"C:\VM\cmlib\rivm\isr.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
         }
 
         static void CreateBIOS()
         {
+            CmCompiler.CompileFile(@"C:\VM\bios\ir_handlers.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
             CmCompiler.CompileFile(@"C:\VM\bios\bios.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
 
             CmLinker.Link(
                 new List<string>() 
                 { 
                     @"C:\VM\bios\bios.o", 
+                    @"C:\VM\bios\ir_handlers.o",
                     @"C:\VM\cmlib\stdlib.o", 
                     @"C:\VM\cmlib\disk.o", 
                     @"C:\VM\cmlib\graphics.o",
-                    @"C:\VM\cmlib\rivm\ivt.o"
+                    @"C:\VM\cmlib\rivm\isr.o"
                 }, 
                 @"C:\VM\bios.exe", 
                 false, 
@@ -57,7 +59,17 @@ namespace CmCompilerTester
         {
             CmCompiler.CompileFile(@"C:\VM\bootloader\bootloader.cm", new CompilerOptions() { Architecture = new RIVMArchitecture() });
 
-            CmLinker.Link(new List<string>() { @"C:\VM\bootloader\bootloader.o", @"C:\VM\cmlib\disk.o", @"C:\VM\cmlib\stdlib.o" }, @"C:\VM\bootloader.exe", false, 0x00007C00);
+            CmLinker.Link(
+                new List<string>() 
+                { 
+                    @"C:\VM\bootloader\bootloader.o",
+                    //@"C:\VM\cmlib\stdlib.o", 
+                    //@"C:\VM\cmlib\disk.o"
+                }, 
+                @"C:\VM\bootloader.exe", 
+                false, 
+                0x00007C00
+            );
         }
 
         static void CreateKernel()

@@ -5,11 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using CmC.Compiler.Context;
 using ParserGen.Parser.Tokens;
+using CmC.Compiler.Syntax.Common.Interface;
 
 namespace CmC.Compiler.Syntax.Assembly
 {
-    [TokenExpression("REGEX:IMM_LABEL", "':[A-Z]+'")]
-    public class LabelAddressToken : ILanguageTerminalToken
+    [TokenExpression("REGEX:IMM_LABEL", "':[a-zA-Z_][a-zA-Z0-9_]*'")]
+    public class LabelAddressToken : ILanguageTerminalToken, IHasValue
     {
         public string Name;
 

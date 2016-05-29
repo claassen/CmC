@@ -9,7 +9,7 @@ using ParserGen.Parser.Tokens;
 
 namespace CmC.Compiler.Syntax.Assembly
 {
-    [TokenExpression("ASM_INSTRUCTION", "(LABEL|ADD|AND|CMP|CPY|DIV|HALT|JMP|LOAD|MOV|MULT|NOP|OR|POP|PUSH|STORE|SUB|INT|IRET|XOR|CLI|STI|SETIDT|SETPT|TLBI)+")]
+    [TokenExpression("ASM_INSTRUCTION", "(LABEL|ADD|AND|CALL|CMP|CPY|DIV|HALT|JMP|LOAD|MOV|MULT|NOP|OR|POP|PUSH|STORE|SUB|INT|IRET|XOR|CLI|STI|SETIDT|SETPT|TLBI|BRK)+")]
     public class AssemblyInstructionToken : ILanguageNonTerminalToken, ICodeEmitter
     {
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)

@@ -143,10 +143,8 @@ namespace CmC.Compiler.Syntax
         {
             if (IsFieldAccess || IsPointerFieldAccess || IsArrayIndex)
             {
+                //Push base variable address
                 ((IHasAddress)Tokens[0]).EmitAddress(context);
-
-                //Address of left hand side -> eax
-                context.EmitInstruction(new IRPop() { To = "eax" });
 
                 string fieldName = "";
 
@@ -171,9 +169,15 @@ namespace CmC.Compiler.Syntax
                         throw new UndefinedVariableException(leftHandSideType.ToString() + "." + fieldName);
                     }
 
+                    //Address of left hand side -> eax
+                    context.EmitInstruction(new IRPop() { To = "eax" });
+
                     //Dereference pointer -> eax
                     context.EmitInstruction(new IRLoadRegister() { From = "eax", To = "ebx", OperandSize = 4 });
                     context.EmitInstruction(new IRMoveRegister() { From = "ebx", To = "eax" });
+
+                    //Push address
+                    context.EmitInstruction(new IRPushRegister() { From = "eax" });
                 }
                 else if (IsArrayIndex)
                 {
@@ -196,6 +200,9 @@ namespace CmC.Compiler.Syntax
                         if (compTypeDef.Fields.ContainsKey(fieldName))
                         {
                             int offset = compTypeDef.Fields[fieldName].Offset;
+
+                            //Address of left hand side -> eax
+                            context.EmitInstruction(new IRPop() { To = "eax" });
 
                             //ecx = variable address + offset
                             context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(offset) });
@@ -220,6 +227,9 @@ namespace CmC.Compiler.Syntax
                     //Get index value
                     ((ICodeEmitter)Tokens[Tokens.Count - 2]).Emit(context);
                     context.EmitInstruction(new IRPop() { To = "ebx" });
+
+                    //Address of base var -> eax
+                    context.EmitInstruction(new IRPop() { To = "eax" });
 
                     //eax = pointer address, ebx = array index, ecx = type size
                     context.EmitInstruction(new IRMoveImmediate() { To = "ecx", Value = new ImmediateValue(valueSize) });
