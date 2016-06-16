@@ -27,5 +27,11 @@ namespace CmC.Compiler.Syntax.Assembly
                 }
             }
         }
+
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

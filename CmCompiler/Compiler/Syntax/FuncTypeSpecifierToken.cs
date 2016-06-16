@@ -30,10 +30,8 @@ namespace CmC.Compiler.Syntax
 
             return new ExpressionType()
             {
-                Type = new TypeDef()
+                BaseType = new FunctionTypeDef()
                 {
-                    Name = "Function",
-                    IsFunction = true,
                     ReturnType = returnType,
                     ArgumentTypes = argumentTypes
                 },

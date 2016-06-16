@@ -29,5 +29,11 @@ namespace CmC.Compiler.Syntax.Assembly
                 context.EmitInstruction(new IRPushImmediate() { Value = ((ImmediateValueToken)Tokens[1]).GetValue(context) });
             }
         }
+
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

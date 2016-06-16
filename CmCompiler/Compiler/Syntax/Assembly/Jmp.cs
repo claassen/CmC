@@ -71,6 +71,12 @@ namespace CmC.Compiler.Syntax.Assembly
                 }
             }
         }
+
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     [TokenExpression("REGEX:JMP_OP", "'j(eq|ge|gt|mp|le|lt|ne)'")] 

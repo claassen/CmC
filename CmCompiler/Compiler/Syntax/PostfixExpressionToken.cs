@@ -53,7 +53,7 @@ namespace CmC.Compiler.Syntax
                     throw new Exception("Postfix operators not (yet?) supported on function calls");
                 }
 
-                EmitAddress(context);
+                PushAddress(context);
                 
                 //variable address -> eax
                 context.EmitInstruction(new IRPop() { To = "eax" });
@@ -105,9 +105,9 @@ namespace CmC.Compiler.Syntax
                     throw new Exception("This shouldn't happen");
                 }
 
-                if (leftHandSideType.Type is CompositeTypeDef)
+                if (leftHandSideType.BaseType is CompositeTypeDef)
                 {
-                    var compTypeDef = (CompositeTypeDef)leftHandSideType.Type;
+                    var compTypeDef = (CompositeTypeDef)leftHandSideType.BaseType;
 
                     if (compTypeDef.Fields.ContainsKey(fieldName))
                     {
@@ -115,12 +115,12 @@ namespace CmC.Compiler.Syntax
                     }
                     else
                     {
-                        throw new UndefinedVariableException(leftHandSideType.Type.Name + "." + fieldName);
+                        throw new UndefinedVariableException(leftHandSideType.BaseType.Name + "." + fieldName);
                     }
                 }
                 else
                 {
-                    throw new UndefinedVariableException(leftHandSideType.Type.Name + "." + fieldName);
+                    throw new UndefinedVariableException(leftHandSideType.BaseType.Name + "." + fieldName);
                 }
             }
             else if (IsArrayIndex)
@@ -129,7 +129,7 @@ namespace CmC.Compiler.Syntax
 
                 return new ExpressionType()
                 {
-                    Type = type.Type,
+                    BaseType = type.BaseType,
                     IndirectionLevel = type.IndirectionLevel - 1, //array access dereferences pointer
                 };
             }
@@ -139,12 +139,12 @@ namespace CmC.Compiler.Syntax
             }
         }
 
-        public void EmitAddress(CompilationContext context)
+        public void PushAddress(CompilationContext context)
         {
             if (IsFieldAccess || IsPointerFieldAccess || IsArrayIndex)
             {
                 //Push base variable address
-                ((IHasAddress)Tokens[0]).EmitAddress(context);
+                ((IHasAddress)Tokens[0]).PushAddress(context);
 
                 string fieldName = "";
 
@@ -193,9 +193,9 @@ namespace CmC.Compiler.Syntax
 
                 if (IsFieldAccess || IsPointerFieldAccess)
                 {
-                    if (leftHandSideType.Type is CompositeTypeDef)
+                    if (leftHandSideType.BaseType is CompositeTypeDef)
                     {
-                        var compTypeDef = (CompositeTypeDef)leftHandSideType.Type;
+                        var compTypeDef = (CompositeTypeDef)leftHandSideType.BaseType;
 
                         if (compTypeDef.Fields.ContainsKey(fieldName))
                         {
@@ -211,12 +211,12 @@ namespace CmC.Compiler.Syntax
                         }
                         else
                         {
-                            throw new UndefinedVariableException(leftHandSideType.Type.Name + "." + fieldName);
+                            throw new UndefinedVariableException(leftHandSideType.BaseType.Name + "." + fieldName);
                         }
                     }
                     else
                     {
-                        throw new UndefinedVariableException(leftHandSideType.Type.Name + "." + fieldName);
+                        throw new UndefinedVariableException(leftHandSideType.BaseType.Name + "." + fieldName);
                     }
                 }
                 else if (IsArrayIndex)
@@ -246,8 +246,13 @@ namespace CmC.Compiler.Syntax
             }
             else
             {
-                ((IHasAddress)Tokens[0]).EmitAddress(context);
+                ((IHasAddress)Tokens[0]).PushAddress(context);
             }
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

@@ -27,10 +27,11 @@ namespace CmC.Compiler.Context
         private Dictionary<string, int> _namedLabels;
         private int _currentScopeLevel;
         private Stack<int> _stackOffsets;
+        private bool _inFunctionScope;
         private int _functionArgBPOffset;
         private int _functionLocalVarSize;
         private int _labelCount;
-        private ExpressionType _functionReturnType;
+        private ExpressionType _functionReturnExpressionType;
         private bool _functionHasReturn;
         private bool _inPossiblyNonExecutedBlock;
 
@@ -101,12 +102,13 @@ namespace CmC.Compiler.Context
         {
             NewScope();
 
+            _inFunctionScope = true;
             _stackOffsets.Push(4);
             _functionArgBPOffset = 0;
             _functionLocalVarSize = 0;
             _functionHasReturn = false;
             _inPossiblyNonExecutedBlock = false;
-            _functionReturnType = returnType;
+            _functionReturnExpressionType = returnType;
         }
 
         public void EndScope(bool isFunction)
@@ -115,8 +117,14 @@ namespace CmC.Compiler.Context
 
             if (isFunction)
             {
+                _inFunctionScope = false;
                 _stackOffsets.Pop();
             }
+        }
+
+        public bool InFunctionScope()
+        {
+            return _inFunctionScope;
         }
 
         public void StartPossiblyNonExecutedBlock()
@@ -129,13 +137,23 @@ namespace CmC.Compiler.Context
             _inPossiblyNonExecutedBlock = false;
         }
 
-        public ExpressionType GetCurrentFunctionReturnType()
+        public ExpressionType GetCurrentFunctionReturnExpressionType()
         {
-            return _functionReturnType;
+            if (!_inFunctionScope)
+            {
+                throw new Exception("Not in a function scope.");
+            }
+
+            return _functionReturnExpressionType;
         }
 
         public void ReportReturnStatement()
         {
+            if (!_inFunctionScope)
+            {
+                throw new Exception("Not in a function scope.");
+            }
+
             if (!_inPossiblyNonExecutedBlock)
             {
                 _functionHasReturn = true;
@@ -144,6 +162,11 @@ namespace CmC.Compiler.Context
 
         public bool FunctionHasReturn()
         {
+            if (!_inFunctionScope)
+            {
+                throw new Exception("Not in a function scope.");
+            }
+
             return _functionHasReturn;
         }
 
@@ -180,9 +203,9 @@ namespace CmC.Compiler.Context
                         Type = type 
                     }
                 );
-                currentStackOffset += type.GetSize();
+                currentStackOffset += type.GetStorageSize();
                 _stackOffsets.Push(currentStackOffset);
-                _functionLocalVarSize += type.GetSize();
+                _functionLocalVarSize += type.GetStorageSize();
             }
         }
 
@@ -198,11 +221,21 @@ namespace CmC.Compiler.Context
 
         public int GetFunctionLocalVarSize()
         {
+            if (!_inFunctionScope)
+            {
+                throw new Exception("Not in a function scope.");
+            }
+
             return _functionLocalVarSize;
         }
 
-        public void AddFunctionSymbol(string name, ExpressionType returnType, List<ExpressionType> parameterTypes, bool isDefined, bool isExported)
+        public void AddFunctionSymbol(string name, ExpressionType returnType, List<ExpressionType> argumentTypes, bool isDefined, bool isExported)
         {
+            if (!_inFunctionScope)
+            {
+                throw new Exception("Not in a function scope.");
+            }
+
             if (_functionSymbolTable.ContainsKey(name))
             {
                 var function = _functionSymbolTable[name];
@@ -211,21 +244,18 @@ namespace CmC.Compiler.Context
                 {
                     throw new DuplicateFunctionDefinitionException(name);
                 }
-                
-                //Check function signature matches previous declaration
-                if (parameterTypes.Count != function.ParameterTypes.Count)
+
+                var functionTypeDef = new FunctionTypeDef()
+                {
+                    ReturnType = returnType,
+                    ArgumentTypes = argumentTypes
+                };
+
+                if(!TypeChecking.TypesMatch(functionTypeDef, function.Type))
                 {
                     throw new FunctionSignatureMismatchException(name);
                 }
 
-                for (int i = 0; i < function.ParameterTypes.Count; i++)
-                {
-                    if (!parameterTypes[i].Equals(function.ParameterTypes[i]))
-                    {
-                        throw new FunctionSignatureMismatchException(name);
-                    }
-                }
-                
                 if (isDefined)
                 {
                     function.IsDefined = true;
@@ -239,8 +269,13 @@ namespace CmC.Compiler.Context
                     new Function()
                     {
                         Address = new LabelAddressValue(CreateNewLabel()),
-                        ReturnType = returnType,
-                        ParameterTypes = parameterTypes,
+                        //ReturnType = returnType,
+                        //ParameterTypes = parameterTypes,
+                        Type = new FunctionTypeDef()
+                        {
+                            ReturnType = returnType,
+                            ArgumentTypes = argumentTypes
+                        },
                         IsDefined = isDefined,
                         IsExported = isExported
                     }
@@ -255,6 +290,11 @@ namespace CmC.Compiler.Context
 
         public void AddFunctionArgSymbol(string name, ExpressionType type)
         {
+            if (!_inFunctionScope)
+            {
+                throw new Exception("Not in a function scope.");
+            }
+
             _functionArgBPOffset -= type.GetSize();
             _varSymbolTables[_currentScopeLevel].Add(name, new Variable() { Address = new StackAddressValue(_functionArgBPOffset), Type = type });
         }
@@ -324,7 +364,7 @@ namespace CmC.Compiler.Context
                 StringConstants.Add(value, new StringConstant()
                 {
                     LabelAddress = CreateNewLabel(),
-                    Value = value.Substring(1, value.Length - 2)
+                    Value = value
                 });
             }
         }

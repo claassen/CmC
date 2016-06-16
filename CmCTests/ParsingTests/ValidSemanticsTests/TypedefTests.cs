@@ -16,7 +16,7 @@ namespace CmCTests.ValidSemanticsTests
         {
             CmCompiler.CompileText(
                 @"typedef X { int x; int y; }
-                  X myX;
+                  static X myX;
                   myX.x = 0;
                   myX.y = 1;"
             );
@@ -28,7 +28,7 @@ namespace CmCTests.ValidSemanticsTests
             CmCompiler.CompileText(
                 @"typedef X { int x; int y; }
                   typedef Y { X x; }
-                  Y myY;
+                  static Y myY;
                   (myY.x).x = 0;"
             );
         }
@@ -38,7 +38,7 @@ namespace CmCTests.ValidSemanticsTests
         {
             CmCompiler.CompileText(
                 @"typedef X { int x; int y; }
-                  X* myX;
+                  static X* myX;
                   myX->x = 0;
                   myX->y = 1;"
             );
@@ -50,7 +50,7 @@ namespace CmCTests.ValidSemanticsTests
             CmCompiler.CompileText(
                 @"typedef X { int x; int y; }
                   typedef Y { X* x; }
-                  Y* myY;
+                  static Y* myY;
                   (myY->x)->x = 0;"
             );
         }

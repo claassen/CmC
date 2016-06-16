@@ -16,7 +16,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void BasicVoidTypeDeclaration_Test()
         {
             CmCompiler.CompileText(
-                @"void v;"
+                @"static void v;"
             );
         }
 
@@ -25,7 +25,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void VoidDefinitionAssignmentTo_Test()
         {
             CmCompiler.CompileText(
-                @"void a = (void)0;"
+                @"static void a = (void)0;"
             );
         }
 
@@ -34,8 +34,8 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void VoidAssignmentTo_Test()
         {
             CmCompiler.CompileText(
-                @"void a;
-                  void b;
+                @"static void a;
+                  static void b;
                   a = b;"
             );
         }

@@ -39,5 +39,20 @@ namespace CmC.Compiler.Syntax
 
             context.EmitLabel(context.ConditionalEndLabels.Pop());
         }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            int sum = 0;
+
+            foreach (var token in Tokens)
+            {
+                if (token is ICodeEmitter)
+                {
+                    sum += ((ICodeEmitter)token).GetSizeOfAllLocalVariables(context);
+                }
+            }
+
+            return sum;
+        }
     }
 }

@@ -11,20 +11,37 @@ namespace CmC.Linker
 {
     public static class CmLinker
     {
-        public static void Link(List<string> objectFiles, string outputFile, bool createExecutable, int loadAddress = 0)
+        public static void Link(Stream toStream, List<string> objectFiles, bool createExecutable, int loadAddress = 0)
         {
-            var headers = new List<ObjectFileHeader>();
+            List<byte[]> objectFileCodes = new List<byte[]>();
+
+            foreach (var filePath in objectFiles)
+            {
+                using (var fs = new FileStream(filePath, FileMode.Open))
+                using (var s = new MemoryStream())
+                {
+                    fs.CopyTo(s);
+                    objectFileCodes.Add(s.GetBuffer());
+                }
+            }
+
+            Link(toStream, objectFileCodes, createExecutable, loadAddress);
+        }
+
+        public static void Link(Stream toStream, List<byte[]> objectFileCodes, bool createExecutable, int loadAddress = 0)
+        {
+            var headers = new List<ObjectCodeHeader>();
             var objDataOffsets = new List<int>();
 
             int objDataOffset = 0;
 
             bool foundEntryPoint = false;
             
-            for(int i = 0; i < objectFiles.Count; i++)
+            for(int i = 0; i < objectFileCodes.Count; i++)
             {
                 objDataOffsets.Add(objDataOffset + ((createExecutable && i == 0) ? 4 : 0));
 
-                var header = ObjectFileUtils.ReadObjectFileHeader(objectFiles[i]);
+                var header = ObjectCodeUtils.ReadObjectCodeHeader(objectFileCodes[i]);
 
                 headers.Add(header);
 
@@ -40,22 +57,15 @@ namespace CmC.Linker
                     }
                 }
 
-                objDataOffset += header.SizeOfDataAndCode; // +header.SizeOfData;
+                objDataOffset += header.SizeOfDataAndCode;
             }
-
-            //TODO: get size of all code
 
             if (createExecutable && !foundEntryPoint)
             {
                 throw new Exception("No entry point found in any source object files");
             }
 
-            if (File.Exists(outputFile))
-            {
-                File.Delete(outputFile);
-            }
-
-            using (var stream = new MemoryStream() /* new FileStream(outputFile, FileMode.Create)*/)
+            using (var stream = new MemoryStream())
             using (var sw = new BinaryWriter(stream))
             using (var sr = new BinaryReader(stream))
             {
@@ -65,10 +75,10 @@ namespace CmC.Linker
                     sw.Write(0); //temporary until entry point address is resolved
                 }
 
-                for (int i = 0; i < objectFiles.Count; i++)
+                for (int i = 0; i < objectFileCodes.Count; i++)
                 {
                     //Write data and code to output file
-                    using (var objStream = new BinaryReader(new FileStream(objectFiles[i], FileMode.Open)))
+                    using (var objStream = new BinaryReader(new MemoryStream(objectFileCodes[i])))
                     {
                         objStream.BaseStream.Seek(headers[i].DataStart, SeekOrigin.Begin);
 
@@ -93,7 +103,7 @@ namespace CmC.Linker
                             bool resolved = false;
 
                             //search all other header symbol tables
-                            for (int j = 0; j < objectFiles.Count; j++)
+                            for (int j = 0; j < objectFileCodes.Count; j++)
                             {
                                 if (i == j) continue;
 
@@ -132,14 +142,8 @@ namespace CmC.Linker
                     }
                 }
 
-                using (var fs = new FileStream(outputFile, FileMode.Create))
-                {
-                    byte[] data = new byte[stream.Length];
-
-                    stream.Seek(0, SeekOrigin.Begin);
-                    stream.Read(data, 0, data.Length);
-                    fs.Write(data, 0, data.Length);
-                }
+                stream.Seek(0, SeekOrigin.Begin);
+                stream.CopyTo(toStream);
             }
         }
     }

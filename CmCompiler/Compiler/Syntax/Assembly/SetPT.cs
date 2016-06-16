@@ -21,5 +21,11 @@ namespace CmC.Compiler.Syntax.Assembly
         {
             context.EmitInstruction(new IRSetPT() { Address = ((ImmediateValueToken)Tokens[1]).GetValue(context) });
         }
+
+
+        public int GetSizeOfAllLocalVariables(Context.CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

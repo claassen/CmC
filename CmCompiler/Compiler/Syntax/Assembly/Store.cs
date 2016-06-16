@@ -47,5 +47,11 @@ namespace CmC.Compiler.Syntax.Assembly
                 context.EmitInstruction(new IRStoreRegisterPlusImmediate() { From = value, To = regPlusImmediateToken.Register, Offset = regPlusImmediateToken.GetImmediateValue(context), OperandSize = NumBytes });
             }
         }
+
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

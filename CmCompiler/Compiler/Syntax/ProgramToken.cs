@@ -28,5 +28,10 @@ namespace CmC.Compiler.Syntax
                 }
             }
         }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
+        }
     }
 }

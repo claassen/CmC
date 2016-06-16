@@ -25,11 +25,11 @@ namespace CmC.Compiler.Syntax
 
             ((ICodeEmitter)Tokens[0]).Emit(context);
 
-            var type = ((IHasType)Tokens[0]).GetExpressionType(context);
+            var expressionType = ((IHasType)Tokens[0]).GetExpressionType(context);
 
             if (Tokens.Count > 1)
             {
-                ExpressionType.CheckTypeIsBoolean(type); 
+                TypeChecking.CheckExpressionTypeIsBoolean(expressionType); 
             }
 
             for (int i = 1; i < Tokens.Count; i += 2)
@@ -38,9 +38,9 @@ namespace CmC.Compiler.Syntax
 
                 ((ICodeEmitter)Tokens[i + 1]).Emit(context);
 
-                type = ((IHasType)Tokens[i + 1]).GetExpressionType(context);
+                expressionType = ((IHasType)Tokens[i + 1]).GetExpressionType(context);
 
-                ExpressionType.CheckTypeIsBoolean(type);
+                TypeChecking.CheckExpressionTypeIsBoolean(expressionType);
 
                 context.EmitInstruction(new IRPop() { To = "ebx" });
                 context.EmitInstruction(new IRPop() { To = "eax" });
@@ -75,7 +75,7 @@ namespace CmC.Compiler.Syntax
         {
             if (Tokens.Count > 1)
             {
-                return new ExpressionType() { Type = context.GetTypeDef("bool") };
+                return new ExpressionType() { BaseType = context.GetTypeDef("bool") };
             }
             else
             {
@@ -83,14 +83,19 @@ namespace CmC.Compiler.Syntax
             }
         }
 
-        public void EmitAddress(CompilationContext context)
+        public void PushAddress(CompilationContext context)
         {
             if (Tokens.Count > 1)
             {
                 throw new Exception("Can't take address of boolean expression");
             }
 
-            ((IHasAddress)Tokens[0]).EmitAddress(context);
+            ((IHasAddress)Tokens[0]).PushAddress(context);
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

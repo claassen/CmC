@@ -15,7 +15,7 @@ namespace CmCTests.ValidSemanticsTests
         public void DecimalNumberLiteral_Test()
         {
             CmCompiler.CompileText(
-                @"int x = 42;"
+                @"static int x = 42;"
             );
         }
 
@@ -23,7 +23,7 @@ namespace CmCTests.ValidSemanticsTests
         public void HexNumberLiteral_Test()
         {
             CmCompiler.CompileText(
-                @"int x = 0x000001EF;"
+                @"static int x = 0x000001EF;"
             );
         }
 
@@ -31,7 +31,7 @@ namespace CmCTests.ValidSemanticsTests
         public void StringLiteral_Test()
         {
             CmCompiler.CompileText(
-                @"byte* s = ""abcdef"";"
+                @"static byte* s = ""abcdef"";"
             );
         }
     }

@@ -22,5 +22,11 @@ namespace CmC.Compiler.Syntax.Assembly
         {
             context.EmitInstruction(new IRHalt());
         }
+
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

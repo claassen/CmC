@@ -26,17 +26,17 @@ namespace CmC.Compiler.Syntax
 
             context.ReportReturnStatement();
 
-            var returnType = new ExpressionType() { Type = new TypeDef() { Name = "void", Size = 0 } };
+            var returnExpressionType = new ExpressionType() { BaseType = new TypeDef() { Name = "void", Size = 0 } };
 
             if (Tokens.Count > 1)
             {
-                returnType = ((IHasType)Tokens[1]).GetExpressionType(context);
+                returnExpressionType = ((IHasType)Tokens[1]).GetExpressionType(context);
 
                 ((ICodeEmitter)Tokens[1]).Emit(context);
 
-                //Caller saves registers
+                //(Caller saves registers)
 
-                if (returnType.GetSize() > 4)
+                if (returnExpressionType.GetSize() > 4)
                 {
                     //Return value gets placed space allocated in caller's stack
                     throw new Exception("Large return values not supported");
@@ -51,15 +51,18 @@ namespace CmC.Compiler.Syntax
             int localVarsSize = context.GetFunctionLocalVarSize();
 
             //Reclaim local variables from stack space
-            context.EmitInstruction(new IRMoveRegister() { To = "sp", From = "bp" });
 
-            ExpressionType.CheckTypesMatch(context.GetCurrentFunctionReturnType(), returnType);
+            context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(localVarsSize) });
+            context.EmitInstruction(new IRSub() { To = "sp", Left = "sp", Right = "ebx" });
+
+            TypeChecking.CheckExpressionTypesMatch(context.GetCurrentFunctionReturnExpressionType(), returnExpressionType);
             
             if (context.IsEntryPointFunction)
             {
+                //DONT WANT THIS. HALT JUST STOPS CPU COMPLETELY NOW
                 //At this point the return value of the function is still in eax and we simple halt execution
                 //as the exe has run to completion
-                context.EmitInstruction(new IRHalt());
+                //context.EmitInstruction(new IRHalt());
             }
             else
             {
@@ -71,6 +74,11 @@ namespace CmC.Compiler.Syntax
         public ExpressionType GetExpressionType(CompilationContext context)
         {
             return ((IHasType)Tokens[1]).GetExpressionType(context);
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

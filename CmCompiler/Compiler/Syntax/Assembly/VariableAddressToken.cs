@@ -31,7 +31,6 @@ namespace CmC.Compiler.Syntax.Assembly
                 //the correct address
                 if (variable.Address is StackAddressValue)
                 {
-                    //throw new Exception("Stack address values not supported for assembly variable references");
                     return new ImmediateValue(variable.Address.Value);
                 }
 

@@ -24,5 +24,11 @@ namespace CmC.Compiler.Syntax.Assembly
 
             context.EmitInstruction(new IRCallImmediate() { Address = value }); 
         }
+
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

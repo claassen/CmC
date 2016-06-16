@@ -38,14 +38,11 @@ namespace CmC.Compiler.Syntax
             {
                 ((ICodeEmitter)token).Emit(context);
             }
+        }
 
-            //foreach (var token in Tokens)
-            //{
-            //    if (token is ICodeEmitter)
-            //    {
-            //        ((ICodeEmitter)token).Emit(context);
-            //    }
-            //}
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

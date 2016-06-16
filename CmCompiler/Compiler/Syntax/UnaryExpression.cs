@@ -27,7 +27,7 @@ namespace CmC.Compiler.Syntax
 
                 if (op == "&")
                 {
-                    ((IHasAddress)Tokens.Last()).EmitAddress(context);
+                    ((IHasAddress)Tokens.Last()).PushAddress(context);
                 }
                 else if (op == "*")
                 {
@@ -73,17 +73,17 @@ namespace CmC.Compiler.Syntax
 
                 if (op == "*")
                 {
-                    return new ExpressionType() { Type = type.Type, IndirectionLevel = type.IndirectionLevel - 1 };
+                    return new ExpressionType() { BaseType = type.BaseType, IndirectionLevel = type.IndirectionLevel - 1 };
                 }
                 else if (op == "&")
                 {
                     if (type.IsArray)
                     {
-                        return new ExpressionType() { Type = type.Type, IndirectionLevel = type.IndirectionLevel };
+                        return new ExpressionType() { BaseType = type.BaseType, IndirectionLevel = type.IndirectionLevel };
                     }
                     else
                     {
-                        return new ExpressionType() { Type = type.Type, IndirectionLevel = type.IndirectionLevel + 1 };
+                        return new ExpressionType() { BaseType = type.BaseType, IndirectionLevel = type.IndirectionLevel + 1 };
                     }
                 }
                 else
@@ -97,7 +97,7 @@ namespace CmC.Compiler.Syntax
             }
         }
 
-        public void EmitAddress(CompilationContext context)
+        public void PushAddress(CompilationContext context)
         {
             if (Tokens[0] is DefaultLanguageTerminalToken)
             {
@@ -116,8 +116,13 @@ namespace CmC.Compiler.Syntax
             else
             {
                 //Emit the address of the variable
-                ((IHasAddress)Tokens[0]).EmitAddress(context);
+                ((IHasAddress)Tokens[0]).PushAddress(context);
             }
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

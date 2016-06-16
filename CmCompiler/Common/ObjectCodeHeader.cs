@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CmC.Common
 {
-    public class ObjectFileHeader
+    public class ObjectCodeHeader
     {
         public int DataStart;
         public int SizeOfDataAndCode;

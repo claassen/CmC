@@ -24,50 +24,79 @@ namespace CmC.Compiler.Syntax
         {
             context.EmitComment(";Assignment");
 
-            var leftSideType = ((IHasType)Tokens[0]).GetExpressionType(context);
-            var rightSideType = ((IHasType)Tokens[2]).GetExpressionType(context);
+            var leftSideExpressionType = ((IHasType)Tokens[0]).GetExpressionType(context);
+            var rightSideExpressionType = ((IHasType)Tokens[2]).GetExpressionType(context);
 
-            if (leftSideType.IsArray)
+            if (leftSideExpressionType.IsArray)
             {
-                throw new TypeMismatchException(new ExpressionType() { IsArray = true, Type = leftSideType.Type, ArrayLength = leftSideType.ArrayLength }, rightSideType);
+                throw new TypeMismatchException(new ExpressionType() { IsArray = true, BaseType = leftSideExpressionType.BaseType, ArrayLength = leftSideExpressionType.ArrayLength }, rightSideExpressionType);
             }
 
-            if (leftSideType.GetSize() == 0)
+            if (leftSideExpressionType.GetSize() == 0)
             {
                 throw new VoidAssignmentException("to");
             }
-            else if (rightSideType.GetSize() == 0)
+            else if (rightSideExpressionType.GetSize() == 0)
             {
                 throw new VoidAssignmentException("from");
             }
 
-            ExpressionType.CheckTypesMatch(leftSideType, rightSideType);
+            TypeChecking.CheckExpressionTypesMatch(leftSideExpressionType, rightSideExpressionType);
 
-            //right hand side value -> stack
-            ((ICodeEmitter)Tokens[2]).Emit(context);
-
-            if (rightSideType.GetSize() > 4)
+            //Special case for assignment of string literal to byte array:
+            //  Don't emit string constant normally (which would add it as a string constant in the data section),
+            //  instead copy the string to the memory occupied by tge byte array itself
+            if (rightSideExpressionType.BaseType is StringLiteralTypeDef && leftSideExpressionType.IsArray)
             {
-                //[sp] -> [destination]
-                //Dest address -> eax
-                ((IHasAddress)Tokens[0]).EmitAddress(context);
+                string stringLiteral = ((StringLiteralTypeDef)rightSideExpressionType.BaseType).Value;
+
+                if (rightSideExpressionType.ArrayLength > leftSideExpressionType.ArrayLength)
+                {
+                    throw new Exception("The string '" + stringLiteral + "' is too large to be assigned by value to the left hand expression.");
+                }
+
+                //Put start address to copy string value to into eax
+                ((IHasAddress)Tokens[0]).PushAddress(context);
                 context.EmitInstruction(new IRPop() { To = "eax" });
 
-                //sp -= size of value
-                context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(rightSideType.GetSize()) });
-                context.EmitInstruction(new IRSub() { Left = "sp", Right = "ebx", To = "sp" });
+                for (int i = 0; i < leftSideExpressionType.ArrayLength; i++)
+                {
+                    byte charValue = i < stringLiteral.Length ? (byte)stringLiteral[i] : (byte)0;
 
-                context.EmitInstruction(new IRMemCopy() { From = "sp", To = "eax", Length = new ImmediateValue(rightSideType.GetSize()) });
+                    //Put char value into ebx
+                    context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(charValue), OperandSize = 1 });
+                    //Store char value into address [eax + char offset]
+                    context.EmitInstruction(new IRStoreRegisterPlusImmediate() { To = "eax", Offset = new ImmediateValue(i), From = "ebx", OperandSize = 1 });
+                }
             }
             else
             {
-                //store ebx -> [destination]
-                ((IHasAddress)Tokens[0]).EmitAddress(context);
-                context.EmitInstruction(new IRPop() { To = "eax" });
+                //right hand side value -> stack
+                ((ICodeEmitter)Tokens[2]).Emit(context);
 
-                //Store assign value in ebx
-                context.EmitInstruction(new IRPop() { To = "ebx" });
-                context.EmitInstruction(new IRStoreRegister() { From = "ebx", To = "eax", OperandSize = rightSideType.GetSize() }); //MB!
+                if (rightSideExpressionType.GetSize() > 4)
+                {
+                    //[sp] -> [destination]
+                    //Dest address -> eax
+                    ((IHasAddress)Tokens[0]).PushAddress(context);
+                    context.EmitInstruction(new IRPop() { To = "eax" });
+
+                    //sp -= size of value
+                    context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(rightSideExpressionType.GetSize()) });
+                    context.EmitInstruction(new IRSub() { Left = "sp", Right = "ebx", To = "sp" });
+
+                    context.EmitInstruction(new IRMemCopy() { From = "sp", To = "eax", Length = new ImmediateValue(rightSideExpressionType.GetSize()) });
+                }
+                else
+                {
+                    //store ebx -> [destination]
+                    ((IHasAddress)Tokens[0]).PushAddress(context);
+                    context.EmitInstruction(new IRPop() { To = "eax" });
+
+                    //Store assign value in ebx
+                    context.EmitInstruction(new IRPop() { To = "ebx" });
+                    context.EmitInstruction(new IRStoreRegister() { From = "ebx", To = "eax", OperandSize = rightSideExpressionType.GetSize() }); //MB!
+                }
             }
         }
 
@@ -76,9 +105,14 @@ namespace CmC.Compiler.Syntax
             return ((IHasType)Tokens[2]).GetExpressionType(context);
         }
 
-        public void EmitAddress(CompilationContext context)
+        public void PushAddress(CompilationContext context)
         {
             throw new Exception("Can't take address of assignment expression");
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

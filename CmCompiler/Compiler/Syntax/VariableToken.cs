@@ -17,30 +17,15 @@ namespace CmC.Compiler.Syntax
     public class VariableToken : ILanguageNonTerminalToken, ICodeEmitter, IHasType, IHasAddress
     {
         public string Name;
-        public bool IsAddressOf;
 
         public override ILanguageToken Create(string expressionValue, List<ILanguageToken> tokens)
         {
-            bool isAddressOf = false;
-
-            if (tokens.Count > 1)
-            {
-                if (((DefaultLanguageTerminalToken)tokens[0]).Value == "&")
-                {
-                    isAddressOf = true;
-                }
-                else
-                {
-                    throw new Exception("This shouldn't ever happen");
-                }
-            }
-
-            return new VariableToken() { Name = ((IdentifierToken)tokens.Last()).Name, IsAddressOf = isAddressOf };
+            return new VariableToken() { Name = ((IdentifierToken)tokens.Last()).Name };
         }
 
         public void Emit(CompilationContext context)
         {
-            try
+            if (context.IsVariableDefined(Name))
             {
                 var variable = context.GetVariable(Name);
 
@@ -61,7 +46,7 @@ namespace CmC.Compiler.Syntax
                 {
                     if (variable.Type.IsArray)
                     {
-                        EmitAddress(context);
+                        PushAddress(context);
                     }
                     else
                     {
@@ -81,22 +66,18 @@ namespace CmC.Compiler.Syntax
 
                 return;
             }
-            catch (UndefinedVariableException)
+            else if (context.IsFunctionDefined(Name))
             {
-                try
-                {
-                    var function = context.GetFunction(Name);
+                var function = context.GetFunction(Name);
 
-                    EmitAddress(context);
+                PushAddress(context);
 
-                    return;
-                }
-                catch (UndefinedFunctionException)
-                {
-                }
+                return;
             }
-
-            throw new UndefinedVariableException(Name);
+            else
+            {
+                throw new UndefinedVariableException(Name);
+            }
         }
 
         public ExpressionType GetExpressionType(CompilationContext context)
@@ -113,13 +94,7 @@ namespace CmC.Compiler.Syntax
 
                 return new ExpressionType()
                 {
-                    Type = new TypeDef()
-                    {
-                        Name = "Function",
-                        IsFunction = true,
-                        ReturnType = function.ReturnType,
-                        ArgumentTypes = function.ParameterTypes
-                    },
+                    BaseType = function.Type,
                     IndirectionLevel = 1
                 };
             }
@@ -127,7 +102,7 @@ namespace CmC.Compiler.Syntax
             throw new UndefinedVariableException(Name);
         }
 
-        public void EmitAddress(CompilationContext context)
+        public void PushAddress(CompilationContext context)
         {
             try
             {
@@ -162,6 +137,11 @@ namespace CmC.Compiler.Syntax
             }
 
             throw new UndefinedVariableException(Name);
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

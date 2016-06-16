@@ -27,7 +27,7 @@ namespace CmC.Compiler.Syntax
             {
                 type = new ExpressionType()
                 {
-                    Type = context.GetTypeDef(((TypeToken)Tokens[0]).GetTypeName())
+                    BaseType = context.GetTypeDef(((TypeToken)Tokens[0]).GetTypeName())
                 };
             }
             else if (Tokens[0] is FuncTypeSpecifierToken)

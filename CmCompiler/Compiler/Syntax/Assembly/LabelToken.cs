@@ -25,5 +25,11 @@ namespace CmC.Compiler.Syntax.Assembly
 
             context.EmitLabel(labelIndex, Name);
         }
+
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

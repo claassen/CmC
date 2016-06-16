@@ -15,9 +15,9 @@ namespace CmCTests.ValidSemanticsTests
         public void CompatibleTypeBoolean_Test()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  bool b;
-                  bool res = x && b;"
+                @"static int x = 0;
+                  static bool b;
+                  static bool res = x && b;"
             );
         }
 
@@ -25,9 +25,9 @@ namespace CmCTests.ValidSemanticsTests
         public void CompatibleTypeBoolean_Test2()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  int y = 1;
-                  bool res = x && y;"
+                @"static int x = 0;
+                  static int y = 1;
+                  static bool res = x && y;"
             );
         }
 
@@ -35,9 +35,9 @@ namespace CmCTests.ValidSemanticsTests
         public void CompatibleTypeBoolean_Test3()
         {
             CmCompiler.CompileText(
-                @"bool a;
-                  bool b;
-                  bool res = a && b ^ 5;"
+                @"static bool a;
+                  static bool b;
+                  static bool res = a && b ^ 5;"
             );
         }
 
@@ -45,9 +45,9 @@ namespace CmCTests.ValidSemanticsTests
         public void CompatibleTypeBoolean_Test4()
         {
             CmCompiler.CompileText(
-                @"bool a;
-                  bool b;
-                  bool res = 5 || a ^ b;"
+                @"static bool a;
+                  static bool b;
+                  static bool res = 5 || a ^ b;"
             );
         }
 
@@ -55,9 +55,9 @@ namespace CmCTests.ValidSemanticsTests
         public void CompatibleTypeBoolean_Test5()
         {
             CmCompiler.CompileText(
-                @"int a;
-                  int b;
-                  bool res = a < 5 && b != 1;"
+                @"static int a;
+                  static int b;
+                  static bool res = a < 5 && b != 1;"
             );
         }
     }

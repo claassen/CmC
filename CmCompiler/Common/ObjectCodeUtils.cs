@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace CmC.Common
 {
-    public static class ObjectFileUtils
+    public static class ObjectCodeUtils
     {
-        public static void WriteObjectFileHeader(ObjectFileHeader header, BinaryWriter bw)
+        public static void WriteObjectFileHeader(ObjectCodeHeader header, BinaryWriter bw)
         {
             //Label address table
             byte[] labelAddressTableData;
+
             using (var stream = new BinaryWriter(new MemoryStream()))
             {
                 if (header.LabelAddresses.Count > 0)
@@ -92,11 +93,11 @@ namespace CmC.Common
             bw.Write(symbolTableData, 0, symbolTableData.Length);
         }
 
-        public static ObjectFileHeader ReadObjectFileHeader(string filePath)
+        public static ObjectCodeHeader ReadObjectCodeHeader(byte[] objectCode)
         {
-            var header = new ObjectFileHeader();
+            var header = new ObjectCodeHeader();
 
-            using (var br = new BinaryReader(new FileStream(filePath, FileMode.Open)))
+            using (var br = new BinaryReader(new MemoryStream(objectCode)))
             {
                 int hasEntryPoint = br.ReadInt32();
                 int entryPointFunctionLabel = br.ReadInt32();

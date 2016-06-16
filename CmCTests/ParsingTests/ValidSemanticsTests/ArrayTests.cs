@@ -15,7 +15,7 @@ namespace CmCTests.ValidSemanticsTests
         public void ArrayDeclaration_Test()
         {
             CmCompiler.CompileText(
-                @"int[10] x;"
+                @"static int[10] x;"
             );
         }
 
@@ -31,7 +31,7 @@ namespace CmCTests.ValidSemanticsTests
         public void ArrayAssignment_Test()
         {
             CmCompiler.CompileText(
-                @"int[10] x;
+                @"static int[10] x;
                   x[1] = 1;"
             );
         }
@@ -40,8 +40,8 @@ namespace CmCTests.ValidSemanticsTests
         public void ArrayOfPointersAssignment_Test()
         {
             CmCompiler.CompileText(
-                @"int x; int y;
-                  int*[10] a;
+                @"static int x; static int y;
+                  static int*[10] a;
                   a[0] = &x; a[1] = &y;"
             );
         }
@@ -50,8 +50,8 @@ namespace CmCTests.ValidSemanticsTests
         public void PointerAsArrayAssignment_Test()
         {
             CmCompiler.CompileText(
-                @"int x; int y;
-                  int* a;
+                @"static int x; static int y;
+                  static int* a;
                   a[0] = x; a[1] = y;"
             );
         }
@@ -60,8 +60,8 @@ namespace CmCTests.ValidSemanticsTests
         public void PointerAsArrayAssignment_Test2()
         {
             CmCompiler.CompileText(
-                @"int x; int y;
-                  int** a;
+                @"static int x; static int y;
+                  static int** a;
                   a[0] = &x; a[1] = &y;"
             );
         }
@@ -70,8 +70,8 @@ namespace CmCTests.ValidSemanticsTests
         public void ArrayOfPointersAsMultiDimensionalArrayAssignment_Test()
         {
             CmCompiler.CompileText(
-                @"int x; int y;
-                  int*[10] a;
+                @"static int x; static int y;
+                  static int*[10] a;
                   (a[0])[0] = x; 
                   (a[1])[1] = y;"
             );
@@ -81,8 +81,8 @@ namespace CmCTests.ValidSemanticsTests
         public void ArrayToArrayAssignment_Test()
         {
             CmCompiler.CompileText(
-                @"int[10] x;
-                  int[5] y = x;"
+                @"static int[10] x;
+                  static int[5] y = x;"
             );
         }
 
@@ -90,9 +90,9 @@ namespace CmCTests.ValidSemanticsTests
         public void AddressOfArrayIsSameAsArray_Test()
         {
             CmCompiler.CompileText(
-                @"int[10] x;
-                  int* p = x;
-                  int* q = &x;"
+                @"static int[10] x;
+                  static int* p = x;
+                  static int* q = &x;"
             );
         }
 
@@ -109,7 +109,7 @@ namespace CmCTests.ValidSemanticsTests
         {
             CmCompiler.CompileText(
                 @"int Test(int[] a) { return 0; }
-                  int[10] a;
+                  static int[10] a;
                   Test(a);"
             );
         }
@@ -119,7 +119,7 @@ namespace CmCTests.ValidSemanticsTests
         {
             CmCompiler.CompileText(
                 @"int Test(int[] a) { return 0; }
-                  int* a;
+                  static int* a;
                   Test(a);"
             );
         }

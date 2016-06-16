@@ -26,21 +26,22 @@ namespace CmC.Compiler.Syntax
 
             ((ICodeEmitter)Tokens[0]).Emit(context);
 
-            ExpressionType t1 = ((IHasType)Tokens[0]).GetExpressionType(context);
+            ExpressionType t1ExpressionType = ((IHasType)Tokens[0]).GetExpressionType(context);
 
             if (Tokens.Count > 1)
             {
-                ExpressionType.CheckTypeIsNumeric(t1);
+                TypeChecking.CheckExpressionTypeIsNumeric(t1ExpressionType);
             }
 
             for (int i = 1; i < Tokens.Count; i += 2)
             {
                 ((ICodeEmitter)Tokens[i+1]).Emit(context);
 
-                ExpressionType t2 = ((IHasType)Tokens[i + 1]).GetExpressionType(context);
-                ExpressionType.CheckTypeIsNumeric(t2);
+                ExpressionType t2ExpressionType = ((IHasType)Tokens[i + 1]).GetExpressionType(context);
                 
-                t1 = t2;
+                TypeChecking.CheckExpressionTypeIsNumeric(t2ExpressionType);
+                
+                t1ExpressionType = t2ExpressionType;
 
                 string op = ((DefaultLanguageTerminalToken)Tokens[i]).Value;
 
@@ -67,7 +68,7 @@ namespace CmC.Compiler.Syntax
             return ((IHasType)Tokens[0]).GetExpressionType(context);
         }
 
-        public void EmitAddress(CompilationContext context)
+        public void PushAddress(CompilationContext context)
         {
             if (Tokens.Count > 1)
             {
@@ -75,8 +76,13 @@ namespace CmC.Compiler.Syntax
             }
             else
             {
-                ((IHasAddress)Tokens[0]).EmitAddress(context);
+                ((IHasAddress)Tokens[0]).PushAddress(context);
             }
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

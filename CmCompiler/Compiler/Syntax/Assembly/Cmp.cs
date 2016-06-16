@@ -31,5 +31,11 @@ namespace CmC.Compiler.Syntax.Assembly
                 context.EmitInstruction(new IRCompareImmediate() { Left = left, Right = ((ImmediateValueToken)Tokens[2]).GetValue(context) });
             }
         }
+
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

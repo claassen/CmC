@@ -18,7 +18,7 @@ namespace CmC.Compiler.Context
 
                 foreach (var field in Fields)
                 {
-                    size += field.Value.Type.GetSize();
+                    size += field.Value.Type.GetStorageSize();
                 }
 
                 if (size % 2 != 0)

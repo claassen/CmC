@@ -17,7 +17,7 @@ namespace CmCTests.SemanticErrorTests
         public void UndefinedVariable_Test()
         {
             CmCompiler.CompileText(
-                @"int x = y + 1;"
+                @"static int x = y + 1;"
             );
         }
 

@@ -17,9 +17,9 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchMultiplicative_Test()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  bool b;
-                  int res = x * b;"
+                @"static int x = 0;
+                  static bool b;
+                  static int res = x * b;"
             );
         }
 
@@ -28,9 +28,9 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchMultiplicative_Test2()
         {
             CmCompiler.CompileText(
-                @"bool a;
-                  bool b;
-                  int res = a * b;"
+                @"static bool a;
+                  static bool b;
+                  static int res = a * b;"
             );
         }
 
@@ -39,10 +39,10 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchMultiplicative_Test3()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  int y = 1;
-                  bool b;
-                  int res = x * y / b;"
+                @"static int x = 0;
+                  static int y = 1;
+                  static bool b;
+                  static int res = x * y / b;"
             );
         }
 
@@ -51,10 +51,10 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchMultiplicative_Test4()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  int y = 1;
-                  bool b;
-                  int res = b * x / y;"
+                @"static int x = 0;
+                  static int y = 1;
+                  static bool b;
+                  static int res = b * x / y;"
             );
         }
 
@@ -62,9 +62,9 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchAdditive_Test()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  bool b;
-                  int res = x + b;"
+                @"static int x = 0;
+                  static bool b;
+                  static int res = x + b;"
             );
         }
 
@@ -73,9 +73,9 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchAdditive_Test2()
         {
             CmCompiler.CompileText(
-                @"bool a;
-                  bool b;
-                  int res = a + b;"
+                @"static bool a;
+                  static bool b;
+                  static int res = a + b;"
             );
         }
 
@@ -83,10 +83,10 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchAdditive_Test3()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  int y = 1;
-                  bool b;
-                  int res = x + y - b;"
+                @"static int x = 0;
+                  static int y = 1;
+                  static bool b;
+                  static int res = x + y - b;"
             );
         }
 
@@ -95,10 +95,10 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchAdditive_Test4()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  int y = 1;
-                  bool b;
-                  int res = b + x - y;"
+                @"static int x = 0;
+                  static int y = 1;
+                  static bool b;
+                  static int res = b + x - y;"
             );
         }
 
@@ -107,9 +107,9 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchEquality_Test()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  bool b;
-                  bool res = x == b;"
+                @"static int x = 0;
+                  static bool b;
+                  static bool res = x == b;"
             );
         }
     }

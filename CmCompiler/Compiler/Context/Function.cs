@@ -9,8 +9,9 @@ namespace CmC.Compiler.Context
     public class Function
     {
         public AddressValue Address;
-        public ExpressionType ReturnType;
-        public List<ExpressionType> ParameterTypes;
+        //public ExpressionType ReturnType;
+        //public List<ExpressionType> ParameterTypes;
+        public FunctionTypeDef Type;
         public bool IsExported;
         public bool IsDefined;
         public bool IsExtern { get { return !IsDefined; } }

@@ -26,5 +26,11 @@ namespace CmC.Compiler.Syntax.Assembly
 
             context.EmitInstruction(new IRMemCopy() { From = from, To = to, Length = length });
         }
+
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

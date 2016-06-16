@@ -9,25 +9,33 @@ namespace CmC.Compiler.Context
 {
     public class ExpressionType
     {
-        public TypeDef Type;
+        public TypeDef BaseType;
         public int IndirectionLevel;
         public bool IsArray;
         public int ArrayLength;
-
-        //public bool IsFunction;
-        //public ExpressionType ReturnType;
-        //public List<ExpressionType> ArgumentTypes;
 
         public int GetSize()
         {
             if (IndirectionLevel == 0)
             {
-                return Type.Size;
+                return BaseType.Size;
             }
             else
             {
                 //Pointer or address-of
                 return 4;
+            }
+        }
+
+        public int GetStorageSize()
+        {
+            if (IsArray)
+            {
+                return BaseType.Size * ArrayLength;
+            }
+            else
+            {
+                return GetSize();
             }
         }
 
@@ -41,7 +49,7 @@ namespace CmC.Compiler.Context
             else if (IndirectionLevel == 1)
             {
                 //Pointer
-                return Type.Size;
+                return BaseType.Size;
             }
             else
             {
@@ -50,68 +58,19 @@ namespace CmC.Compiler.Context
             }
         }
 
-        public static void CheckTypesMatch(ExpressionType t1, ExpressionType t2)
-        {
-            if (t1.Type.Name != t2.Type.Name)
-            {
-                throw new TypeMismatchException(t1, t2);
-            }
-
-            if (t1.IndirectionLevel != t2.IndirectionLevel)
-            {
-                throw new TypeMismatchException(t1, t2);
-            }
-
-            if (t1.Type.IsFunction != t2.Type.IsFunction)
-            {
-                throw new TypeMismatchException(t1, t2);
-            }
-
-            if (t1.Type.IsFunction)
-            {
-                CheckTypesMatch(t1.Type.ReturnType, t2.Type.ReturnType);
-
-                if (t1.Type.ArgumentTypes.Count != t2.Type.ArgumentTypes.Count)
-                {
-                    throw new TypeMismatchException(t1, t2);
-                }
-
-                for (int i = 0; i < t1.Type.ArgumentTypes.Count; i++)
-                {
-                    CheckTypesMatch(t1.Type.ArgumentTypes[i], t2.Type.ArgumentTypes[i]);
-                }
-            }
-        }
-
-        public static void CheckTypeIsNumeric(ExpressionType t)
-        {
-            if (t.GetSize() != 4)
-            {
-                throw new TypeMismatchException(new ExpressionType() { Type = new TypeDef() { Name = "Numeric value (4 byte value)" } }, t);
-            }
-        }
-
-        public static void CheckTypeIsBoolean(ExpressionType t)
-        {
-            if (t.GetSize() != 4)
-            {
-                throw new TypeMismatchException(new ExpressionType() { Type = new TypeDef() { Name = "Boolean value (4 byte value)" } }, t);
-            }
-        }
-
         public override string ToString()
         {
             if (IsArray)
             {
-                return Type.Name + "[]";
+                return BaseType.Name + "[]";
             }
             else if (IndirectionLevel >= 0)
             {
-                return Type.Name + String.Join("", Enumerable.Range(0, IndirectionLevel).Select(_ => "*"));
+                return BaseType.Name + String.Join("", Enumerable.Range(0, IndirectionLevel).Select(_ => "*"));
             }
             else
             {
-                return "&" + Type.Name;
+                return "&" + BaseType.Name;
             }
         }
 
@@ -119,7 +78,7 @@ namespace CmC.Compiler.Context
         {
             var other = (ExpressionType)obj;
 
-            return this.Type.Equals(other.Type) && this.IndirectionLevel == other.IndirectionLevel;
+            return this.BaseType.Equals(other.BaseType) && this.IndirectionLevel == other.IndirectionLevel;
         }
 
         public override int GetHashCode()

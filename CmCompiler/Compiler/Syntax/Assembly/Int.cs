@@ -22,5 +22,11 @@ namespace CmC.Compiler.Syntax.Assembly
         {
             context.EmitInstruction(new IRInt() { InterruptNumber = ((ImmediateValueToken)Tokens[1]).GetValue(context).Value });
         }
+
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

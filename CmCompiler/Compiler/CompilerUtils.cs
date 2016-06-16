@@ -17,9 +17,16 @@ namespace CmC.Compiler
             source = commentsRegex.Replace(source, "\n");
         }
 
-        public static void ProcessIncludes(ref string source, string sourceFolder)
+        public static void ProcessIncludes(ref string source, string sourceFolder, HashSet<String> alreadyIncludedFiles = null)
         {
+            if (alreadyIncludedFiles == null)
+            {
+                alreadyIncludedFiles = new HashSet<string>();
+            }
+
             var matches = Regex.Matches(source, "#include (\".*\")");
+
+            List<String> includePaths = new List<string>();
 
             for (int i = 0; i < matches.Count; i++)
             {
@@ -29,17 +36,31 @@ namespace CmC.Compiler
                 {
                     includePath = Path.Combine(sourceFolder, includePath);
                 }
+
+                includePaths.Add(includePath);
                 
-                using (var stream = new StreamReader(new FileStream(includePath, FileMode.Open)))
+                source = source.Replace("#include " + matches[i].Groups[1].Value, "");
+            }
+
+            string includedSource = "";
+
+            foreach (String path in includePaths)
+            {
+                using (var stream = new StreamReader(new FileStream(path, FileMode.Open)))
                 {
-                    string includedSource = stream.ReadToEnd();
+                    string fileSource = stream.ReadToEnd();
 
-                    ProcessIncludes(ref includedSource, Path.GetDirectoryName(includePath));
+                    ProcessIncludes(ref fileSource, Path.GetDirectoryName(path), alreadyIncludedFiles);
 
-                    source = source.Replace("#include " + matches[i].Groups[1].Value, "");
-                    source = includedSource + " \n " + source;
+                    if (!alreadyIncludedFiles.Contains(path))
+                    {
+                        includedSource = includedSource + "\n" + fileSource;
+                        alreadyIncludedFiles.Add(path);
+                    }
                 }
             }
+
+            source = includedSource + "\n" + source;
         }
 
         public static void ProcessMacros(ref string source)

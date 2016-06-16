@@ -32,12 +32,18 @@ namespace CmC.Compiler.Syntax.Common
 
         public ExpressionType GetExpressionType(CompilationContext context)
         {
-            return new ExpressionType() { Type = context.GetTypeDef("int") };
+            return new ExpressionType() { BaseType = context.GetTypeDef("int") };
         }
 
-        public void EmitAddress(CompilationContext context)
+        public void PushAddress(CompilationContext context)
         {
             throw new Exception("Can't take address of number literal");
+        }
+
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

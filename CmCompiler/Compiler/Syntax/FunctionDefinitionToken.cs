@@ -82,15 +82,26 @@ namespace CmC.Compiler.Syntax
 
             if (IsDefined)
             {
+                //Add halt instruction to guard code from running into function code when the function was not explicitly called
+                context.EmitInstruction(new IRHalt());
+
                 context.EmitLabel(context.GetFunction(functionName).Address.Value);
-                ((ICodeEmitter)Tokens.Last()).Emit(context);
+
+                var functionBody = ((ICodeEmitter)Tokens.Last());
+
+                int sizeOfAllLocalVariables = functionBody.GetSizeOfAllLocalVariables(context);
+
+                context.EmitInstruction(new IRMoveImmediate() { To = "eax", Value = new ImmediateValue(sizeOfAllLocalVariables) });
+                context.EmitInstruction(new IRAdd() { Left = "sp", Right = "eax", To = "sp" });
+
+                //Function body
+                functionBody.Emit(context);
 
                 if (!context.FunctionHasReturn())
                 {
                     if (returnType.GetSize() > 0)
                     {
                         throw new MissingReturnException(functionName);
-
                     }
                     else
                     {
@@ -102,6 +113,11 @@ namespace CmC.Compiler.Syntax
             context.EndScope(true);
 
             context.IsEntryPointFunction = false;
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

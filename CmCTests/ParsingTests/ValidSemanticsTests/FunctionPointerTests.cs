@@ -15,7 +15,7 @@ namespace CmCTests.ValidSemanticsTests
         public void VariableDeclaration_Test()
         {
             CmCompiler.CompileText(
-                @"(int)(int) fp;"
+                @"static (int)(int) fp;"
             );
         }
 
@@ -23,7 +23,7 @@ namespace CmCTests.ValidSemanticsTests
         public void VariableDeclarationMultipleParameters_Test()
         {
             CmCompiler.CompileText(
-                @"(int)(int,int,byte*) fp;"
+                @"static (int)(int,int,byte*) fp;"
             );
         }
 
@@ -31,7 +31,7 @@ namespace CmCTests.ValidSemanticsTests
         public void VariableDeclarationPointer_Test()
         {
             CmCompiler.CompileText(
-                @"(int*)(int*) fp;"
+                @"static (int*)(int*) fp;"
             );
         }
 
@@ -39,7 +39,7 @@ namespace CmCTests.ValidSemanticsTests
         public void VariableDeclarationArray_Test()
         {
             CmCompiler.CompileText(
-                @"(int[])(int[]) fp;"
+                @"static (int[])(int[]) fp;"
             );
         }
 
@@ -47,7 +47,7 @@ namespace CmCTests.ValidSemanticsTests
         public void VariableDeclarationNested_Test()
         {
             CmCompiler.CompileText(
-                @"(int)((int)(int)) fp;"
+                @"static (int)((int)(int)) fp;"
             );
         }
 
@@ -56,7 +56,7 @@ namespace CmCTests.ValidSemanticsTests
         {
             CmCompiler.CompileText(
                 @"int Test(int x, byte* y) { return 0; }
-                  (int)(int, byte*) fp = Test;
+                  static (int)(int, byte*) fp = Test;
                  "
             );
         }
@@ -66,11 +66,11 @@ namespace CmCTests.ValidSemanticsTests
         {
             CmCompiler.CompileText(
                 @"int Test(int x, byte* y) { return 0; }
-                  (int)(int, byte*) fp = Test;
+                  static (int)(int, byte*) fp = Test;
                   
-                  byte* b;
-                  int x = Test(0, b);
-                  int y = fp(x, b);
+                  static byte* b;
+                  static int x = Test(0, b);
+                  static int y = fp(x, b);
                  "
             );
         }
@@ -79,7 +79,7 @@ namespace CmCTests.ValidSemanticsTests
         public void ArrayOfFunctionPointers_Test()
         {
             CmCompiler.CompileText(
-                @"(int)(int,int)[10] fpArray;"
+                @"static (int)(int,int)[10] fpArray;"
             );
         }
     }

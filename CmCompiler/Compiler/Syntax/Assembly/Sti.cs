@@ -21,5 +21,11 @@ namespace CmC.Compiler.Syntax.Assembly
         {
             context.EmitInstruction(new IRArchitectureSpecificAsm("sti"));
         }
+
+
+        public int GetSizeOfAllLocalVariables(Context.CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

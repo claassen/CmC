@@ -10,5 +10,6 @@ namespace CmC.Compiler.Syntax.TokenInterfaces
     public interface ICodeEmitter
     {
         void Emit(CompilationContext context);
+        int GetSizeOfAllLocalVariables(CompilationContext context);
     }
 }

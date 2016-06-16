@@ -25,15 +25,16 @@ namespace CmC.Compiler.Syntax
         {
             context.EmitComment(";Function call");
 
-            var type = ((IHasType)Tokens[0]).GetExpressionType(context);
+            var expressionType = ((IHasType)Tokens[0]).GetExpressionType(context);
 
-            if (!type.Type.IsFunction)
+            if (!(expressionType.BaseType is FunctionTypeDef))
             {
-                throw new Exception("Can't call expression type: " + type + " as a function");
+                throw new Exception("Can't call expression type: " + expressionType + " as a function");
             }
 
-            ExpressionType returnType = type.Type.ReturnType;
-            List<ExpressionType> parameterTypes = type.Type.ArgumentTypes;
+            FunctionTypeDef functionType = (FunctionTypeDef)expressionType.BaseType;
+            ExpressionType returnType = functionType.ReturnType;
+            //List<ExpressionType> parameterTypes = functionType.ArgumentTypes;
             
             if (returnType.GetSize() > 4)
             {
@@ -46,12 +47,18 @@ namespace CmC.Compiler.Syntax
             //Push base pointer on stack
             context.EmitInstruction(new IRPushRegister() { From = "bp" });
 
+            //Save registers (TODO: Not actually needed until we have smarter allocation that uses registers instead of stack)
+            //context.EmitInstruction(new IRPushRegister() { From = "eax" });
+            //context.EmitInstruction(new IRPushRegister() { From = "ebx" });
+            //context.EmitInstruction(new IRPushRegister() { From = "ecx" });
+            //context.EmitInstruction(new IRPushRegister() { From = "edx" });
+
             int argumentCount = Tokens.Count - 1;
             int argumentsSize = 0;
 
-            if (argumentCount != parameterTypes.Count)
+            if (argumentCount != functionType.ArgumentTypes.Count)
             {
-                throw new ArgumentCountMismatchException(Tokens[0].ToString(), parameterTypes.Count, argumentCount);
+                throw new ArgumentCountMismatchException(Tokens[0].ToString(), functionType.ArgumentTypes.Count, argumentCount);
             }
 
             if (Tokens.Count > 1)
@@ -59,22 +66,22 @@ namespace CmC.Compiler.Syntax
                 //Push arguments on stack in reverse order
                 for (int i = Tokens.Count - 1; i > 0; i--)
                 {
-                    var argType = ((IHasType)Tokens[i]).GetExpressionType(context);
-                    var paramType = parameterTypes[parameterTypes.Count - 1 - (Tokens.Count - 1 - i)];
+                    var argExpressionType = ((IHasType)Tokens[i]).GetExpressionType(context);
+                    var paramExpressionType = functionType.ArgumentTypes[functionType.ArgumentTypes.Count - 1 - (Tokens.Count - 1 - i)];
 
-                    ExpressionType.CheckTypesMatch(paramType, argType);
+                    TypeChecking.CheckExpressionTypesMatch(paramExpressionType, argExpressionType);
 
                     //Push argument value on stack
                     ((ICodeEmitter)Tokens[i]).Emit(context);
                     
                     argumentCount++;
-                    argumentsSize += argType.GetSize();
+                    argumentsSize += argExpressionType.GetSize();
                 }
             }
 
             var returnLabel = new LabelAddressValue(context.CreateNewLabel());
 
-            //Expression value -> eax
+            //Address of function -> eax
             ((ICodeEmitter)Tokens[0]).Emit(context);
             context.EmitInstruction(new IRPop() { To = "eax" });
 
@@ -85,12 +92,19 @@ namespace CmC.Compiler.Syntax
             //Push return address
             context.EmitInstruction(new IRPushImmediate() { Value = returnLabel });
             
+            //Jump to function
             context.EmitInstruction(new IRJumpRegister() { Address = "eax" });
 
             //Resume here, reclaim space from arguments pushed on stack
             context.EmitLabel(returnLabel.Value);
             context.EmitInstruction(new IRMoveImmediate() { To = "ebx", Value = new ImmediateValue(argumentsSize) });
             context.EmitInstruction(new IRSub() { To = "sp", Left = "sp", Right = "ebx" });
+
+            //Restore registers (TODO: Not actually needed until we have smarter allocation that uses registers instead of stack)
+            //context.EmitInstruction(new IRPop() { To = "edx" });
+            //context.EmitInstruction(new IRPop() { To = "ecx" });
+            //context.EmitInstruction(new IRPop() { To = "ebx" });
+            //context.EmitInstruction(new IRPop() { To = "eax" });
 
             //Reset base pointer
             context.EmitInstruction(new IRPop() { To = "bp" });
@@ -100,7 +114,7 @@ namespace CmC.Compiler.Syntax
                 //Return value is already on stack
                 throw new LargeReturnValuesNotSupportedException();
             }
-            else
+            else if(returnType.GetSize() > 0)
             {
                 //Return value in eax, put on stack
                 context.EmitInstruction(new IRPushRegister() { From = "eax" });
@@ -109,16 +123,21 @@ namespace CmC.Compiler.Syntax
 
         public ExpressionType GetExpressionType(CompilationContext context)
         {
-            var funcType = ((IHasType)Tokens[0]).GetExpressionType(context);
+            var functionCallExpressionType = ((IHasType)Tokens[0]).GetExpressionType(context);
 
-            return funcType.Type.ReturnType;
+            return ((FunctionTypeDef)functionCallExpressionType.BaseType).ReturnType;
         }
 
-        public void EmitAddress(CompilationContext context)
+        public void PushAddress(CompilationContext context)
         {
             throw new Exception("Can't take address of function call");
 
             //Emitting the address of a function call -> address of where return value (temporary) is stored on the stack?
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

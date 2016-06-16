@@ -17,17 +17,17 @@ namespace CmC.Compiler.Syntax
 
         public override ILanguageToken Create(string expressionValue)
         {
-            return new StringLiteralToken() { Value = expressionValue.Replace("\\n", "\n") };
+            return new StringLiteralToken() { Value = expressionValue.Replace("\\n", "\n").Trim('"') };
         }
 
         public void Emit(CompilationContext context)
         {
             context.AddStringConstant(Value);
 
-            EmitAddress(context);
+            PushAddress(context);
         }
 
-        public void EmitAddress(CompilationContext context)
+        public void PushAddress(CompilationContext context)
         {
             context.AddStringConstant(Value);
 
@@ -40,11 +40,21 @@ namespace CmC.Compiler.Syntax
         {
             return new ExpressionType()
             {
-                Type = new TypeDef() { Name = "byte", Size = 1 },
+                BaseType = new StringLiteralTypeDef() 
+                { 
+                    Name = "byte", 
+                    Size = 1,
+                    Value = Value
+                },
                 IsArray = true,
-                ArrayLength = Value.Length - 1, //-2 to remove quotes, +1 for trailing \0
-                IndirectionLevel = 1
+                ArrayLength = Value.Length + 1, //+1 for trailing \0
+                IndirectionLevel = 1,
             };
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

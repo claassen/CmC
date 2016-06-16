@@ -29,9 +29,14 @@ namespace CmC.Compiler.Syntax
             return ((IHasType)Tokens[0]).GetExpressionType(context);
         }
 
-        public void EmitAddress(CompilationContext context)
+        public void PushAddress(CompilationContext context)
         {
-            ((IHasAddress)Tokens.Last()).EmitAddress(context);
+            ((IHasAddress)Tokens.Last()).PushAddress(context);
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

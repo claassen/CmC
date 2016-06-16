@@ -17,8 +17,8 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchAssignmentFromVariable_Test()
         {
             CmCompiler.CompileText(
-                @"bool b;
-                  int x = 0;
+                @"static bool b;
+                  static int x = 0;
                   x = b;"
             );
         }
@@ -28,9 +28,9 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchAssignmentFromExpression_Test()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  int y = 1;
-                  bool b;
+                @"static int x = 0;
+                  static int y = 1;
+                  static bool b;
                   b = x + y;"
             );
         }
@@ -40,7 +40,7 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchAssignmentFromNumber_Test()
         {
             CmCompiler.CompileText(
-                @"bool b;
+                @"static bool b;
                   b = 5;"
             );
         }
@@ -60,8 +60,8 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
                       int a;
                       X* px;
                   }
-                  X x;
-                  Y y;
+                  static X x;
+                  static Y y;
                   y = x;"
             );
         }
@@ -81,8 +81,8 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
                       int a;
                       X* px;
                   }
-                  X x;
-                  Y y;
+                  static X x;
+                  static Y y;
                   x.x = y;"
             );
         }
@@ -102,8 +102,8 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
                       int a;
                       X x;
                   }
-                  X x;
-                  Y y;
+                  static X x;
+                  static Y y;
                   x.x = y.x;"
             );
         }
@@ -113,8 +113,8 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchIndirectionLevelAssignment_Test()
         {
             CmCompiler.CompileText(
-                @"int y = 0;
-                  int x;
+                @"static int y = 0;
+                  static int x;
                   x = &y;"
             );
         }
@@ -124,8 +124,8 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchIndirectionLevelAssignment_Test2()
         {
             CmCompiler.CompileText(
-                @"int y = 0;
-                  int* x;
+                @"static int y = 0;
+                  static int* x;
                   x = y;"
             );
         }
@@ -135,10 +135,10 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchIndirectionLevelAssignment_Test3()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  int *y;
+                @"static int x = 0;
+                  static int *y;
                   y = &x;
-                  int *z;
+                  static int *z;
                   z = &y;"
             );
         }
@@ -148,8 +148,8 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchIndirectionLevelAssignment_Test4()
         {
             CmCompiler.CompileText(
-                @"int* x;
-                  int y;
+                @"static int* x;
+                  static int y;
                   y = *(*x);"
             );
         }
@@ -159,8 +159,8 @@ namespace CmCTests.SemanticErrorTests.TypeMismatchErrorTests
         public void TypeMismatchIndirectionLevelAssignment_Test5()
         {
             CmCompiler.CompileText(
-                @"int* x;
-                  int* y;
+                @"static int* x;
+                  static int* y;
                   y = &x;"
             );
         }

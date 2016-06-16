@@ -14,12 +14,15 @@ namespace CmCTests.ValidSemanticsTests
         [TestMethod]
         public void BasicForLoop_Test()
         {
-            CmCompiler.CompileText(
-                @"for(int i = 0; i < 10; i = i + 1)
-                  {
-                      int j = i;
-                  }"
-            );
+            CmCompiler.CompileText(@"
+                void test()
+                {
+                    for(int i = 0; i < 10; i = i + 1)
+                    {
+                        int j = i;
+                    }
+                }
+            ");
         }
     }
 }

@@ -21,6 +21,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ParserGen">
@@ -43,7 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\ObjectFileUtils.cs" />
+    <Compile Include="Common\ObjectCodeUtils.cs" />
     <Compile Include="Compiler\Architecture\IArchitecture.cs" />
     <Compile Include="Compiler\Architecture\TestArchitecture.cs" />
     <Compile Include="Compiler\Architecture\RIVMArchitecture.cs" />
@@ -55,6 +57,7 @@
     <Compile Include="Compiler\Context\Field.cs" />
     <Compile Include="Compiler\Context\Function.cs" />
     <Compile Include="Compiler\Context\StringConstant.cs" />
+    <Compile Include="Compiler\Context\TypeChecking.cs" />
     <Compile Include="Compiler\Context\TypeDef.cs" />
     <Compile Include="Compiler\Context\Variable.cs" />
     <Compile Include="Compiler\Exceptions\ArgumentCountMismatchException.cs" />
@@ -164,7 +167,7 @@
     <Compile Include="Compiler\Context\ImmediateValue.cs" />
     <Compile Include="Linker\CmLinker.cs" />
     <Compile Include="Common\LabelAddressTableEntry.cs" />
-    <Compile Include="Common\ObjectFileHeader.cs" />
+    <Compile Include="Common\ObjectCodeHeader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Compiler\Syntax\AdditiveExpressionToken.cs" />
     <Compile Include="Compiler\Syntax\AssignmentToken.cs" />

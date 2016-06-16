@@ -21,47 +21,32 @@ namespace CmC.Compiler
 {
     public static class CmCompiler
     {
-        public static void CompileFile(string path, CompilerOptions options)
+        public static CompilationContext CompileFile(string path)
         {
-            string objFileName = !String.IsNullOrEmpty(options.ObjectFileName) 
-                ? options.ObjectFileName 
-                : Path.Combine(
-                    Path.GetDirectoryName(path),
-                    Path.GetFileNameWithoutExtension(path) + ".o"
-                );
-
             using (var stream = new StreamReader(new FileStream(path, FileMode.Open)))
             {
-                CompileText(stream.ReadToEnd(), objFileName, Path.GetDirectoryName(path), options.Architecture);
+                return CompileText(stream.ReadToEnd(), Path.GetDirectoryName(path));
             }
         }
 
-        public static void CompileText(string source)
+        public static CompilationContext CompileText(string text, string sourceFolder = "")
         {
-            CompileText(source, "", "", new TestArchitecture());
-        }
+            if (!String.IsNullOrEmpty(sourceFolder))
+            {
+                CompilerUtils.ProcessIncludes(ref text, sourceFolder);
+            }
 
-        public static void CompileText(string source, string outputObjFile, string sourceFolder, IArchitecture architecture)
-        {
-            CompilerUtils.ProcessIncludes(ref source, sourceFolder);
-            CompilerUtils.RemoveComments(ref source);
-            CompilerUtils.ProcessMacros(ref source);
+            CompilerUtils.RemoveComments(ref text);
+            CompilerUtils.ProcessMacros(ref text);
 
             var context = new CompilationContext();
 
-            ProcessSourceText(source, context);
+            ProcessSourceText(text, context);
 
-            CreateObjectFile(outputObjFile, architecture, context.GetIR(), context.GetStringConstants(), context.GetGlobalVariables(), context.GetFunctions());
+            return context;
         }
 
-        public static void CompileIR(string outputObjFile, IArchitecture architecture, List<IRInstruction> ir, Dictionary<string, StringConstant> stringConstants = null, Dictionary<string, Variable> globalVariables = null, Dictionary<string, Function> functions = null)
-        {
-            ShowIR(ir);
-
-            CreateObjectFile(outputObjFile, architecture, ir, stringConstants, globalVariables, functions);
-        }
-
-        internal static void ProcessSourceText(string source, CompilationContext context)
+        private static void ProcessSourceText(string text, CompilationContext context)
         {
             var grammar = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(c => c.Namespace == "CmC.Compiler.Syntax" || c.Namespace == "CmC.Compiler.Syntax.Common")
@@ -72,20 +57,17 @@ namespace CmC.Compiler
 
             LanguageParser parser = generator.GetParser();
 
-            var tokens = parser.Parse(source);
+            var tokens = parser.Parse(text);
 
             foreach (var token in tokens)
             {
                 ((ICodeEmitter)token).Emit(context);
-            }
+            }            
         }
 
-        private static void CreateObjectFile(string outputObjFile, IArchitecture architecture, List<IRInstruction> ir, Dictionary<string, StringConstant> stringConstants, Dictionary<string, Variable> globalVariables, Dictionary<string, Function> functions)
+        public static void CreateObjectCode(Stream toStream, IArchitecture architecture, List<IRInstruction> ir, Dictionary<string, StringConstant> stringConstants, Dictionary<string, Variable> globalVariables, Dictionary<string, Function> functions)
         {
-            Console.WriteLine("\n\n::" + outputObjFile + "::\n");
-            ShowIR(ir);
-
-            var header = new ObjectFileHeader();
+            var header = new ObjectCodeHeader();
 
             header.RelocationAddresses = new List<int>();
             header.LabelAddresses = new List<LabelAddressTableEntry>();
@@ -230,46 +212,49 @@ namespace CmC.Compiler
 
             header.SizeOfDataAndCode = offset;
 
-            if (!String.IsNullOrEmpty(outputObjFile))
+            using (var sw = new BinaryWriter(toStream))
             {
-                using (var sw = new BinaryWriter(new FileStream(outputObjFile, FileMode.Create)))
+                ObjectCodeUtils.WriteObjectFileHeader(header, sw);
+
+                //Code section
+                foreach (byte b in code)
                 {
-                    ObjectFileUtils.WriteObjectFileHeader(header, sw);
+                    sw.Write(b);
+                }
 
-                    //Code section
-                    foreach (byte b in code)
+                //Initialized data
+                if (stringConstants != null)
+                {
+                    foreach (var str in stringConstants)
                     {
-                        sw.Write(b);
-                    }
-
-                    //Initialized data
-                    if (stringConstants != null)
-                    {
-                        foreach (var str in stringConstants)
+                        foreach (var ch in str.Value.Value.ToCharArray())
                         {
-                            foreach (var ch in str.Value.Value.ToCharArray())
-                            {
-                                sw.Write((byte)ch);
-                            }
-
-                            sw.Write((byte)0); //0 terminated strings
+                            sw.Write((byte)ch);
                         }
-                    }
 
-                    //Uninitialized data
-                    for (int i = 0; i < uninitializedDataSize; i++)
-                    {
-                        sw.Write((byte)0);
+                        sw.Write((byte)0); //0 terminated strings
                     }
+                }
+
+                //Uninitialized data
+                for (int i = 0; i < uninitializedDataSize; i++)
+                {
+                    sw.Write((byte)0);
                 }
             }
         }
 
-        private static void ShowIR(List<IRInstruction> ir)
+        public static void GenerateAssemblyOutput(Stream stream, List<IRInstruction> ir, bool includeComments)
         {
-            foreach (var i in ir)
+            using(var sw = new StreamWriter(stream))
             {
-                Console.WriteLine(i.Display());
+                foreach (var i in ir)
+                {
+                    if (includeComments || !(i is IRComment))
+                    {
+                        sw.WriteLine(i.Display());
+                    }
+                }
             }
         }
     }

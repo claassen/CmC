@@ -34,7 +34,7 @@ namespace CmC.Compiler.Syntax
 
                 fields.Add(fieldName, new Field() { Offset = offset, Type = type });
 
-                offset += type.GetSize();
+                offset += type.GetStorageSize();
             }
 
             var typeDef = new CompositeTypeDef()
@@ -44,6 +44,11 @@ namespace CmC.Compiler.Syntax
             };
 
             context.AddTypeDef(typeDef);
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

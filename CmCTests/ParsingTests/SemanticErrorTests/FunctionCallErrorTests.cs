@@ -32,7 +32,7 @@ namespace CmCTests.SemanticErrorTests
                 @"int Test(int x, int y) {
                       return x + y;
                   }
-                  bool b;
+                  static bool b;
                   Test(b, 2);"
             );
         }

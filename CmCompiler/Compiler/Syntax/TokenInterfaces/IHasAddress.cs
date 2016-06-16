@@ -9,6 +9,6 @@ namespace CmC.Compiler.Syntax.TokenInterfaces
 {
     public interface IHasAddress
     {
-        void EmitAddress(CompilationContext context);
+        void PushAddress(CompilationContext context);
     }
 }

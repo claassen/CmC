@@ -17,7 +17,7 @@ namespace CmCTests.SemanticErrorTests
         public void ArrayIndexOnNonArray_Test()
         {
             CmCompiler.CompileText(
-                @"int x;
+                @"static int x;
                   x[1] = 1;"
             );
         }
@@ -27,7 +27,7 @@ namespace CmCTests.SemanticErrorTests
         public void ArrayIndexOnNonArray_Test2()
         {
             CmCompiler.CompileText(
-                @"int[10] x;
+                @"static int[10] x;
                   (x[1])[2] = 1;"
             );
         }
@@ -37,8 +37,8 @@ namespace CmCTests.SemanticErrorTests
         public void ArrayOfPointersAssignmentError_Test()
         {
             CmCompiler.CompileText(
-                @"int x; int y;
-                  int*[10] a;
+                @"static int x; static int y;
+                  static int*[10] a;
                   a[0] = x; a[1] = y;"
             );
         }
@@ -48,8 +48,8 @@ namespace CmCTests.SemanticErrorTests
         public void PointerAsArrayAssignmentError_Test()
         {
             CmCompiler.CompileText(
-                @"int x; int y;
-                  int* a;
+                @"static int x; static int y;
+                  static int* a;
                   a[0] = &x; a[1] = &y;"
             );
         }
@@ -59,7 +59,7 @@ namespace CmCTests.SemanticErrorTests
         public void AssignmentToArrayVariable_Test()
         {
             CmCompiler.CompileText(
-                @"int[10] a;
+                @"static int[10] a;
                   a = 1;"
             );
         }
@@ -69,19 +69,18 @@ namespace CmCTests.SemanticErrorTests
         public void AssignmentToArrayVariable_Test2()
         {
             CmCompiler.CompileText(
-                @"int[10] a;
-                  int[10] b;
+                @"static int[10] a;
+                  static int[10] b;
                   a = b;"
             );
         }
 
-        
         [TestMethod]
         [ExpectedException(typeof(MissingArraySizeSpecifierException))]
         public void MissingArraySizeSpecifier_Test()
         {
             CmCompiler.CompileText(
-                @"int[] a;"
+                @"static int[] a;"
             );
         }
     }

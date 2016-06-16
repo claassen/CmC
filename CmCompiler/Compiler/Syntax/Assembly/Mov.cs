@@ -35,5 +35,11 @@ namespace CmC.Compiler.Syntax.Assembly
                 context.EmitInstruction(new IRMoveRegister() { To = destRegister, From = srcRegister });
             }
         }
+
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

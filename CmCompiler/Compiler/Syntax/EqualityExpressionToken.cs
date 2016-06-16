@@ -26,7 +26,7 @@ namespace CmC.Compiler.Syntax
 
             ((ICodeEmitter)Tokens[0]).Emit(context);
 
-            var t1 = ((IHasType)Tokens[0]).GetExpressionType(context);
+            var t1ExpressionType = ((IHasType)Tokens[0]).GetExpressionType(context);
 
             for (int i = 1; i < Tokens.Count; i += 2)
             {
@@ -34,10 +34,10 @@ namespace CmC.Compiler.Syntax
 
                 ((ICodeEmitter)Tokens[i + 1]).Emit(context);
 
-                var t2 = ((IHasType)Tokens[i + 1]).GetExpressionType(context);
+                var t2ExpressionType = ((IHasType)Tokens[i + 1]).GetExpressionType(context);
 
-                ExpressionType.CheckTypesMatch(t1, t2);
-                t1 = t2;
+                TypeChecking.CheckExpressionTypesMatch(t1ExpressionType, t2ExpressionType);
+                t1ExpressionType = t2ExpressionType;
 
                 context.EmitInstruction(new IRPop() { To = "ebx" });
                 context.EmitInstruction(new IRPop() { To = "eax" });
@@ -82,7 +82,7 @@ namespace CmC.Compiler.Syntax
         {
             if (Tokens.Count > 1)
             {
-                return new ExpressionType() { Type = context.GetTypeDef("bool") };
+                return new ExpressionType() { BaseType = context.GetTypeDef("bool") };
             }
             else
             {
@@ -90,14 +90,19 @@ namespace CmC.Compiler.Syntax
             }
         }
 
-        public void EmitAddress(CompilationContext context)
+        public void PushAddress(CompilationContext context)
         {
             if (Tokens.Count > 1)
             {
                 throw new Exception("Can't take address of equality expression");
             }
 
-            ((IHasAddress)Tokens[0]).EmitAddress(context);
+            ((IHasAddress)Tokens[0]).PushAddress(context);
+        }
+
+        public int GetSizeOfAllLocalVariables(CompilationContext context)
+        {
+            return 0;
         }
     }
 }

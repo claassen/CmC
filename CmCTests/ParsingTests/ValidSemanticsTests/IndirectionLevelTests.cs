@@ -16,9 +16,9 @@ namespace CmCTests.ValidSemanticsTests
         public void IndirectionLevels_Test()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  int* y = &x;
-                  int** z = &y;"
+                @"static int x = 0;
+                  static int* y = &x;
+                  static int** z = &y;"
             );
         }
 
@@ -26,8 +26,8 @@ namespace CmCTests.ValidSemanticsTests
         public void IndirectionLevels_Test2()
         {
             CmCompiler.CompileText(
-                @"int** x;
-                  int y = *(*x);"
+                @"static int** x;
+                  static int y = *(*x);"
             );
         }
 
@@ -35,10 +35,10 @@ namespace CmCTests.ValidSemanticsTests
         public void IndirectionLevelsAssignment_Test()
         {
             CmCompiler.CompileText(
-                @"int x = 0;
-                  int* y;
+                @"static int x = 0;
+                  static int* y;
                   y = &x;
-                  int** z;
+                  static int** z;
                   z = &y;"
             );
         }
@@ -47,8 +47,8 @@ namespace CmCTests.ValidSemanticsTests
         public void IndirectionLevelsAssingment_Test2()
         {
             CmCompiler.CompileText(
-                @"int** x;
-                  int y;
+                @"static int** x;
+                  static int y;
                   y = *(*x);"
             );
         }
